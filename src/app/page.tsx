@@ -1,30 +1,30 @@
-"use client"; // Necesario si usamos hooks o estados
+"use client";
 
 import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="container">
+    <div className="max-w-3xl mx-auto p-8 text-center">
       <header>
-        <h1>Logística UTN</h1>
-        <p>Portal de gestión de envíos y logística</p>
+        <h1 className="text-[2.5rem] mb-2 text-brand font-bold">Logística UTN</h1>
+        <p className="text-[1.2rem] text-gray-600">Portal de gestión de envíos y logística</p>
       </header>
 
       <main>
-        <div className="cards">
-          <Link href="/calcular-costo" className="card">
-            <h2>Calcular Costo</h2>
-            <p>Simulá el costo de envío de tus productos</p>
+        <div className="flex flex-wrap justify-center gap-6 mt-8">
+          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
+            <h2 className="mb-2 text-xl text-brand font-semibold">Calcular Costo</h2>
+            <p className="text-gray-800 text-[0.95rem]">Simulá el costo de envío de tus productos</p>
           </Link>
 
-          <Link href="/crear-envio" className="card">
-            <h2>Crear Envío</h2>
-            <p>Generá un nuevo envío y reservá stock</p>
+          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
+            <h2 className="mb-2 text-xl text-brand font-semibold">Crear Envío</h2>
+            <p className="text-gray-800 text-[0.95rem]">Generá un nuevo envío y reservá stock</p>
           </Link>
 
-          <Link href="/envios/789" className="card">
-            <h2>Consultar Envío</h2>
-            <p>Seguimiento de tus envíos por ID</p>
+          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
+            <h2 className="mb-2 text-xl text-brand font-semibold">Consultar Envío</h2>
+            <p className="text-gray-800 text-[0.95rem]">Seguimiento de tus envíos por ID</p>
           </Link>
         </div>
       </main>
