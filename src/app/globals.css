@@ -1,0 +1,14 @@
+/* Primero importa la font */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap');
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font global y reset básico */
+body {
+  font-family: 'Archivo', sans-serif;
+  margin: 0;
+  padding: 0;
+}
