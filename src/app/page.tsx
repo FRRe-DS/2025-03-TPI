@@ -4,29 +4,39 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="max-w-3xl mx-auto p-8 text-center">
-      <header>
-        <h1 className="text-[2.5rem] mb-2 text-brand font-bold">Logística UTN</h1>
-        <p className="text-[1.2rem] text-gray-600">Portal de gestión de envíos y logística</p>
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-blue-50 via-white to-blue-50 font-archivo p-6 pt-20">
+      <header className="text-center mb-12 mt-10">
+        <h1 className="text-5xl md:text-6xl font-bold text-brand mb-4">Logística UTN</h1>
+        <p className="text-lg md:text-xl text-blue-400">Portal de gestión de envíos y logística</p>
       </header>
 
-      <main>
-        <div className="flex flex-wrap justify-center gap-6 mt-8">
-          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
-            <h2 className="mb-2 text-xl text-brand font-semibold">Calcular Costo</h2>
-            <p className="text-gray-800 text-[0.95rem]">Simulá el costo de envío de tus productos</p>
-          </Link>
+      <main className="flex flex-wrap justify-center gap-8">
+        {/* Card 1 */}
+        <Link
+          href="#"
+          className="w-64 p-8 bg-white border-2 border-blue-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
+        >
+          <h2 className="text-2xl font-semibold text-blue-600 mb-3">Calcular Costo</h2>
+          <p className="text-gray-700 text-sm">Simulá el costo de envío de tus productos</p>
+        </Link>
 
-          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
-            <h2 className="mb-2 text-xl text-brand font-semibold">Crear Envío</h2>
-            <p className="text-gray-800 text-[0.95rem]">Generá un nuevo envío y reservá stock</p>
-          </Link>
+        {/* Card 2 */}
+        <Link
+          href="#"
+          className="w-64 p-8 bg-white border-2 border-green-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-green-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
+        >
+          <h2 className="text-2xl font-semibold text-green-600 mb-3">Crear Envío</h2>
+          <p className="text-gray-700 text-sm">Generá un nuevo envío y reservá stock</p>
+        </Link>
 
-          <Link href="#" className="block w-[250px] p-6 bg-[#fafafa] border border-gray-200 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand">
-            <h2 className="mb-2 text-xl text-brand font-semibold">Consultar Envío</h2>
-            <p className="text-gray-800 text-[0.95rem]">Seguimiento de tus envíos por ID</p>
-          </Link>
-        </div>
+        {/* Card 3 */}
+        <Link
+          href="#"
+          className="w-64 p-8 bg-white border-2 border-purple-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
+        >
+          <h2 className="text-2xl font-semibold text-purple-600 mb-3">Consultar Envío</h2>
+          <p className="text-gray-700 text-sm">Seguimiento de tus envíos por ID</p>
+        </Link>
       </main>
     </div>
   );
