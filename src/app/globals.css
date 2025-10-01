@@ -1,0 +1,12 @@
+@import "tailwindcss";
+/* fuente */
+:root {
+  --font-primary: 'Archivo', sans-serif;
+}
+
+/* reset basico */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+}
