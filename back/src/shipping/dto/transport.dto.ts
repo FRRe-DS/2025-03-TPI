@@ -1,6 +1,8 @@
-import { IsIn } from 'class-validator';
+import { IsNotEmpty, IsIn } from "class-validator"
 
-export class TransportDto{
+export class TransportDto {
+
+    @IsNotEmpty()
     @IsIn(['air', 'sea', 'road', 'rail'])
-    transportType: 'air' | 'sea' | 'road' | 'rail';
+    type: 'air' | 'sea' | 'road' | 'rail';
 }
