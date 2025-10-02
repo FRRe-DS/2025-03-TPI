@@ -1,4 +1,4 @@
-#Proyecto: Trabajo Práctico Integrador (TPI) - Desarrollo de Software
+# Proyecto: Trabajo Práctico Integrador (TPI) - Desarrollo de Software
 
 Grupo: 3 - Big Brain
 
