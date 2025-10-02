@@ -6,14 +6,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-blue-50 via-white to-blue-50 font-archivo p-6 pt-20">
       <header className="text-center mb-12 mt-10">
-        <h1 className="text-5xl md:text-6xl font-bold text-brand mb-4">Logística UTN</h1>
-        <p className="text-lg md:text-xl text-blue-500">Portal de gestión de envíos y logística</p>
+        <h1 className="text-5xl md:text-6xl font-bold text-blue-700 text-brand mb-4">Logística UTN</h1>
+        <p className="text-lg md:text-xl">Portal de gestión de envíos y logística</p>
       </header>
 
       <main className="flex flex-wrap justify-center gap-8">
         {/* Card 1 */}
         <Link
-          href="#"
+          href="/calcular-costo"
           className="w-64 p-8 bg-white border-2 border-blue-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
         >
           <h2 className="text-2xl font-semibold text-blue-600 mb-3">Calcular Costo</h2>
