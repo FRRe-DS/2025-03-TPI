@@ -5,7 +5,11 @@ import { ShippingListResponse } from './dto/shipping-list.response';
 import { ShipmentSummaryDto } from './dto/shipment-summary.dto';
 import { ProductQtyDto } from './dto/product-qty.dto';
 import { ShippingStatus } from './dto/shipping-status.enum';
-
+import {
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 
 
 @Injectable()
@@ -74,3 +78,64 @@ export class ShippingServicePagination {
     };
   }
 }
+
+// ====== NUEVO: tipo interno para “fila” del envío ======
+type ShippingRecord = {
+  id: number;
+  status: ShippingStatus;
+  cancelled_at?: string;
+  // acá podrían ir otros campos reales (order_id, user_id, etc.)
+};
+
+@Injectable()
+export class ShippingCancelService {
+  // ====== NUEVO: “repositorio” en memoria solo para demo ======
+  private readonly db = new Map<number, ShippingRecord>([
+    [1, { id: 1, status: ShippingStatus.CREATED }],
+    [2, { id: 2, status: ShippingStatus.IN_TRANSIT }],
+    [3, { id: 3, status: ShippingStatus.RESERVED }],
+  ]);
+
+  // ====== NUEVO: helper para buscar o lanzar 404 ======
+  private getOr404(id: number): ShippingRecord {
+    const row = this.db.get(id);
+    if (!row) throw new NotFoundException('Shipment not found');
+    return row;
+  }
+
+  // ====== NUEVO: regla de negocio (solo created/reserved pueden cancelarse) ======
+  private canCancel(status: ShippingStatus): boolean {
+    return (
+      status === ShippingStatus.CREATED || status === ShippingStatus.RESERVED
+    );
+  }
+
+  // ====== NUEVO: método principal del endpoint POST /shipping/:id/cancel ======
+  cancel(shippingId: number) {
+    const row = this.getOr404(shippingId);
+
+    if (row.status === ShippingStatus.CANCELLED) {
+      // ya estaba cancelado → 409
+      throw new ConflictException('Shipment is already cancelled');
+    }
+
+    if (!this.canCancel(row.status)) {
+      // estado no permitido para cancelar → 400
+      throw new BadRequestException(
+        `Shipment cannot be cancelled from status '${row.status}'.`,
+      );
+    }
+
+    // ok: aplicamos la cancelación
+    const now = new Date().toISOString();
+    row.status = ShippingStatus.CANCELLED;
+    row.cancelled_at = now;
+    this.db.set(row.id, row);
+
+    // respuesta alineada con el schema de la OpenAPI
+    return {
+      shipping_id: row.id,
+      status: 'cancelled' as const,
+      cancelled_at: now,
+    };
+  }}

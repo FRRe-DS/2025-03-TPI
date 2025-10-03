@@ -29,7 +29,7 @@ export class ShippingController {
         return this.shippingServicePagination.list(page, items_per_page);
     }
 
-    @Get(':id') //1
+    @Get(':id') 
     getShippingOrderById(@Param('id') id: number) : ShippingDetailsResponseDto{
         // Logic to retrieve a specific shipping order by ID
         return { shipping_id: id,
@@ -88,6 +88,5 @@ export class ShippingController {
         // Logic to retrieve available transport methods
         return this.shippingService.getTransportMethods();
     }
-
-
+    
 }
