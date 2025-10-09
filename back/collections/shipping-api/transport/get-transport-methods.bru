@@ -1,0 +1,53 @@
+meta {
+  name: Get Transport Methods
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/shipping/transport-methods
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Available Transport Methods
+  
+  Retrieves all available transport methods for shipping.
+  
+  ## Response
+  Returns a list of available transport methods including:
+  - Air transport
+  - Sea transport
+  - Road transport
+  - Rail transport
+  
+  ## Example Response
+  ```json
+  {
+    "methods": [
+      {
+        "type": "air",
+        "name": "Air Transport",
+        "description": "Fast delivery via air"
+      },
+      {
+        "type": "sea",
+        "name": "Sea Transport",
+        "description": "Cost-effective for bulk shipments"
+      },
+      {
+        "type": "road",
+        "name": "Road Transport",
+        "description": "Standard ground delivery"
+      },
+      {
+        "type": "rail",
+        "name": "Rail Transport",
+        "description": "Efficient rail delivery"
+      }
+    ]
+  }
+  ```
+}
+

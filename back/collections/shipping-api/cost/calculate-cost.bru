@@ -1,0 +1,74 @@
+meta {
+  name: Calculate Shipping Cost
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/shipping/cost
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "deliveryAddress": {
+      "street": "Av. Corrientes 1234",
+      "city": "Buenos Aires",
+      "state": "CABA",
+      "country": "AR",
+      "postalCode": "C1043"
+    },
+    "products": [
+      {
+        "id": 1,
+        "quantity": 3
+      },
+      {
+        "id": 5,
+        "quantity": 1
+      }
+    ]
+  }
+}
+
+docs {
+  # Calculate Shipping Cost
+  
+  Calculates the estimated shipping cost based on delivery address and products.
+  
+  ## Request Body
+  
+  ### Required Fields
+  - `deliveryAddress` (object): Delivery address details
+    - `street` (string): Street address
+    - `city` (string): City name
+    - `state` (string): State/Province
+    - `country` (string): Country code
+    - `postalCode` (string): Postal/ZIP code
+  - `products` (array): List of products
+    - `id` (number): Product ID (min: 1)
+    - `quantity` (number): Quantity (min: 1)
+  
+  ## Response
+  Returns the calculated shipping cost.
+  
+  ## Example Response
+  ```json
+  {
+    "cost": 10.0
+  }
+  ```
+  
+  ## Notes
+  - Cost calculation may vary based on:
+    - Delivery location
+    - Product weight and dimensions
+    - Total quantity
+    - Selected transport method (if applicable)
+}
+

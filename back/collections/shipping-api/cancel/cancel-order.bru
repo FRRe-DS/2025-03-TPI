@@ -1,0 +1,41 @@
+meta {
+  name: Cancel Shipping Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/shipping/1/cancel
+  body: none
+  auth: none
+}
+
+docs {
+  # Cancel Shipping Order
+  
+  Cancels an existing shipping order.
+  
+  ## Path Parameters
+  - `id` (required): The shipping order ID to cancel
+  
+  ## Response
+  Returns a success message confirming the cancellation.
+  
+  ## Example Response
+  ```json
+  {
+    "message": "Shipping order 1 canceled successfully"
+  }
+  ```
+  
+  ## Important Notes
+  - Only orders in certain statuses can be cancelled
+  - Once cancelled, the order cannot be reactivated
+  - Consider checking the order status before attempting cancellation
+  
+  ## Status Codes
+  - `200`: Order successfully cancelled
+  - `404`: Order not found
+  - `400`: Order cannot be cancelled (invalid status)
+}
+

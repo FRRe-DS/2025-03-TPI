@@ -1,0 +1,101 @@
+meta {
+  name: Create Shipping Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/shipping
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "orderId": 1,
+    "userId": 1,
+    "deliveryAddress": {
+      "street": "Av. Siempre Viva 742",
+      "city": "Springfield",
+      "state": "Illinois",
+      "country": "US",
+      "postalCode": "62704"
+    },
+    "transport": {
+      "type": "road"
+    },
+    "products": [
+      {
+        "id": 1,
+        "quantity": 2
+      },
+      {
+        "id": 2,
+        "quantity": 5
+      }
+    ]
+  }
+}
+
+docs {
+  # Create Shipping Order
+  
+  Creates a new shipping order in the system.
+  
+  ## Request Body
+  
+  ### Required Fields
+  - `orderId` (number): The order ID (min: 1)
+  - `userId` (number): The user ID (min: 1)
+  - `deliveryAddress` (object): Delivery address details
+    - `street` (string): Street address
+    - `city` (string): City name
+    - `state` (string): State/Province
+    - `country` (string): Country code
+    - `postalCode` (string): Postal/ZIP code
+  - `transport` (object): Transport method
+    - `type` (string): One of: 'air', 'sea', 'road', 'rail'
+  - `products` (array): List of products
+    - `id` (number): Product ID (min: 1)
+    - `quantity` (number): Quantity (min: 1)
+  
+  ## Response
+  Returns a success message with the created order details.
+  
+  ## Example Response
+  ```json
+  {
+    "message": "Shipping order created successfully",
+    "order": {
+      "orderId": 1,
+      "userId": 1,
+      "deliveryAddress": {
+        "street": "Av. Siempre Viva 742",
+        "city": "Springfield",
+        "state": "Illinois",
+        "country": "US",
+        "postalCode": "62704"
+      },
+      "transport": {
+        "type": "road"
+      },
+      "products": [
+        {
+          "id": 1,
+          "quantity": 2
+        }
+      ]
+    }
+  }
+  ```
+  
+  ## Validation Rules
+  - All address fields are required and must be non-empty strings
+  - Transport type must be one of: 'air', 'sea', 'road', 'rail'
+  - Product IDs and quantities must be integers >= 1
+}
+
