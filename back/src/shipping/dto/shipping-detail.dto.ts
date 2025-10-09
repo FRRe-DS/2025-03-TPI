@@ -1,4 +1,4 @@
-import { Type } from "class-transformer/types/decorators/type.decorator";
+import { Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from "class-validator";
 import { AddressDto } from "./address.dto";
 import { ProductRequestDto } from "./product-request.dto";

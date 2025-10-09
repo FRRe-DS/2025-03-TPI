@@ -22,6 +22,12 @@ export class ShippingController {
          };
     }
 
+    @Get('transport-methods')
+    getTransportMethods() : TransportMethodsResponseDto {
+        // Logic to retrieve available transport methods
+        return this.shippingService.getTransportMethods();
+    }
+    
     @Get() 
     getShippingOrders(@Query() { page, items_per_page }: PaginationInDto,
   ): ShippingListResponse {
@@ -83,10 +89,5 @@ export class ShippingController {
         return { cost: 10.00 }; // Example fixed cost
     }
 
-    @Get('transport-methods')
-    getTransportMethods() : TransportMethodsResponseDto {
-        // Logic to retrieve available transport methods
-        return this.shippingService.getTransportMethods();
-    }
     
 }
