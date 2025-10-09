@@ -1,0 +1,53 @@
+meta {
+  name: List Shipping Orders
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:3000/shipping?page=1&items_per_page=10
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  items_per_page: 10
+}
+
+docs {
+  # List Shipping Orders
+  
+  Retrieves a paginated list of all shipping orders.
+  
+  ## Query Parameters
+  - `page` (optional): Page number, defaults to 1
+  - `items_per_page` (optional): Number of items per page, defaults to 10
+  
+  ## Response
+  Returns a paginated list of shipping orders with metadata including:
+  - Current page
+  - Total pages
+  - Total items
+  - Items per page
+  - List of shipping orders
+  
+  ## Example Response
+  ```json
+  {
+    "page": 1,
+    "total_pages": 5,
+    "total_items": 50,
+    "items_per_page": 10,
+    "data": [
+      {
+        "shipping_id": 1,
+        "order_id": 123,
+        "status": "in_transit",
+        "created_at": "2025-09-01T10:00:00Z"
+      }
+    ]
+  }
+  ```
+}
+

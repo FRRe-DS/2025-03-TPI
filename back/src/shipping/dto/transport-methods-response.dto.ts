@@ -1,12 +1,9 @@
 import { IsArray } from "class-validator";
-import { TransportMethods } from "./transport-methods.enum";
+import { TransportMethods } from "../../shared/enums/transport-methods.enum";
 
 export class TransportMethodsItem {
-
     type: TransportMethods
-
     name: string;
-
     estimatedDeliveryTimeInDays: number[];
 }
 

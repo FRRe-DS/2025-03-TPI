@@ -1,6 +1,6 @@
 import { ProductQtyDto } from "./product-qty.dto";
-import { ShippingStatus } from './shipping-status.enum';
-import { TransportMethods } from './transport-methods.enum';
+import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
+import { TransportMethods } from '../../shared/enums/transport-methods.enum';
 
 export class ShipmentSummaryDto {
   shipping_id!: number;

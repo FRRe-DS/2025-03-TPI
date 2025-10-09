@@ -4,7 +4,6 @@ import { AddressDto } from './address.dto';
 import { ProductRequestDto } from './product-request.dto';
 
 export class CostCalculationRequestDto {
-
     //delivery address
     @ValidateNested()
     @Type(() => AddressDto)

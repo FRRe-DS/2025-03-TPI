@@ -12,5 +12,8 @@ async function bootstrap() {
   }));
 
   await app.listen(3000);
+  const HOST = process.env.HOST || 'localhost';
+  const PORT = process.env.PORT || 3000;
+  console.log(`🚀  Server ready at http://${HOST}:${PORT}`)
 }
 bootstrap();

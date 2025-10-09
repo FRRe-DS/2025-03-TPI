@@ -1,0 +1,79 @@
+meta {
+  name: Get Order by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3000/shipping/1
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Shipping Order Details
+  
+  Retrieves detailed information about a specific shipping order.
+  
+  ## Path Parameters
+  - `id` (required): The shipping order ID
+  
+  ## Response
+  Returns complete details of the shipping order including:
+  - Order information
+  - Delivery and departure addresses
+  - Products list
+  - Current status
+  - Transport type
+  - Delivery estimates
+  - Status change logs
+  
+  ## Example Response
+  ```json
+  {
+    "shipping_id": 1,
+    "order_id": 123,
+    "user_id": 456,
+    "deliveryAddress": {
+      "street": "Av. Siempre Viva 742",
+      "city": "Springfield",
+      "state": "Illinois",
+      "country": "US",
+      "postalCode": "62704"
+    },
+    "departureAddress": {
+      "street": "Depósito Central",
+      "city": "Springfield",
+      "state": "Illinois",
+      "country": "US",
+      "postalCode": "62701"
+    },
+    "products": [
+      {
+        "id": 1,
+        "quantity": 2
+      }
+    ],
+    "shippingStatus": "in_transit",
+    "transport_type": {
+      "type": "road"
+    },
+    "estimated_delivery_at": "2025-10-01T00:00:00Z",
+    "created_at": "2025-09-01T10:00:00Z",
+    "updated_at": "2025-09-20T10:00:00Z",
+    "logs": [
+      {
+        "timestamp": "2025-09-15T09:29:00Z",
+        "status": "in_transit",
+        "message": "Shipment is in distribution"
+      },
+      {
+        "timestamp": "2025-09-10T14:00:00Z",
+        "status": "created",
+        "message": "Shipment created"
+      }
+    ]
+  }
+  ```
+}
+

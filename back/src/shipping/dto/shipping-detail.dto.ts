@@ -2,13 +2,12 @@ import { Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from "class-validator";
 import { AddressDto } from "./address.dto";
 import { ProductRequestDto } from "./product-request.dto";
-import { ShippingStatus } from "./shipping-status.enum";
+import { ShippingStatus } from "../../shared/enums/shipping-status.enum";
 import { TransportDto } from "./transport.dto";
 import { ShippingLogDto } from "./shipping-log.dto";
 
 
 export class ShippingDetailsResponseDto {
-
     @IsNumber() 
     @Min(1)
     @IsNotEmpty()

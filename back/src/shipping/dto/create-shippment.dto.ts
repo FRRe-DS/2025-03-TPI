@@ -4,9 +4,7 @@ import { AddressDto } from './address.dto';
 import { ProductRequestDto } from './product-request.dto';
 import { TransportDto } from './transport.dto';
 
-
 export class CreateShipmentDto {
-
     @IsNumber() @Max(1)
     orderId: number;
 
