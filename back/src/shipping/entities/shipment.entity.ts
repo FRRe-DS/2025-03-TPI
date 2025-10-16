@@ -1,36 +1,53 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+} from 'typeorm';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
-import { TransportMethods } from '../../shared/enums/transport-methods.enum';
+import { Address } from './address.entity';
+import { User } from './user.entity';
+import { TransportMethod } from './transport-method.entity';
+import { ShipmentProduct } from './shipment-product.entity';
 
-@Entity('shipments') // Nombre de la tabla en MySQL
+@Entity('shipments')
 export class Shipment {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    orderId: string;
+    // Relación muchos a uno con User (cada envío pertenece a un usuario)
+    @ManyToOne(() => User, (user) => user.shipments, { eager: true })
+    @JoinColumn({ name: 'userId' })
+    user: User;
+
+    // Relación muchos a uno con Address (origen)
+    @ManyToOne(() => Address, { eager: true })
+    @JoinColumn({ name: 'fromId' })
+    from: Address;
+
+    // Relación muchos a uno con Address (destino)
+    @ManyToOne(() => Address, { eager: true })
+    @JoinColumn({ name: 'toId' })
+    to: Address;
+
+    @CreateDateColumn({ type: 'timestamp' })
+    date: Date;
 
     @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.PENDING })
     status: ShippingStatus;
 
-    @Column({ type: 'enum', enum: TransportMethods })
-    transportMethod: TransportMethods;
+    // Relación muchos a uno con TransportMethod
+    @ManyToOne(() => TransportMethod, (transportMethod) => transportMethod.shipments, { eager: true })
+    @JoinColumn({ name: 'transportMethodId' })
+    transportMethod: TransportMethod;
 
-    @Column({ type: 'decimal', precision: 10, scale: 2 })
-    cost: number;
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    totalCost: number;
 
-    @Column({ type: 'json' })
-    origin: object;
-
-    @Column({ type: 'json' })
-    destination: object;
-
-    @Column({ type: 'json', nullable: true })
-    products: object[];
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
+    // Relación uno a muchos con ShipmentProduct (tabla intermedia)
+    @OneToMany(() => ShipmentProduct, (shipmentProduct) => shipmentProduct.shipment)
+    shipmentProducts: ShipmentProduct[];
 }
