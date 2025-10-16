@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Servicio de base de datos MySQL
+  mysql:
+    image: mysql:8.0                    # Descarga MySQL versión 8.0
+    container_name: shipping_mysql       # Nombre del contenedor
+    restart: always                      # Se reinicia si se cae
+    environment:
+      MYSQL_ROOT_PASSWORD: root123       # Contraseña del usuario root
+      MYSQL_DATABASE: shipping_db        # Crea esta base de datos automáticamente
+      MYSQL_USER: shipping_user          # Usuario adicional
+      MYSQL_PASSWORD: shipping_pass      # Contraseña del usuario
+    ports:
+      - "3306:3306"                      # Puerto: tu_pc:contenedor
+    volumes:
+      - mysql_data:/var/lib/mysql        # Guarda datos aunque elimines el contenedor
+    networks:
+      - shipping_network
+
+# Volumen para persistir datos
+volumes:
+  mysql_data:
+
+# Red para que los servicios se comuniquen
+networks:
+  shipping_network:
