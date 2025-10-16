@@ -44,6 +44,22 @@ export class ShippingDetailsResponseDto {
     @Type(() => TransportDto)
     transport_type: TransportDto;
 
+    @ValidateNested()
+    @IsNotEmpty()
+    tracking_number: string;
+    
+    @ValidateNested()
+    @IsNotEmpty()
+    carrier_name: string;
+
+    @ValidateNested()
+    @IsNotEmpty()
+    total_cost: number;
+
+    @ValidateNested()
+    @IsNotEmpty()
+    currency: string;
+
     @IsNotEmpty()
     estimated_delivery_at: string;
 
