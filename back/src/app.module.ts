@@ -13,15 +13,15 @@ import { ShipmentProduct } from './shipping/entities/shipment-product.entity';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'back\.env',
+      envFilePath: '.env',
     }),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '3306', 10),
-      username: process.env.DB_USERNAME || 'shipping_user',
-      password: process.env.DB_PASSWORD || 'shipping_pass',
+      username: process.env.DB_USERNAME || '',
+      password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'shipping_db',
       entities: [
         Shipment,
