@@ -6,7 +6,6 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 
 import { CreateShipmentDto } from './dto/create-shippment.dto';
