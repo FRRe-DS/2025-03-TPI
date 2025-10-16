@@ -14,7 +14,6 @@ import { TransportMethodsResponseDto } from './dto/transport-methods-response.dt
 import { ShippingListResponse } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
-import { ShippingServicePagination } from './services/shipping-pagination.service';
 import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
 import { ShippingStatus } from 'src/shared/enums/shipping-status.enum';
 
@@ -22,7 +21,6 @@ import { ShippingStatus } from 'src/shared/enums/shipping-status.enum';
 export class ShippingController {
   constructor(
     private readonly shippingService: ShippingService,
-    private readonly shippingServicePagination: ShippingServicePagination,
   ) {}
 
   @Post()
@@ -40,7 +38,7 @@ export class ShippingController {
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
   ): Promise<ShippingListResponse> {
-    return await this.shippingServicePagination.list(page, items_per_page);
+    return await this.shippingService.ShippingServicePagination(page, items_per_page);
   }
 
   @Get(':id')

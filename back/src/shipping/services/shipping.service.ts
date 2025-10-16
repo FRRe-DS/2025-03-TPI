@@ -5,10 +5,12 @@ import { TransportMethodsResponseDto } from '../dto/transport-methods-response.d
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingStatus } from 'src/shared/enums/shipping-status.enum';
 import { TransportMethods } from '../../shared/enums/transport-methods.enum';
+import { ShippingListResponse } from '../dto/shipping-list.response';
+import * as shipmentsData from '../../shared/data/shippments.json';
 
 //exceptions
 import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
-import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.ecxeption';
+import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
 import { UnprocessableEntityException } from 'src/common/exceptions/unprocessable-entity.exception';
 import { UnauthorizedException } from 'src/common/exceptions/unauthorized.exception';
 import { BusinessRuleViolationException } from 'src/common/exceptions/business-rule-viol.exception';
@@ -17,6 +19,7 @@ import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shi
 import { ShippingIdNonCancellableException } from 'src/common/exceptions/shipping-id-noncancellable.exception';
 import { ShippingIdNotFoundException } from 'src/common/exceptions/shipping-id-notfound.exception';
 import { ShippingOrdersException } from 'src/common/exceptions/shipping-orders.exception';
+import { ShipmentSummaryDto } from '../dto/shipment-summary.dto';
 
 @Injectable()
 export class ShippingService {
@@ -182,4 +185,33 @@ export class ShippingService {
       throw new UnexpectedErrorException();
     }
   }
+    private data: ShipmentSummaryDto[] = shipmentsData.shipments as ShipmentSummaryDto[];
+
+    async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
+      try {
+        const totalItems = this.data.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        const currentPage = Math.min(Math.max(1, page), totalPages);
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+    
+        const shipments = this.data.slice(start, end);
+    
+        return {
+          shipments,
+          pagination: {
+            current_page: currentPage,
+            total_pages: totalPages,
+            total_items: totalItems,
+            items_per_page: itemsPerPage,
+          },
+        };
+      } catch (error) {
+        if (error.status) {
+          throw error;
+        }
+        throw new UnexpectedErrorException();
+    }
+  }
+  
 } // class ShippingService
