@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { calcularCosto } from "../services/logistica-mock";
 import type {
   Address,
@@ -13,9 +14,17 @@ function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
 }
 
+// Componente de Flecha de Volver
+const BackArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+);
+
 export default function CalcularCostoPage() {
+  // CAMBIO CLAVE 1: Inicializamos todos los campos como cadenas vacías ("")
   const [address, setAddress] = useState<Address>({
-    street: "",
+    street: "", 
     city: "",
     state: "",
     postal_code: "",
@@ -43,13 +52,13 @@ export default function CalcularCostoPage() {
   };
 
   const validate = () => {
-    if (!address.street.trim()) return "Street is required";
-    if (!address.city.trim()) return "City is required";
-    if (!address.postal_code.trim()) return "Postal code is required";
-    if (products.length === 0) return "Add at least one product";
+    if (!address.street.trim()) return "La Calle es requerida.";
+    if (!address.city.trim()) return "La Ciudad es requerida.";
+    if (!address.postal_code.trim()) return "El Código Postal es requerido.";
+    if (products.length === 0) return "Agregue al menos un producto.";
     for (const p of products) {
-      if (p.id < 1) return "Product ID must be >= 1";
-      if (p.quantity < 1) return "Product quantity must be >= 1";
+      if (p.id < 1) return "El ID del Producto debe ser >= 1.";
+      if (p.quantity < 1) return "La Cantidad del Producto debe ser >= 1.";
     }
     return null;
   };
@@ -67,7 +76,7 @@ export default function CalcularCostoPage() {
 
     const data: ShippingCostRequest = {
         delivery_address: address,
-        departure_postal_code: "1000", // <-- esto faltaba
+        departure_postal_code: "1000",
         products,
     };
 
@@ -77,124 +86,162 @@ export default function CalcularCostoPage() {
       setResult(resp);
     } catch (err) {
       console.error(err);
-      setError("Error calculating cost. Try again.");
+      setError("Error al calcular el costo. Intente nuevamente.");
     } finally {
       setLoading(false);
     }
   };
+  
+  // Clases de estilo reutilizables
+  // Nota: Tailwind aplica automáticamente un color gris pálido y transparente a los placeholders.
+  const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-[var(--color-light)]";
+  const labelStyle = "text-sm text-[var(--color-text-dark)] font-medium";
+  
+  // Estilo Base: Contorno Primario (Limpia resultado)
+  const baseOutlineButton = "border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-light)] rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
+  
+  // 1. Estilo para Botón Calcular Costo (MISMO TAMAÑO PERO CON RELLENO PRIMARIO)
+  const calculateButton = `px-5 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold border-2 border-[var(--color-primary)] hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] transition-colors duration-300 disabled:opacity-60`;
+
+  // 2. Estilo para Botón Limpiar Resultado (TAMAÑO BASE: px-5 py-2)
+  const clearButton = `px-5 py-2 ${baseOutlineButton}`;
+
+  // 3. Estilo para Botones Agregar/Eliminar (Tamaño pequeño)
+  const smallButton = `px-3 py-1 text-xs ${baseOutlineButton}`; 
+
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
-        <h1 className="text-2xl font-semibold text-brand mb-2">Calcular Costo de Envío</h1>
-        <p className="text-sm text-gray-600 mb-6">
+    <div 
+        className="min-h-screen bg-[var(--color-bg)] py-12 text-[var(--color-text-dark)] flex items-center justify-center" 
+    >
+      <div className="max-w-4xl w-full mx-auto p-8 bg-[var(--color-light)] shadow-xl rounded-xl border border-[var(--color-gray)]"> 
+        
+        {/* Encabezado con Botón Volver a la izquierda */}
+        <div className="flex items-center mb-4">
+            <Link href="/" passHref className="mr-4">
+                <button 
+                    className="p-1 rounded-full text-[var(--color-primary)] hover:bg-[var(--color-light)] transition-colors duration-300"
+                    aria-label="Volver a la página de inicio"
+                >
+                    <BackArrowIcon />
+                </button>
+            </Link>
+            <h1 className="text-3xl font-heading font-bold text-[var(--color-primary)]">Calcular Costo de Envío</h1>
+        </div>
+        
+        <p className="text-sm text-[var(--color-text-dark)] opacity-80 mb-6">
           Complete la dirección y los productos para simular el costo.
         </p>
 
-        <form onSubmit={onSubmit} className="space-y-6">
-          {/* Address */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="space-y-8">
+          
+          {/* Dirección */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Calle</span>
+              <span className={labelStyle}>Calle</span>
               <input
                 value={address.street}
                 onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                className="mt-1 p-2 border rounded"
-                placeholder="Av. Siempre Viva 123"
+                className={inputStyle}
+                placeholder="Av. Siempre Viva 123" // CAMBIO CLAVE 2: Mover el texto a placeholder
               />
             </label>
 
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Ciudad</span>
+              <span className={labelStyle}>Ciudad</span>
               <input
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className="mt-1 p-2 border rounded"
-                placeholder="Resistencia"
+                className={inputStyle}
+                placeholder="Resistencia" // CAMBIO CLAVE 2: Mover el texto a placeholder
               />
             </label>
 
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Provincia</span>
+              <span className={labelStyle}>Provincia</span>
               <input
                 value={address.state}
                 onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                className="mt-1 p-2 border rounded"
-                placeholder="Chaco"
+                className={inputStyle}
+                placeholder="Chaco" // CAMBIO CLAVE 2: Mover el texto a placeholder
               />
             </label>
 
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Código Postal</span>
+              <span className={labelStyle}>Código Postal</span>
               <input
                 value={address.postal_code}
                 onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
-                className="mt-1 p-2 border rounded"
-                placeholder="3500"
+                className={inputStyle}
+                placeholder="3500" // CAMBIO CLAVE 2: Mover el texto a placeholder
               />
             </label>
 
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">País</span>
+              <span className={labelStyle}>País</span>
               <input
-                value={address.country}
+                value={address.country} // Mantenemos el valor "AR" ya que es un valor fijo (readonly)
                 onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                className={inputStyle}
                 placeholder="AR"
+                readOnly
               />
             </label>
           </div>
 
-          {/* Products */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-medium">Productos</h2>
+          {/* Productos */}
+          <div className="pt-4 border-t border-[var(--color-gray)]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-heading font-medium text-[var(--color-text-dark)]">Productos</h2>
               <button
                 type="button"
                 onClick={addProduct}
-                className="text-sm text-white bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+                className={smallButton} 
               >
                 + Agregar producto
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {products.map((p, i) => (
                 <div
                   key={i}
-                  className="p-3 border rounded grid grid-cols-1 md:grid-cols-3 gap-2 items-end"
+                  className="p-4 border border-[var(--color-gray)] rounded-lg grid grid-cols-5 md:grid-cols-5 gap-4 items-end bg-[var(--color-light)]/50" 
                 >
-                  <div>
-                    <label className="text-xs text-gray-600">ID del Producto</label>
+                  <div className="col-span-2">
+                    <label className="text-xs text-[var(--color-text-dark)] opacity-75">ID Producto</label>
                     <input
                       type="number"
                       min={1}
-                      value={p.id}
+                      value={p.id} // Mantenemos el valor inicial de "1" para ID y Cantidad si es necesario
                       onChange={(e) =>
                         updateProduct(i, { id: Math.max(1, Number(e.target.value)) })
                       }
-                      className="mt-1 p-1 border rounded w-full"
+                      className={inputStyle.replace('p-2', 'p-1')}
+                      placeholder="Ej: 456" // Añadimos placeholders aquí también
                     />
                   </div>
 
-                  <div>
-                    <label className="text-xs text-gray-600">Cantidad</label>
+                  <div className="col-span-2">
+                    <label className="text-xs text-[var(--color-text-dark)] opacity-75">Cantidad</label>
                     <input
                       type="number"
                       min={1}
-                      value={p.quantity}
+                      value={p.quantity} // Mantenemos el valor inicial de "1" si es necesario
                       onChange={(e) =>
                         updateProduct(i, { quantity: Math.max(1, Number(e.target.value)) })
                       }
-                      className="mt-1 p-1 border rounded w-full"
+                      className={inputStyle.replace('p-2', 'p-1')}
+                      placeholder="Ej: 5" // Añadimos placeholders aquí también
                     />
                   </div>
-
-                  <div className="flex gap-2">
+                  
+                  <div className="col-span-1 flex justify-end">
                     <button
                       type="button"
                       onClick={() => removeProduct(i)}
-                      className="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                      className={smallButton}
                     >
                       Eliminar
                     </button>
@@ -203,48 +250,55 @@ export default function CalcularCostoPage() {
               ))}
             </div>
           </div>
+          
+          {/* Mensajes y Botones de Acción */}
+          {error && <div className="text-sm p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">{error}</div>}
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
-
-          <div className="flex items-center gap-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
-            >
-              {loading ? "Calculando..." : "Calcular Costo"}
-            </button>
-
+          {/* Distribución de botones: AMBOS A LA IZQUIERDA */}
+          <div className="flex items-center gap-4 pt-4 border-t border-[var(--color-gray)]">
+            
+            {/* Botón Limpiar (Izquierda) */}
             <button
               type="button"
               onClick={() => {
                 setResult(null);
                 setError(null);
               }}
-              className="px-4 py-2 border rounded"
+              className={clearButton} 
             >
               Limpiar resultado
             </button>
+            
+            {/* Botón Calcular Costo (A su lado, con relleno) */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={calculateButton}
+            >
+              {loading ? "Calculando..." : "Calcular Costo"}
+            </button>
+            
           </div>
         </form>
 
+        {/* Resultado */}
         {result && (
-          <div className="mt-6 p-4 border rounded bg-gray-50">
-            <h3 className="text-lg font-medium mb-2">Resultado</h3>
-            <p>
-              <strong>Total:</strong> {result.total_cost} {result.currency}
+          <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-[var(--color-light)] text-[var(--color-text-dark)]">
+            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Resultado de Simulación</h3>
+            <p className="text-lg">
+              <strong>Total Estimado:</strong> <span className="text-[var(--color-secondary)] font-bold">{result.total_cost} {result.currency}</span>
             </p>
             <p>
-              <strong>Transporte:</strong> {result.transport_type}
+              <strong>Tipo de Transporte:</strong> {result.transport_type}
             </p>
 
-            <div className="mt-4">
-              <h4 className="font-medium">Desglose por producto</h4>
+            <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
+              <h4 className="font-heading font-medium">Desglose por Producto</h4>
               <ul className="mt-2 space-y-1">
                 {result.products.map((pr) => (
-                  <li key={pr.id} className="flex justify-between">
-                    <span>Producto #{pr.id}</span>
-                    <span>{pr.cost} {result.currency}</span>
+                  <li key={pr.id} className="flex justify-between text-sm">
+                    <span>Producto ID #{pr.id}</span>
+                    <span className="font-medium">{pr.cost} {result.currency}</span>
                   </li>
                 ))}
               </ul>
