@@ -8,6 +8,7 @@ import { User } from './shipping/entities/user.entity';
 import { Product } from './shipping/entities/product.entity';
 import { TransportMethod } from './shipping/entities/transport-method.entity';
 import { ShipmentProduct } from './shipping/entities/shipment-product.entity';
+import { KeycloakModule } from './auth/keycloak.module';
 
 @Module({
   imports: [
@@ -15,7 +16,6 @@ import { ShipmentProduct } from './shipping/entities/shipment-product.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
-
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST || 'localhost',
@@ -34,8 +34,8 @@ import { ShipmentProduct } from './shipping/entities/shipment-product.entity';
       synchronize: true,
       logging: true,
     }),
-
+    KeycloakModule,
     ShippingModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
