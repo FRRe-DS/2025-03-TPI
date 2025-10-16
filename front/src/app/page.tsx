@@ -1,73 +1,112 @@
-"use client";
+"use client"
 
-import Link from "next/link";
+import Link from "next/link"
+
+const PackageIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+    />
+  </svg>
+)
+
+const SendIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+  </svg>
+)
+
+const SearchIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+)
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-[var(--color-bg)] text-[var(--color-text-dark)]  transition-colors duration-300 dark:bg-[var(--color-bg-dark)] dark:text-[var(--color-text-light)]">
-     {/* Hero Banner */}
-      <section
-        className="relative w-screen h-[85vh] flex items-center justify-center bg-cover bg-center"
+    <div className="min-h-screen flex flex-col items-center justify-start bg-slate-100 text-slate-900 transition-colors duration-300">
+    <section
+        className="relative w-screen h-[100vh] flex items-center justify-center bg-cover bg-center"
         style={{ backgroundImage: "url('/heroBanner.png')" }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/25 dark:bg-black/40"></div>
-
-        {/* Texto del Hero */}
-       <div className="relative z-10 text-center px-4 max-w-3xl">
-          <h2 className="text-5xl md:text-6xl font-heading font-bold text-[var(--color-light)] mb-4 leading-tight">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-slate-100 to-transparent z-10"></div>
+        <div className="relative z-10 text-center px-6 max-w-4xl">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight text-balance">
             Tu carga, nuestro compromiso.
-          </h2>
-          <p className="text-xl md:text-2xl text-[var(--color-light)] opacity-90 leading-relaxed">
+          </h1>
+          <p className="text-xl md:text-2xl lg:text-3xl text-white/95 font-light leading-relaxed text-pretty">
             Logística inteligente para un mundo que no se detiene.
           </p>
         </div>
       </section>
 
-      {/* Cards */}
-      <main className="flex flex-wrap justify-center gap-8 mt-16 mb-20">
-        {/* Card 1 */}
+      <main className="w-full max-w-7xl px-6 flex flex-wrap justify-center gap-8 -mt-24 mb-32 relative z-20">
+        {/* Card 1 - Calcular Costo */}
         <Link
           href="/calcular-costo"
-          className="group w-64 p-8 bg-white border-2 border-[var(--color-gray)] rounded-3xl shadow-md hover:shadow-xl hover:bg-[var(--color-light)] transform hover:-translate-y-2 transition-all duration-300 text-center 
-          dark:bg-[var(--color-card-dark)] dark:border-[var(--color-card-border-dark)] dark:hover:bg-[var(--color-card-hover-dark)] "
+          className="group relative w-full sm:w-80 lg:w-96 p-10 bg-white border border-slate-200 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden"
         >
-          <h2 className="text-2xl font-semibold text-[var(--color-primary)] group-hover:text-[var(--color-secondary)] mb-3 dark:text-[var(--color-primary)]">
-            Calcular Costo
-          </h2>
-          <p className="text-sm text-[var(--color-secondary)] group-hover:text-[var(--color-text-light)] transition-colors duration-300 dark:text-[var(--color-secondary)] dark:group-hover:text-[var(--color-text-light)]">
-            Simulá el costo de envío de tus productos
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          <div className="relative z-10">
+            <div className="w-14 h-14 mb-6 rounded-xl bg-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <PackageIcon className="w-7 h-7 text-blue-600" />
+            </div>
+
+            <h2 className="text-3xl font-bold text-slate-900 group-hover:text-blue-600 mb-4 transition-colors duration-300">
+              Calcular Costo
+            </h2>
+            <p className="text-base text-slate-600 leading-relaxed">
+              Simulá el costo de envío de tus productos de manera rápida y precisa
+            </p>
+          </div>
         </Link>
 
-        {/* Card 2 */}
+        {/* Card 2 - Crear Envío */}
         <Link
           href="#"
-          className="group w-64 p-8 bg-white border-2 border-[var(--color-gray)] rounded-3xl shadow-md hover:shadow-xl hover:bg-[var(--color-light)] transform hover:-translate-y-2 transition-all duration-300 text-center 
-          dark:bg-[var(--color-card-dark)] dark:border-[var(--color-card-border-dark)] dark:hover:bg-[var(--color-card-hover-dark)] "
+          className="group relative w-full sm:w-80 lg:w-96 p-10 bg-white border border-slate-200 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden"
         >
-          <h2 className="text-2xl font-semibold text-[var(--color-primary)] group-hover:text-[var(--color-secondary)] mb-3 dark:text-[var(--color-primary)]">
-            Crear Envío
-          </h2>
-          <p className="text-sm text-[var(--color-secondary)] group-hover:text-[var(--color-text-light)] transition-colors duration-300 dark:text-[var(--color-secondary)] dark:group-hover:text-[var(--color-text-light)]">
-            Generá un nuevo envío y reservá stock
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          <div className="relative z-10">
+            <div className="w-14 h-14 mb-6 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <SendIcon className="w-7 h-7 text-emerald-600" />
+            </div>
+
+            <h2 className="text-3xl font-bold text-slate-900 group-hover:text-emerald-600 mb-4 transition-colors duration-300">
+              Crear Envío
+            </h2>
+            <p className="text-base text-slate-600 leading-relaxed">
+              Generá un nuevo envío y reservá stock en tiempo real
+            </p>
+          </div>
         </Link>
 
-        {/* Card 3 */}
+        {/* Card 3 - Consultar Envío */}
         <Link
           href="#"
-          className="group w-64 p-8 bg-white border-2 border-[var(--color-gray)] rounded-3xl shadow-md hover:shadow-xl hover:bg-[var(--color-light)] transform hover:-translate-y-2 transition-all duration-300 text-center 
-          dark:bg-[var(--color-card-dark)] dark:border-[var(--color-card-border-dark)] dark:hover:bg-[var(--color-card-hover-dark)] "
+          className="group relative w-full sm:w-80 lg:w-96 p-10 bg-white border border-slate-200 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden"
         >
-          <h2 className="text-2xl font-semibold text-[var(--color-primary)] group-hover:text-[var(--color-secondary)] mb-3 dark:text-[var(--color-primary)]">
-            Consultar Envío
-          </h2>
-          <p className="text-sm text-[var(--color-secondary)] group-hover:text-[var(--color-text-light)] transition-colors duration-300 dark:text-[var(--color-secondary)] dark:group-hover:text-[var(--color-text-light)]">
-            Seguimiento de tus envíos por ID
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          <div className="relative z-10">
+            <div className="w-14 h-14 mb-6 rounded-xl bg-orange-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <SearchIcon className="w-7 h-7 text-orange-600" />
+            </div>
+
+            <h2 className="text-3xl font-bold text-slate-900 group-hover:text-orange-600 mb-4 transition-colors duration-300">
+              Consultar Envío
+            </h2>
+            <p className="text-base text-slate-600 leading-relaxed">
+              Seguimiento completo de tus envíos por ID en tiempo real
+            </p>
+          </div>
         </Link>
       </main>
     </div>
-  );
+  )
 }
