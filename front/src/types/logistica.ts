@@ -33,3 +33,17 @@ export interface ShippingCostResponse {
   transport_type: string;
   products: ProductCost[];
 }
+
+export interface ShippingCreationRequest {
+  user_id: number; 
+  delivery_address: Address;
+  departure_postal_code: string;
+  products: ProductItemInput[];
+}
+
+export interface ShippingCreationResponse {
+  shipping_id: number;
+  status: string; 
+  transport_type: string; 
+  estimated_delivery_at: string; 
+}
