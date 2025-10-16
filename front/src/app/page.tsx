@@ -22,7 +22,7 @@ export default function HomePage() {
 
         {/* Card 2 */}
         <Link
-          href="#"
+          href="/crear-envio"
           className="w-64 p-8 bg-white border-2 border-blue-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
         >
           <h2 className="text-2xl font-semibold text-blue-600 mb-3">Crear Envío</h2>
