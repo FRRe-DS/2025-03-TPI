@@ -114,7 +114,12 @@ const Footer = () => {
           {/* Columna 1: Logo y Slogan - Se asegura que ocupe todo su espacio en la rejilla */}
           <div className="space-y-4 col-span-2 md:col-span-1 w-full">
             <div className="flex items-center space-x-2">
-              <EnviGoIcon className="h-8 w-8 text-[var(--color-secondary)]" />
+              <img
+                src="/logo.png"
+                alt="EnviGo Logo"
+                className="h-10 w-10 object-contain"
+              />
+
               <span className="text-2xl font-bold font-[var(--font-heading)]">
                 {companyName}
               </span>
