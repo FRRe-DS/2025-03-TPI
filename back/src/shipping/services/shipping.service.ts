@@ -1,34 +1,160 @@
-import { Injectable } from '@nestjs/common';
-
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Shipment } from '../entities/shipment.entity';
+import { Address } from '../entities/address.entity';
+import { Product } from '../entities/product.entity';
+import { ShipmentProduct } from '../entities/shipment-product.entity';
+import { User } from '../entities/user.entity';
+import { TransportMethod } from '../entities/transport-method.entity';
+import { CreateShippmentDto } from '../dto/create-shippment.dto';
+import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
+import TransportMethodsRepository from '../repositories/transport_methods.repository';
+import ShipmentRepository from '../repositories/shipment.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
-import { TransportMethods } from '../../shared/enums/transport-methods.enum';
+import { ShippingListResponse } from '../dto/shipping-list.response';
+import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
+//import { PaginationDto } from '../../shared/dto/pagination.dto';
+import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 
 @Injectable()
 export class ShippingService {
-  getTransportMethods(): TransportMethodsResponseDto {
+  constructor(
+    private readonly transportMethodsRepository: TransportMethodsRepository,
+    private readonly shipmentRepository: ShipmentRepository,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Address)
+    private readonly addressRepository: Repository<Address>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(ShipmentProduct)
+    private readonly shipmentProductRepository: Repository<ShipmentProduct>,
+    @InjectRepository(TransportMethod)
+    private readonly transportMethodRepository: Repository<TransportMethod>
+  ) { }
+
+  async getTransportMethods(): Promise<TransportMethodsResponseDto> {
+    const methods = await this.transportMethodsRepository.getTransportMethods();
     return {
-      transportMethods: [
-        {
-          type: TransportMethods.AIR,
-          name: 'Air',
-          estimatedDeliveryTimeInDays: [1, 2]
-        },
-        {
-          type: TransportMethods.SEA,
-          name: 'Sea',
-          estimatedDeliveryTimeInDays: [5, 10]
-        },
-        {
-          type: TransportMethods.ROAD,
-          name: 'Road',
-          estimatedDeliveryTimeInDays: [3, 7]
-        },
-        {
-          type: TransportMethods.RAIL,
-          name: 'Rail',
-          estimatedDeliveryTimeInDays: [4, 8]
-        }
-      ]
+      transportMethods: methods.map(method => ({
+        id: method.id,
+        name: method.name,
+        type: method.type,
+        estimatedDays: method.estimatedDays
+      }))
     };
+  }
+
+  async createShipment(createShippmentDto: CreateShippmentDto): Promise<Shipment> {
+    // 1. Verificar o crear usuario
+    let user = await this.userRepository.findOne({
+      where: { id: createShippmentDto.userId }
+    });
+
+    if (!user) {
+      user = this.userRepository.create({ id: createShippmentDto.userId });
+      user = await this.userRepository.save(user);
+    }
+
+    // 2. Crear direcciones (siempre se crean nuevas)
+    const originAddress = this.addressRepository.create({
+      street: createShippmentDto.originAddress.street,
+      city: createShippmentDto.originAddress.city,
+      state: createShippmentDto.originAddress.state,
+      country: createShippmentDto.originAddress.country,
+      postalCode: createShippmentDto.originAddress.postalCode
+    });
+    const savedOriginAddress = await this.addressRepository.save(originAddress);
+
+    const destinationAddress = this.addressRepository.create({
+      street: createShippmentDto.destinationAddress.street,
+      city: createShippmentDto.destinationAddress.city,
+      state: createShippmentDto.destinationAddress.state,
+      country: createShippmentDto.destinationAddress.country,
+      postalCode: createShippmentDto.destinationAddress.postalCode
+    });
+    const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
+
+    // 3. Verificar método de transporte
+    const transportMethod = await this.transportMethodRepository.findOne({
+      where: { id: createShippmentDto.transportMethodId }
+    });
+
+    if (!transportMethod) {
+      throw new NotFoundException('Transport method not found');
+    }
+
+    // 4. Crear shipment
+    const savedShipment = await this.shipmentRepository.createShipment({
+      user: user,
+      originAddress: savedOriginAddress,
+      destinationAddress: savedDestinationAddress,
+      transportMethod: transportMethod,
+      status: ShippingStatus.PENDING,
+      totalCost: createShippmentDto.totalCost || 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    // 5. Verificar o crear produtos e criar relações
+    for (const productDto of createShippmentDto.products) {
+      let product = await this.productRepository.findOne({
+        where: { id: productDto.productId }
+      });
+
+      if (!product) {
+        product = this.productRepository.create({ id: productDto.productId });
+        product = await this.productRepository.save(product);
+      }
+
+      const shipmentProduct = this.shipmentProductRepository.create({
+        shipment: savedShipment,
+        product: product,
+        quantity: productDto.quantity
+      });
+      await this.shipmentProductRepository.save(shipmentProduct);
+    }
+
+    // 6. Retornar shipment completo
+    const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
+
+    if (!result) {
+      throw new NotFoundException('Shipment created but not found');
+    }
+
+    return result;
+  }
+
+  async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
+    // TODO: Implementar lógica de paginación
+    throw new Error('Method not implemented');
+  }
+
+  async findById(id: number): Promise<ShippingDetailsResponseDto> {
+    const shipment = await this.shipmentRepository.findShipmentById(id);
+
+    if (!shipment) {
+      throw new NotFoundException(`Shipment with id ${id} not found`);
+    }
+
+    // TODO: Mapear a ShippingDetailsResponseDto
+    throw new Error('Method not implemented');
+  }
+
+  async cancelShipment(id: number): Promise<any> {
+    const shipment = await this.shipmentRepository.findShipmentById(id);
+
+    if (!shipment) {
+      throw new NotFoundException(`Shipment with id ${id} not found`);
+    }
+
+    // TODO: Implementar lógica de cancelación
+    throw new Error('Method not implemented');
+  }
+
+  async calculateCost(costRequest: CostCalculationRequestDto): Promise<any> {
+    // TODO: Implementar lógica de cálculo de costo
+    throw new Error('Method not implemented');
   }
 }

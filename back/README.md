@@ -57,42 +57,27 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Obtener un token JWT
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl --location 'http://localhost:8080/realms/ds-2025-realm/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'client_id=grupo-03' \
+--data-urlencode 'client_secret=21cd6616-6571-4ee7-be29-0f781f77c74e'
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+y como resultado
 
-## Resources
+```json
+{
+    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmdXlRZ3o1Yy1JM29VdUdoT3RzOGxqTl8wX0Ewbm5IQjlhd1dhOC1WMWx3In0.eyJleHAiOjE3NTk5NjYyNTYsImlhdCI6MTc1OTk2NTk1NiwianRpIjoiYzc3MzdjYmEtNDIxYS00N2IzLTk5YzQtZjdmNTBiZjUwOTMzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9kcy0yMDI1LXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjEwYmNiYjMyLTRhYjQtNGJmNy1iYjVjLTQ0ZDMxMzA0ODM0MiIsInR5cCI6IkJlYXJlciIsImF6cCI6Imdyb3VwXzAxIiwiYWNyIjoiMSIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiZGVmYXVsdC1yb2xlcy1kcy0yMDI1LXJlYWxtIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiY2xpZW50SG9zdCI6IjE5Mi4xNjguNjUuMSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LWdyb3VwXzAxIiwiY2xpZW50QWRkcmVzcyI6IjE5Mi4xNjguNjUuMSIsImNsaWVudF9pZCI6Imdyb3VwXzAxIn0.PKx-qlEl98_F-modzU_5Bx7HekA9YOM_Mgdv_w32dIsWILjR8MkfSMtF3HI-uKpSRJSfQuw9fJAniIYohWtv7pKeCd-STjxQ2lhzGeVq_FJoN8y_72RlFXvzQ0INoxU7j6Ku5zUWvQElkmmfPxLaDN6E_DI_5dbxDY2974hiE0m03LuO_lgWN96o_HYQuPB-Yx826T1tuwNYRpZg1kcynrWS3Rm1ItdqlfCny2UboTpGvhclrTdHyUvLUw6SGrPkSVbIQgTMH2pNSJt_ude5mvAicyQk4pK7mP6lZ9mVdBTCkFmIdyO90THrh1S_uycsUjKUMq6SCuCgpjgUGADJ0w",
+    "expires_in": 300,
+    "refresh_expires_in": 0,
+    "token_type": "Bearer",
+    "not-before-policy": 0,
+    "scope": "email profile"
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Copiar el token obtenido y usarlo para autenticarse en las request hacia el backend.

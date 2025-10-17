@@ -1,0 +1,59 @@
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    ManyToOne,
+    OneToMany,
+    JoinColumn,
+} from 'typeorm';
+import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
+import { Address } from './address.entity';
+import { User } from './user.entity';
+import { TransportMethod } from './transport-method.entity';
+import { ShipmentProduct } from './shipment-product.entity';
+
+@Entity('shipments')
+export class Shipment {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    // Relación muchos a uno con User (cada envío pertenece a un usuario)
+    @ManyToOne(() => User, (user) => user.shipments, { eager: true })
+    @JoinColumn({ name: 'userId' })
+    user: User;
+
+    // Relación muchos a uno con Address (origen)
+    @ManyToOne(() => Address)
+    @JoinColumn({ name: 'origin_address_id' })
+    originAddress: Address;
+
+    // Relación muchos a uno con Address (destino)
+    @ManyToOne(() => Address)
+    @JoinColumn({ name: 'destination_address_id' })
+    destinationAddress: Address;
+
+    @CreateDateColumn({ type: 'timestamp' })
+    date: Date;
+
+    @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.PENDING })
+    status: ShippingStatus;
+
+    // Relación muchos a uno con TransportMethod
+    @ManyToOne(() => TransportMethod, (transportMethod) => transportMethod.shipments, { eager: true })
+    @JoinColumn({ name: 'transportMethodId' })
+    transportMethod: TransportMethod;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    totalCost: number;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
+    createdAt: Date;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP', name: 'updated_at' })
+    updatedAt: Date;
+
+    // Relación uno a muchos con ShipmentProduct (tabla intermedia)
+    @OneToMany(() => ShipmentProduct, (shipmentProduct) => shipmentProduct.shipment)
+    shipmentProducts: ShipmentProduct[];
+}
