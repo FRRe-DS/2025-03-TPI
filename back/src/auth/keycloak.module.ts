@@ -2,12 +2,11 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { 
   KeycloakConnectModule, 
-  PolicyEnforcementMode, 
   TokenValidation, 
   AuthGuard, 
-  ResourceGuard, 
   RoleGuard 
 } from 'nest-keycloak-connect';
+import { KeycloakResourceGuard } from './keycloak-resource.guard';
 
 @Module({
   imports: [
@@ -16,8 +15,8 @@ import {
       realm: 'ds-2025-realm',
       clientId: 'grupo-03',
       secret: '21cd6616-6571-4ee7-be29-0f781f77c74e',
-      policyEnforcement: PolicyEnforcementMode.ENFORCING,
-      tokenValidation: TokenValidation.ONLINE,
+      tokenValidation: TokenValidation.ONLINE, // Cambiar a validación online para debugging
+      bearerOnly: true,
     }),
   ],
   providers: [
@@ -27,7 +26,7 @@ import {
     },
     {
       provide: APP_GUARD,
-      useClass: ResourceGuard,
+      useClass: KeycloakResourceGuard,
     },
     {
       provide: APP_GUARD,
