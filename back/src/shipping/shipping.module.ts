@@ -8,6 +8,8 @@ import { Product } from './entities/product.entity';
 import { TransportMethod } from './entities/transport-method.entity';
 import { User } from './entities/user.entity';
 import { ShipmentProduct } from './entities/shipment-product.entity';
+import TransportMethodsRepository from './repositories/transport_methods.repository';
+import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transport_methods_repositories';
 
 @Module({
   imports: [
@@ -16,6 +18,10 @@ import { ShipmentProduct } from './entities/shipment-product.entity';
   controllers: [ShippingController],
   providers: [
     ShippingService,
+    {
+      provide: TransportMethodsRepository,
+      useClass: MySqlTransportMethodsRepositories,
+    },
   ],
   exports: [ShippingService],
 })

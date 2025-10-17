@@ -20,45 +20,20 @@ import { ShippingIdNonCancellableException } from 'src/common/exceptions/shippin
 import { ShippingIdNotFoundException } from 'src/common/exceptions/shipping-id-notfound.exception';
 import { ShippingOrdersException } from 'src/common/exceptions/shipping-orders.exception';
 import { ShipmentSummaryDto } from '../dto/shipment-summary.dto';
+import TransportMethodsRepository from '../repositories/transport_methods.repository';
 
 @Injectable()
 export class ShippingService {
   constructor(
+    private readonly transportMethodsRepository: TransportMethodsRepository
     // Inyectar repositorios, servicios externos, etc.
     // private readonly shippingRepository: ShippingRepository,
     // private readonly carrierService: CarrierService,
-  ) {}
-  
+  ) { }
+
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     try {
-      // Lógica para obtener métodos de transporte
-      // const methods = await this.transportRepository.findAll();
-      
-      // Mock de respuesta
-      return {
-        transportMethods: [
-        {
-          type: TransportMethods.AIR,
-          name: 'Air',
-          estimatedDeliveryTimeInDays: [1, 2]
-        },
-        {
-          type: TransportMethods.SEA,
-          name: 'Sea',
-          estimatedDeliveryTimeInDays: [5, 10]
-        },
-        {
-          type: TransportMethods.ROAD,
-          name: 'Road',
-          estimatedDeliveryTimeInDays: [3, 7]
-        },
-        {
-          type: TransportMethods.RAIL,
-          name: 'Rail',
-          estimatedDeliveryTimeInDays: [4, 8]
-        }
-      ]
-      };
+      return await this.transportMethodsRepository.getTransportMethods()
     } catch (error) {   //Captura todos los errores conocidos por HttpException y los definidos por nosotros
       if (error.status) {
         throw error;
@@ -74,7 +49,7 @@ export class ShippingService {
 
       // Lógica de creación
       // const shipment = await this.shippingRepository.create(createShipmentDto);
-      
+
       // Por ahora retornamos mock
       return { message: 'Shipping order created successfully', order: ship };
     } catch (error) {
@@ -174,10 +149,12 @@ export class ShippingService {
 
       // const cost = this.mockCalculateCost(costRequest);
 
-      return { currency: 'ARS', 
-        cost: 10.0, 
-        transport_method: TransportMethods.AIR, 
-        products: [{ id: 1, quantity: 2 }] };
+      return {
+        currency: 'ARS',
+        cost: 10.0,
+        transport_method: TransportMethods.AIR,
+        products: [{ id: 1, quantity: 2 }]
+      };
     } catch (error) {
       if (error.status) {
         throw error;
@@ -185,33 +162,33 @@ export class ShippingService {
       throw new UnexpectedErrorException();
     }
   }
-    private data: ShipmentSummaryDto[] = shipmentsData.shipments as ShipmentSummaryDto[];
+  private data: ShipmentSummaryDto[] = shipmentsData.shipments as ShipmentSummaryDto[];
 
-    async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
-      try {
-        const totalItems = this.data.length;
-        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-        const currentPage = Math.min(Math.max(1, page), totalPages);
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-    
-        const shipments = this.data.slice(start, end);
-    
-        return {
-          shipments,
-          pagination: {
-            current_page: currentPage,
-            total_pages: totalPages,
-            total_items: totalItems,
-            items_per_page: itemsPerPage,
-          },
-        };
-      } catch (error) {
-        if (error.status) {
-          throw error;
-        }
-        throw new UnexpectedErrorException();
+  async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
+    try {
+      const totalItems = this.data.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+
+      const shipments = this.data.slice(start, end);
+
+      return {
+        shipments,
+        pagination: {
+          current_page: currentPage,
+          total_pages: totalPages,
+          total_items: totalItems,
+          items_per_page: itemsPerPage,
+        },
+      };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      throw new UnexpectedErrorException();
     }
   }
-  
+
 } // class ShippingService
