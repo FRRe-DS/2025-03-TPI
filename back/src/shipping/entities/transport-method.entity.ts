@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { TransportType } from '../../shared/enums/transport-type.enum';
+import { TransportMethods } from 'src/shared/enums/transport-methods.enum';
 import { Shipment } from './shipment.entity';
 
 @Entity('transport_methods')
@@ -10,8 +10,8 @@ export class TransportMethod {
     @Column({ type: 'varchar', length: 100, nullable: false })
     name: string;
 
-    @Column({ type: 'enum', enum: TransportType })
-    type: TransportType;
+    @Column({ type: 'enum', enum: TransportMethods })
+    type: TransportMethods;
 
     @Column({ type: 'varchar', length: 100, nullable: false })
     estimatedDays: string;

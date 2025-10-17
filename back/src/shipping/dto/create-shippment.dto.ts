@@ -1,28 +1,33 @@
-import { IsNumber, ValidateNested, Max, IsArray } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AddressDto } from './address.dto';
-import { ProductRequestDto } from './product-request.dto';
-import { TransportDto } from './transport.dto';
+import { ProductQtyDto } from './product-qty.dto';
 
-export class CreateShipmentDto {
-    @IsNumber() @Max(1)
-    orderId: number;
-
-    @IsNumber() @Max(1)
+export class CreateShippmentDto {
+    @IsNumber()
+    @IsNotEmpty()
     userId: number;
 
     @ValidateNested()
     @Type(() => AddressDto)
-    deliveryAddress: AddressDto;
+    @IsNotEmpty()
+    originAddress: AddressDto;
 
     @ValidateNested()
-    @Type(() => TransportDto)
-    transport: TransportDto;
+    @Type(() => AddressDto)
+    @IsNotEmpty()
+    destinationAddress: AddressDto;
+
+    @IsNumber()
+    @IsNotEmpty()
+    transportMethodId: number;
+
+    @IsNumber()
+    @IsOptional()
+    totalCost?: number;
 
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ProductRequestDto)
-    products: ProductRequestDto[];
-
-
+    @Type(() => ProductQtyDto)
+    products: ProductQtyDto[];
 }

@@ -31,7 +31,7 @@ import { KeycloakModule } from './auth/keycloak.module';
         TransportMethod,
         ShipmentProduct,
       ],
-      //synchronize: true,
+      synchronize: true,
       logging: true,
     }),
     KeycloakModule,
