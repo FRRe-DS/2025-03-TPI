@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import { Poppins, Inter } from "next/font/google";
+import Footer from "./footer";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -20,14 +21,13 @@ export const metadata = {
 };
 
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode; }) {
   return (
     <html lang="es" className={`${poppins.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body className="overflow-x-hidden">
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
