@@ -9,19 +9,20 @@ import {
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
-import { CreateShipmentDto } from './dto/create-shippment.dto';
+import { CreateShippmentDto } from './dto/create-shippment.dto';
 import { CostCalculationRequestDto } from './dto/cost-calculation-request.dto';
 import { TransportMethodsResponseDto } from './dto/transport-methods-response.dto';
 import { ShippingListResponse } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
 import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
+import { Shipment } from './entities/shipment.entity';
 
 @Controller('shipping')
 export class ShippingController {
   constructor(
     private readonly shippingService: ShippingService,
-  ) {}
+  ) { }
 
   @Get('test')
   @Public()
@@ -33,7 +34,7 @@ export class ShippingController {
   @Post()
   @HttpCode(200)
   @Scopes('envios:write')
-  async createShippingOrder(@Body() ship: CreateShipmentDto) {
+  async createShippingOrder(@Body() ship: CreateShippmentDto): Promise<Shipment> {
     return await this.shippingService.createShipment(ship);
   }
 
@@ -42,7 +43,6 @@ export class ShippingController {
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
   }
-
 
   @Get()
   @Scopes('envios:read')
@@ -58,17 +58,17 @@ export class ShippingController {
     return await this.shippingService.findById(id);
   }
 
-  @Post(':id/cancel') 
+  @Post(':id/cancel')
   @HttpCode(200)
   @Scopes('envios:write')
-  async cancelShippingOrder(@Param('id') id: number) {
+  async cancelShippingOrder(@Param('id') id: number): Promise<any> {
     return await this.shippingService.cancelShipment(id);
   }
 
   @Post('cost')
   @HttpCode(200)
   @Scopes('envios:write')
-  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto) {
+  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<any> {
     return await this.shippingService.calculateCost(costRequest);
   }
 }

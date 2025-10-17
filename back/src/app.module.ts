@@ -38,4 +38,4 @@ import { KeycloakModule } from './auth/keycloak.module';
     ShippingModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

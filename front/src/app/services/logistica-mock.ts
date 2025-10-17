@@ -2,7 +2,7 @@
 import type {
   ShippingCostRequest,
   ShippingCostResponse,
-  ShippingCreationRequest, 
+  ShippingCreationRequest,
   ShippingCreationResponse,
   ProductCost,
 } from "@/types/logistica";
@@ -45,16 +45,16 @@ export async function calcularCosto(data: ShippingCostRequest): Promise<Shipping
  * Mock que simula la creación exitosa de un envío.
  */
 export async function crearEnvio(data: ShippingCreationRequest): Promise<ShippingCreationResponse> {
-  
+
   await new Promise((r) => setTimeout(r, 1200));
 
   const shippingId = Math.floor(Math.random() * 9000) + 1000; // ID aleatorio
 
-  const transportType = data.delivery_address.postal_code.startsWith("35") ? "Camión" : "Avión";
-  
+  const transportMethod = data.delivery_address.postal_code.startsWith("35") ? "Camión" : "Avión";
+
   const estimatedDeliveryDate = new Date();
   estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 7);
-  
+
   return {
     shipping_id: shippingId,
     status: "created",
