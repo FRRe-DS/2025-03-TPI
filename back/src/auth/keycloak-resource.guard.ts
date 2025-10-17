@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, Logger } from '@nestjs/common';
+import { Injectable, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { ResourceGuard } from 'nest-keycloak-connect';
 
 @Injectable()
@@ -13,12 +13,10 @@ export class KeycloakResourceGuard extends ResourceGuard {
         this.customLogger.log('Token validation passed with standard validation');
         return true;
       }
-      
-      return false
-      
+      throw new UnauthorizedException();
     } catch (error) {
-      this.customLogger.error('Error in token validation:', error.message);
-      return false;
+      this.customLogger.error('[KeycloakResourceGuard] - Authentication error:', error.message);
+      throw new UnauthorizedException('Authentication failed', error.message);
     }
   }
 }
