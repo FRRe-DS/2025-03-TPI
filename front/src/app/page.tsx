@@ -60,7 +60,7 @@ export default function HomePage() {
               Calcular Costo
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
-              Simulá el costo de envío de tus productos de manera rápida y precisa
+              Calculá el costo de envío de tus productos de manera rápida y precisa
             </p>
           </div>
         </Link>
@@ -68,7 +68,8 @@ export default function HomePage() {
         {/* Card 2 - Crear Envío */}
         <Link
           href="/crear-envio"
-          className="w-64 p-8 bg-white border-2 border-blue-200 rounded-3xl shadow-md hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-50 transform hover:-translate-y-2 transition-all duration-300 text-center"
+          // ✅ LÍNEA CORREGIDA: Ahora tiene las mismas clases que las otras tarjetas
+          className="group relative w-full sm:w-80 lg:w-96 p-10 bg-white border border-slate-200 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
