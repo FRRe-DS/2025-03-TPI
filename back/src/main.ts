@@ -11,9 +11,9 @@ async function bootstrap() {
     transform: true,            // castea tipos (query/params)
   }));
 
-  await app.listen(3000);
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3000;
+  await app.listen(PORT);
   console.log(`🚀  Server ready at http://${HOST}:${PORT}`)
 }
 bootstrap();

@@ -16,13 +16,19 @@ import { ShippingListResponse } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
 import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
-import { ShippingStatus } from 'src/shared/enums/shipping-status.enum';
 
 @Controller('shipping')
 export class ShippingController {
   constructor(
     private readonly shippingService: ShippingService,
   ) {}
+
+  @Get('test')
+  @Public()
+  async getTransportMethodsTest(): Promise<any> {
+    //only for testing purposes
+    return { message: 'Hello World' };
+  }
 
   @Post()
   @HttpCode(200)
@@ -32,10 +38,11 @@ export class ShippingController {
   }
 
   @Get('transport-methods')
-  @Public()
+  @Scopes('envios:write')
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
   }
+
 
   @Get()
   @Scopes('envios:read')

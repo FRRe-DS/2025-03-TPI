@@ -13,10 +13,10 @@ import {
   imports: [
     KeycloakConnectModule.register({
       authServerUrl: 'http://localhost:8080',
-      realm: 'master',
+      realm: 'ds-2025-realm',
       clientId: 'grupo-03',
       secret: '21cd6616-6571-4ee7-be29-0f781f77c74e',
-      policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
+      policyEnforcement: PolicyEnforcementMode.ENFORCING,
       tokenValidation: TokenValidation.ONLINE,
     }),
   ],
