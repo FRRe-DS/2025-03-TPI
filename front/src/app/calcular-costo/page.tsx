@@ -30,6 +30,7 @@ export default function CalcularCostoPage() {
     country: "AR",
   });
 
+  const [transportMethod, setTransportMethod] = useState<string>("terrestre");
   const [products, setProducts] = useState<ProductItemInput[]>([emptyProduct(1)]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ShippingCostResponse | null>(null);
@@ -77,6 +78,7 @@ export default function CalcularCostoPage() {
         delivery_address: address,
         departure_postal_code: "1000",
         products,
+        transport_method: transportMethod,
     };
 
     try {
@@ -180,6 +182,20 @@ export default function CalcularCostoPage() {
                 placeholder="AR"
                 readOnly
               />
+            </label>
+
+            <label className="flex flex-col">
+              <span className={labelStyle}>Método de transporte</span>
+              <select
+                value={transportMethod}
+                onChange={(e) => setTransportMethod(e.target.value)}
+                className={inputStyle}
+              >
+                <option value="terrestre">Terrestre</option>
+                <option value="aereo">Aéreo</option>
+                <option value="maritimo">Marítimo</option>
+                <option value="express">Express</option>
+              </select>
             </label>
           </div>
 
