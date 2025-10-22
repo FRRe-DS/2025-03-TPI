@@ -1,11 +1,12 @@
-import { IsNumber, IsNotEmpty, Min } from 'class-validator';
+import { IsNotEmpty, Min, IsInt } from 'class-validator';
 
 export class ProductQtyDto {
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     id: number;
 
-    @IsNumber()
+    @IsInt()
     @Min(1)
+    @IsNotEmpty()
     quantity: number;
 }

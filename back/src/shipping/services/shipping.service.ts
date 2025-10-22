@@ -7,13 +7,13 @@ import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
 import { User } from '../entities/user.entity';
 import { TransportMethod } from '../entities/transport-method.entity';
-import { CreateShippmentDto } from '../dto/create-shippment.dto';
+import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
 import GetShipmentsRepository from '../repositories/get-shipments.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
-import { ShippingListResponse } from '../dto/shipping-list.response';
+import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
@@ -49,7 +49,7 @@ export class ShippingService {
     };
   }
 
-  async createShipment(createShippmentDto: CreateShippmentDto): Promise<Shipment> {
+  async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<Shipment> {
     // 1. Verificar o crear usuario
     let user = await this.userRepository.findOne({
       where: { id: createShippmentDto.user_id }
@@ -76,7 +76,7 @@ export class ShippingService {
       city: createShippmentDto.delivery_address.city,
       state: createShippmentDto.delivery_address.state,
       country: createShippmentDto.delivery_address.country,
-      postalCode: parseInt(createShippmentDto.delivery_address.postal_code || '0')
+      postalCode: createShippmentDto.delivery_address.postal_code
     });
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
@@ -135,7 +135,7 @@ export class ShippingService {
   async ShippingServicePagination(
     page: number = 1,
     itemsPerPage: number = 20,
-  ): Promise<ShippingListResponse> {
+  ): Promise<ShippingListResponseDto> {
     const [shipments, total] = await this.getShipmentsRepository.findAll(page, itemsPerPage);
 
     const totalPages = Math.ceil(total / itemsPerPage);
@@ -203,8 +203,8 @@ export class ShippingService {
       total_cost: shipment.totalCost,
       currency: 'ARS',
       estimated_delivery_at: shipment.transportMethod.estimatedDays,
-      created_at: shipment.createdAt,
-      updated_at: shipment.updatedAt,
+      created_at: shipment.createdAt.toDateString(),
+      updated_at: shipment.updatedAt.toDateString(),
       logs: shipment.logs?.map(log => ({
         timestamp: log.timestamp.toISOString(),
         status: log.status,
