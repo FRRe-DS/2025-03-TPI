@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { calcularCosto } from "../services/logistica-mock";
+import { calcularCosto } from "../services/logistica-backend";
 import type {
   Address,
   ProductItemInput,
@@ -13,7 +13,7 @@ import type {
 import { getTransportMethodName } from "@/types/transport-methods";
 
 function emptyProduct(id = 1): ProductItemInput {
-  return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
+  return { id, quantity: 1 };
 }
 
 // Componente de Flecha de Volver

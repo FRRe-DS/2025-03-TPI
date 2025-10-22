@@ -73,7 +73,7 @@ export class ShippingService {
       city: createShippmentDto.delivery_address.city,
       state: createShippmentDto.delivery_address.state,
       country: createShippmentDto.delivery_address.country,
-      postalCode: createShippmentDto.delivery_address.postalCode
+      postalCode: parseInt(createShippmentDto.delivery_address.postal_code || '0')
     });
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
@@ -103,11 +103,11 @@ export class ShippingService {
     // 5. Verificar o crear produtos e criar relações
     for (const productDto of createShippmentDto.products) {
       let product = await this.productRepository.findOne({
-        where: { id: productDto.productId }
+        where: { id: productDto.id }
       });
 
       if (!product) {
-        product = this.productRepository.create({ id: productDto.productId });
+        product = this.productRepository.create({ id: productDto.id });
         product = await this.productRepository.save(product);
       }
 
