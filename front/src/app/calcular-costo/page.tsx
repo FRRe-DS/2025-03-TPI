@@ -127,7 +127,7 @@ export default function CalcularCostoPage() {
 
   return (
     <div 
-      className="min-h-screen bg-slate-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
+      className="min-h-screen bg-gray-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
     >
       <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-xl rounded-xl border border-[var(--color-gray)]">
         
