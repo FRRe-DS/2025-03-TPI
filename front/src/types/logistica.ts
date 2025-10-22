@@ -48,3 +48,10 @@ export interface ShippingCreationResponse {
   transport_type: string; 
   estimated_delivery_at: string; 
 }
+
+export interface TransportMethod {
+  id: number;
+  name: string;
+  type: string;
+  estimatedDays: string;
+}
