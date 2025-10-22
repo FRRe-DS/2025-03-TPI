@@ -5,6 +5,7 @@ import api from "./api";
 export async function calcularCosto(data: unknown) {
   const res = await api.post("/shipping/cost", data);
   return res.data;
+  
 }
 
 // Crear envío
