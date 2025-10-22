@@ -17,8 +17,8 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled
-            ? "bg-[var(--color-bg)] shadow-md"
-            : "bg-[var(--color-bg)]/70 backdrop-blur-sm"
+            ? "bg-white shadow-md"
+            : "bg-white"
       }`}
     >
       <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-12 py-6 text-[var(--color-text-dark)]">

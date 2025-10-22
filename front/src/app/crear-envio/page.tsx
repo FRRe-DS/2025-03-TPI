@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { crearEnvio } from "../services/logistica-mock";
+import { useEffect, useState } from "react";
+import { crearEnvio } from "../services/logistica-backend";
 import type {
   Address,
   ProductItemInput,
   ShippingCreationRequest,
-  ShippingCreationResponse, 
+  ShippingResponse,
+  TransportMethod, 
 } from "@/types/logistica";
+import { getTransportMethodName } from "@/types/transport-methods";
 
 function emptyProduct(id = 1): ProductItemInput {
-  return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
+  return { id, quantity: 1 };
 }
 
 export default function CrearEnvioPage() {
@@ -25,8 +27,28 @@ export default function CrearEnvioPage() {
   const [products, setProducts] = useState<ProductItemInput[]>([emptyProduct(1)]);
   const [loading, setLoading] = useState(false);
   
-  const [result, setResult] = useState<ShippingCreationResponse | null>(null);
+  const [result, setResult] = useState<ShippingResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [transportMethod, setTransportMethod] = useState<string>("");
+  const [transportMethods, setTransportMethods] = useState<TransportMethod[]>([]);
+
+
+  useEffect(() => {
+    //llamada a la api de transportes       
+    const fetchTransportes = async () => {
+      try {
+        const response = await fetch("http://localhost:3010/shipping/transport-methods");
+        const data: { transportMethods: TransportMethod[] } = await response.json();
+        console.log("Tengo mis transportes!!", data);
+        setTransportMethods(data.transportMethods);
+      } catch (error) {
+        console.error("Error al cargar métodos de transporte:", error);
+      }
+    }
+
+    fetchTransportes();
+}, []);
   
   const updateProduct = (index: number, patch: Partial<ProductItemInput>) => {
     setProducts((prev) =>
@@ -76,11 +98,14 @@ export default function CrearEnvioPage() {
     }
     
     const data: ShippingCreationRequest = {
+      order_id: Number("123" + Date.now().toString()),
       user_id: Number(userId), 
       delivery_address: address,
-      departure_postal_code: "1000", 
       products,
+      transport_type: transportMethod,
     };
+
+    console.log("On submit data", data);
 
     try {
       setLoading(true);
@@ -94,6 +119,12 @@ export default function CrearEnvioPage() {
     }
   };
 
+  const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
+  const labelStyle = "text-sm text-[var(--color-text-dark)] font-medium";
+  
+  // CAMBIO 2: Se reemplaza bg-[var(--color-light)] por bg-white en los botones
+  const baseOutlineButton = "cursor-pointer border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
+  
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
@@ -166,6 +197,26 @@ export default function CrearEnvioPage() {
                 className="mt-1 p-2 border rounded"
                 placeholder="AR"
               />
+            </label>
+
+
+            <label className="flex flex-col">
+              <span className={labelStyle}>Método de transporte</span>
+              <select
+                value={transportMethod}
+                onChange={(e) => setTransportMethod(e.target.value)}
+                className={inputStyle}
+              >
+                <option value="">Seleccione un método de transporte</option>
+                {/* con map recorremos el array y devolvemos algo por cada elemento */}
+                {transportMethods.map((method) => (
+                  <option key={method.id} value={method.type}>
+                    {
+                      getTransportMethodName(method.type)
+                     }
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 
@@ -248,16 +299,19 @@ export default function CrearEnvioPage() {
           <div className="mt-6 p-4 border rounded bg-green-50">
             <h3 className="text-lg font-medium text-green-700 mb-2">Envío Creado con Éxito</h3>
             <p>
-              <strong>ID del Envío:</strong> {result.shipping_id}
+              <strong>ID del Envío:</strong> {result.id}
             </p>
             <p>
               <strong>Estado:</strong> {result.status.toUpperCase()}
             </p>
             <p>
-              <strong>Tipo de Transporte:</strong> {result.transport_type}
+              <strong>Tipo de Transporte:</strong> {result.transportMethod.name}
             </p>
             <p>
-              <strong>Entrega Estimada (ETA):</strong> {new Date(result.estimated_delivery_at).toLocaleDateString()}
+              <strong>Costo Total:</strong> ${result.totalCost}
+            </p>
+            <p>
+              <strong>Fecha de Creación:</strong> {new Date(result.createdAt).toLocaleDateString()}
             </p>
           </div>
         )}

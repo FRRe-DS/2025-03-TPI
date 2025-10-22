@@ -17,7 +17,7 @@ export class AddressDto {
     @IsNotEmpty()
     country: string;
 
-    @IsInt()
+    @IsString()
     @IsOptional()
-    postal_code?: number;
+    postal_code?: string;
 }
