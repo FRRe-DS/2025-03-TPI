@@ -1,8 +1,9 @@
 // src/services/api.ts
 import axios from "axios";
+import { API_BASE_URL } from "@/config/api";
 
 const api = axios.create({
-  baseURL: "https://api.logistica-utn.com", // URL de tu backend
+  baseURL: API_BASE_URL,
 });
 
 export default api;

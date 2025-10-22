@@ -1,11 +1,10 @@
 // src/services/logistica-mock.ts
+import { API_BASE_URL } from "@/config/api";
 import type {
   ShippingCostRequest,
   ShippingCostResponse,
   ShippingCreationRequest,
-  ShippingCreationResponse,
   ShippingResponse,
-  ProductCost,
 } from "@/types/logistica";
 
 /**
@@ -29,7 +28,7 @@ export async function crearEnvio(data: ShippingCreationRequest): Promise<Shippin
 
   console.log("Crear envio data", data);
 
-  const response = await fetch("http://localhost:3010/shipping", {
+  const response = await fetch(`${API_BASE_URL}/shipping`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

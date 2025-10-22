@@ -11,6 +11,7 @@ import type {
   TransportMethod,
 } from "@/types/logistica";
 import { getTransportMethodName } from "@/types/transport-methods";
+import { API_BASE_URL } from "@/config/api";
 
 function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1 };
@@ -42,7 +43,7 @@ export default function CalcularCostoPage() {
       //llamada a la api de transportes       
       const fetchTransportes = async () => {
         try {
-          const response = await fetch("http://localhost:3010/shipping/transport-methods");
+          const response = await fetch(`${API_BASE_URL}/shipping/transport-methods`);
           const data: { transportMethods: TransportMethod[] } = await response.json();
           console.log("Tengo mis transportes!!", data);
           setTransportMethods(data.transportMethods);
