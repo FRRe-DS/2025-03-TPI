@@ -23,10 +23,12 @@ export default function Navbar() {
     >
       <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-12 py-6 text-[var(--color-text-dark)]">
         {/* Logo + nombre */}
+        <Link href="/">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-10 h-10" />
-          <span className="font-semibold text-lg tracking-wide">EnviGo</span>
-        </div>
+            <img src="/logo.png" alt="Logo" className="w-10 h-10" />
+            <span className="font-semibold text-lg tracking-wide">EnviGo</span>
+          </div>
+        </Link>
 
         {/* Links */}
         <div className="flex items-center justify-center gap-10 text-base font-medium">
@@ -37,7 +39,7 @@ export default function Navbar() {
             Home
           </Link>
           <Link
-            href="/calcular"
+            href="/calcular-costo"
             className="hover:text-[var(--color-primary)] transform transition-transform duration-200 hover:scale-110"
           >
             Calcular costo

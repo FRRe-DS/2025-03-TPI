@@ -49,42 +49,45 @@ export class ShippingService {
   async createShipment(createShippmentDto: CreateShippmentDto): Promise<Shipment> {
     // 1. Verificar o crear usuario
     let user = await this.userRepository.findOne({
-      where: { id: createShippmentDto.userId }
+      where: { id: createShippmentDto.user_id }
     });
 
     if (!user) {
-      user = this.userRepository.create({ id: createShippmentDto.userId });
+      user = this.userRepository.create({ id: createShippmentDto.user_id });
       user = await this.userRepository.save(user);
     }
 
+    //TODO esto se deberia buscar de los productos
     // 2. Crear direcciones (siempre se crean nuevas)
     const originAddress = this.addressRepository.create({
-      street: createShippmentDto.originAddress.street,
-      city: createShippmentDto.originAddress.city,
-      state: createShippmentDto.originAddress.state,
-      country: createShippmentDto.originAddress.country,
-      postalCode: createShippmentDto.originAddress.postalCode
+      street: "Av. Siempre Viva 742",
+      city: "Springfield",
+      state: "Illinois",
+      country: "US",
+      postalCode: 62704
     });
     const savedOriginAddress = await this.addressRepository.save(originAddress);
 
     const destinationAddress = this.addressRepository.create({
-      street: createShippmentDto.destinationAddress.street,
-      city: createShippmentDto.destinationAddress.city,
-      state: createShippmentDto.destinationAddress.state,
-      country: createShippmentDto.destinationAddress.country,
-      postalCode: createShippmentDto.destinationAddress.postalCode
+      street: createShippmentDto.delivery_address.street,
+      city: createShippmentDto.delivery_address.city,
+      state: createShippmentDto.delivery_address.state,
+      country: createShippmentDto.delivery_address.country,
+      postalCode: createShippmentDto.delivery_address.postalCode
     });
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
     // 3. Verificar método de transporte
     const transportMethod = await this.transportMethodRepository.findOne({
-      where: { id: createShippmentDto.transportMethodId }
+      where: { type: createShippmentDto.transport_type }
     });
 
     if (!transportMethod) {
       throw new NotFoundException('Transport method not found');
     }
 
+    // TODO: Implementar lógica de cálculo de costo
+    const totalCost = 100;
     // 4. Crear shipment
     const savedShipment = await this.shipmentRepository.createShipment({
       user: user,
@@ -92,7 +95,7 @@ export class ShippingService {
       destinationAddress: savedDestinationAddress,
       transportMethod: transportMethod,
       status: ShippingStatus.PENDING,
-      totalCost: createShippmentDto.totalCost || 0,
+      totalCost: totalCost,
       createdAt: new Date(),
       updatedAt: new Date()
     });

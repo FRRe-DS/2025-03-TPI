@@ -16,29 +16,27 @@ headers {
 
 body:json {
   {
-    "orderId": 1,
-    "userId": 1,
-    "deliveryAddress": {
-      "street": "Av. Siempre Viva 742",
-      "city": "Springfield",
-      "state": "Illinois",
-      "country": "US",
-      "postalCode": "62704"
+  "user_id": 1,
+  "order_id": 12345,
+  "delivery_address": {
+    "street": "Av. Corrientes 1234",
+    "city": "Buenos Aires",
+    "state": "CABA",
+    "country": "Argentina",
+    "postalCode": 1043
+  },
+  "transport_type": "air",
+  "products": [
+    {
+      "productId": 101,
+      "quantity": 2
     },
-    "transport": {
-      "type": "road"
-    },
-    "products": [
-      {
-        "id": 1,
-        "quantity": 2
-      },
-      {
-        "id": 2,
-        "quantity": 5
-      }
-    ]
-  }
+    {
+      "productId": 202,
+      "quantity": 1
+    }
+  ]
+}
 }
 
 docs {

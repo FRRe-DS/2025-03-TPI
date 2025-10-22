@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { calcularCosto } from "../services/logistica-mock";
 import type {
@@ -8,7 +8,9 @@ import type {
   ProductItemInput,
   ShippingCostRequest,
   ShippingCostResponse,
+  TransportMethod,
 } from "@/types/logistica";
+import { getTransportMethodName } from "@/types/transport-methods";
 
 function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
@@ -29,11 +31,28 @@ export default function CalcularCostoPage() {
     postal_code: "",
     country: "AR",
   });
-
+  const [transportMethod, setTransportMethod] = useState<string>("");
+  const [transportMethods, setTransportMethods] = useState<TransportMethod[]>([]);
   const [products, setProducts] = useState<ProductItemInput[]>([emptyProduct(1)]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ShippingCostResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+      //llamada a la api de transportes       
+      const fetchTransportes = async () => {
+        try {
+          const response = await fetch("http://localhost:3010/shipping/transport-methods");
+          const data: { transportMethods: TransportMethod[] } = await response.json();
+          console.log("Tengo mis transportes!!", data);
+          setTransportMethods(data.transportMethods);
+        } catch (error) {
+          console.error("Error al cargar métodos de transporte:", error);
+        }
+      }
+
+      fetchTransportes();
+  }, []);
 
   const updateProduct = (index: number, patch: Partial<ProductItemInput>) => {
     setProducts((prev) =>
@@ -77,6 +96,7 @@ export default function CalcularCostoPage() {
         delivery_address: address,
         departure_postal_code: "1000",
         products,
+        transport_method: transportMethod,
     };
 
     try {
@@ -180,6 +200,25 @@ export default function CalcularCostoPage() {
                 placeholder="AR"
                 readOnly
               />
+            </label>
+
+            <label className="flex flex-col">
+              <span className={labelStyle}>Método de transporte</span>
+              <select
+                value={transportMethod}
+                onChange={(e) => setTransportMethod(e.target.value)}
+                className={inputStyle}
+              >
+                <option value="">Seleccione un método de transporte</option>
+                {/* con map recorremos el array y devolvemos algo por cada elemento */}
+                {transportMethods.map((method) => (
+                  <option key={method.id} value={method.type}>
+                    {
+                    getTransportMethodName(method.type)
+                     }
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 

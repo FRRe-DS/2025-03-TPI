@@ -20,6 +20,7 @@ export interface ShippingCostRequest {
   delivery_address: Address;
   departure_postal_code: string;
   products: ProductItemInput[];
+  transport_method?: string;
 }
 
 export interface ProductCost {
@@ -46,4 +47,11 @@ export interface ShippingCreationResponse {
   status: string; 
   transport_type: string; 
   estimated_delivery_at: string; 
+}
+
+export interface TransportMethod {
+  id: number;
+  name: string;
+  type: string;
+  estimatedDays: string;
 }
