@@ -10,5 +10,5 @@ export class ShipmentSummaryDto {
   status!: ShippingStatus;
   transport_type!: TransportMethods;
   estimated_delivery_at!: string; // ISO-8601
-  created_at!: string;            // ISO-8601
+  created_at!: Date;            // ISO-8601
 }
