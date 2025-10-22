@@ -33,6 +33,8 @@ export default function CrearEnvioPage() {
   const [transportMethod, setTransportMethod] = useState<string>("");
   const [transportMethods, setTransportMethods] = useState<TransportMethod[]>([]);
 
+  const [formInvalidMessage, setFormInvalidMessage] = useState<string | null>(null);
+
 
   useEffect(() => {
     //llamada a la api de transportes       
@@ -65,35 +67,59 @@ export default function CrearEnvioPage() {
     setProducts((p) => p.filter((_, i) => i !== index));
   };
 
-  const validate = () => {
-    const baseValidation = validateBase(address, products);
-    if (baseValidation) return baseValidation;
-    
-    if (!userId || Number(userId) < 1) return "User ID must be a number >= 1";
+  const getValidationError = (): string | null => {
+    const hasLettersRegex = /[a-zA-Z]/;
+    const isNumericOnlyRegex = /^\d+$/;
+
+    // 1. Validar ID de Usuario
+    if (!userId || Number(userId) < 1) return "Debe ingresar un ID de usuario válido.";
+
+    // 2. Validar Dirección
+    const streetTrim = address.street.trim();
+    if (!address.street.trim()) return "El campo 'Calle' es obligatorio.";
+    if (!hasLettersRegex.test(streetTrim)) return "El valor ingresado en el campo 'Calle' debe ser válido.";
+
+    const cityTrim = address.city.trim();
+    if (!address.city.trim()) return "El campo 'Ciudad' es obligatorio.";
+    if (!hasLettersRegex.test(cityTrim)) return "El valor ingresado en el campo 'Ciudad' debe ser válido.";
+
+    const stateTrim = address.state.trim();
+    if (!address.state.trim()) return "El campo 'Provincia' es obligatorio.";
+    if (!hasLettersRegex.test(stateTrim)) return "El valor ingresado en el campo 'Provincia' debe ser válido.";
+
+    const countryTrim = address.country.trim();
+    if (!address.country.trim()) return "El campo 'País' es obligatorio.";
+    if (!hasLettersRegex.test(countryTrim)) return "El valor ingresado en el campo 'País' debe ser válido.";
+
+    const postalCodeTrim = address.postal_code.trim();
+    if (!address.postal_code.trim()) return "El campo 'Código Postal' es obligatorio.";
+    if (!isNumericOnlyRegex.test(postalCodeTrim)) return "El valor ingresado en el campo 'Código Postal' debe ser válido.";
+
+    // 3. Validar Método de Transporte
+    if (!transportMethod.trim()) return "El campo 'Método de transporte' es obligatorio.";
+
+    // 4. Validar Productos
+    if (products.length === 0) return "Agregue al menos un producto.";
+    for (const p of products) {
+      if (!p.id || p.id < 1) return "Debe ingresar un ID de producto válido.";
+    //  if (!p.quantity || p.quantity < 1) return "La Cantidad del Producto debe ser un número >= 1.";
+    }
     
     return null;
   };
   
-  function validateBase(address: Address, products: ProductItemInput[]) {
-    if (!address.street.trim()) return "Street is required";
-    if (!address.city.trim()) return "City is required";
-    if (!address.postal_code.trim()) return "Postal code is required";
-    if (products.length === 0) return "Add at least one product";
-    for (const p of products) {
-      if (p.id < 1) return "Product ID must be >= 1";
-      if (p.quantity < 1) return "Product quantity must be >= 1";
-    }
-    return null;
-  }
-  
+  useEffect(() => {
+    setFormInvalidMessage(getValidationError()); 
+  }, [userId, address, products, transportMethod]);
+
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
     setResult(null);
 
-    const v = validate();
-    if (v) {
-      setError(v);
+    const validationCheck = getValidationError();
+    if (validationCheck) {
+      setError(validationCheck); 
       return;
     }
     
@@ -122,7 +148,6 @@ export default function CrearEnvioPage() {
   const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
   const labelStyle = "text-sm text-[var(--color-text-dark)] font-medium";
   
-  // CAMBIO 2: Se reemplaza bg-[var(--color-light)] por bg-white en los botones
   const baseOutlineButton = "cursor-pointer border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
   
   return (
