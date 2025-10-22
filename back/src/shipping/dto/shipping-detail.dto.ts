@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, IsNumber, Min, ValidateNested } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsString, Min, ValidateNested } from "class-validator";
 import { AddressDto } from "./address.dto";
 import { ProductRequestDto } from "./product-request.dto";
 import { ShippingStatus } from "../../shared/enums/shipping-status.enum";
@@ -23,53 +23,63 @@ export class ShippingDetailsResponseDto {
     @IsNotEmpty()
     user_id: number;
 
+    @IsNotEmpty()
     @ValidateNested()
     @Type(() => AddressDto)
     delivery_Address: AddressDto;
 
+    @IsNotEmpty()
     @ValidateNested()
     @Type(() => AddressDto)
     departure_Address: AddressDto;
 
     @IsArray()
+    @ArrayNotEmpty()
     @ValidateNested({ each: true })
     @Type(() => ProductRequestDto)
     products: ProductRequestDto[];
 
     //shipping status
+    @IsEnum(ShippingStatus)
     @ValidateNested()
     status: ShippingStatus;
 
+    @IsNotEmpty()
     @ValidateNested()
     @Type(() => TransportDto)
     transport_type: TransportDto;
 
-    @ValidateNested()
+    @IsString()
     @IsNotEmpty()
     tracking_number: string;
 
-    @ValidateNested()
+    @IsString()
     @IsNotEmpty()
     carrier_name: string;
 
-    @ValidateNested()
+    @IsNumber()
     @IsNotEmpty()
     total_cost: number;
 
-    @ValidateNested()
+    @IsString()
     @IsNotEmpty()
     currency: string;
 
+    @IsDateString()
     @IsNotEmpty()
     estimated_delivery_at: string;
 
+    @IsDateString()
     @IsNotEmpty()
-    created_at: Date;
+    created_at: string;
 
+    @IsDateString()
     @IsNotEmpty()
-    updated_at: Date;
+    updated_at: string;
 
     @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => ShippingLogDto)
     @IsNotEmpty()
     logs: ShippingLogDto[];
 

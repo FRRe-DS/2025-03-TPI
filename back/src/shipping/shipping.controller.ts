@@ -9,10 +9,10 @@ import {
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
-import { CreateShippmentDto } from './dto/create-shippment.dto';
+import { CreateShippmentRequestDto } from './dto/create-shippment-request.dto';
 import { CostCalculationRequestDto } from './dto/cost-calculation-request.dto';
 import { TransportMethodsResponseDto } from './dto/transport-methods-response.dto';
-import { ShippingListResponse } from './dto/shipping-list.response';
+import { ShippingListResponseDto } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
 import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
@@ -35,7 +35,7 @@ export class ShippingController {
   @HttpCode(200)
   // @Scopes('envios:write')
   @Public()
-  async createShippingOrder(@Body() ship: CreateShippmentDto): Promise<Shipment> {
+  async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<Shipment> {
     return await this.shippingService.createShipment(ship);
   }
 
@@ -50,7 +50,7 @@ export class ShippingController {
   @Scopes('envios:read')
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
-  ): Promise<ShippingListResponse> {
+  ): Promise<ShippingListResponseDto> {
     return await this.shippingService.ShippingServicePagination(page, items_per_page);
   }
 
