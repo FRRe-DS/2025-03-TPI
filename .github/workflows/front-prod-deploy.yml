@@ -11,6 +11,8 @@ on:
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     steps:
       - uses: actions/checkout@v2
       - name: Install Vercel CLI
@@ -20,10 +22,20 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
-      - name: Output Deployment URL
+        id: deploy
         run: |
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
           DEPLOYMENT_URL=$(cat deployment-url.txt)
-          echo "🚀 Production deployment successful!"
-          echo "📍 Deployment URL: $DEPLOYMENT_URL"
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+
+  Show-Deployment-URL:
+    runs-on: ubuntu-latest
+    needs: Deploy-Production
+    steps:
+      - name: Display Production Deployment URL
+        run: |
+          echo "🚀 Production deployment successful!"
+          echo "📍 Production URL: ${{ needs.Deploy-Production.outputs.deployment_url }}"
+          echo ""
+          echo "🔗 Click here to view your deployment:"
+          echo "${{ needs.Deploy-Production.outputs.deployment_url }}"
