@@ -22,7 +22,6 @@ const BackArrowIcon = () => (
 );
 
 export default function CalcularCostoPage() {
-  // CAMBIO CLAVE 1: Inicializamos todos los campos como cadenas vacías ("")
   const [address, setAddress] = useState<Address>({
     street: "", 
     city: "",
@@ -92,35 +91,30 @@ export default function CalcularCostoPage() {
     }
   };
   
-  // Clases de estilo reutilizables
-  // Nota: Tailwind aplica automáticamente un color gris pálido y transparente a los placeholders.
-  const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-[var(--color-light)]";
+  // CAMBIO 1: Se reemplaza bg-[var(--color-light)] por bg-white
+  const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
   const labelStyle = "text-sm text-[var(--color-text-dark)] font-medium";
   
-  // Estilo Base: Contorno Primario (Limpia resultado)
-  const baseOutlineButton = "border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-light)] rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
+  // CAMBIO 2: Se reemplaza bg-[var(--color-light)] por bg-white en los botones
+  const baseOutlineButton = "cursor-pointer border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
   
-  // 1. Estilo para Botón Calcular Costo (MISMO TAMAÑO PERO CON RELLENO PRIMARIO)
-  const calculateButton = `px-5 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold border-2 border-[var(--color-primary)] hover:bg-[var(--color-secondary)] hover:border-[var(--color-secondary)] transition-colors duration-300 disabled:opacity-60`;
+  const calculateButton = `cursor-pointer px-5 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold border-2 border-[var(--color-primary)] shadow-md hover:shadow-xl hover:scale-105 transform transition-all duration-300 disabled:opacity-60`;
 
-  // 2. Estilo para Botón Limpiar Resultado (TAMAÑO BASE: px-5 py-2)
   const clearButton = `px-5 py-2 ${baseOutlineButton}`;
 
-  // 3. Estilo para Botones Agregar/Eliminar (Tamaño pequeño)
   const smallButton = `px-3 py-1 text-xs ${baseOutlineButton}`; 
 
 
   return (
     <div 
-        className="min-h-screen bg-[var(--color-bg)] py-12 text-[var(--color-text-dark)] flex items-center justify-center" 
+      className="min-h-screen bg-slate-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
     >
-      <div className="max-w-4xl w-full mx-auto p-8 bg-[var(--color-light)] shadow-xl rounded-xl border border-[var(--color-gray)]"> 
+      <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-xl rounded-xl border border-[var(--color-gray)]">
         
-        {/* Encabezado con Botón Volver a la izquierda */}
         <div className="flex items-center mb-4">
             <Link href="/" passHref className="mr-4">
                 <button 
-                    className="p-1 rounded-full text-[var(--color-primary)] hover:bg-[var(--color-light)] transition-colors duration-300"
+                    className="p-2 rounded-full text-[var(--color-primary)] hover:bg-gray-200/75 hover:scale-110 transform transition-all duration-300 cursor-pointer"
                     aria-label="Volver a la página de inicio"
                 >
                     <BackArrowIcon />
@@ -130,12 +124,11 @@ export default function CalcularCostoPage() {
         </div>
         
         <p className="text-sm text-[var(--color-text-dark)] opacity-80 mb-6">
-          Complete la dirección y los productos para simular el costo.
+          Ingrese los datos del envío para calcular el costo.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-8">
           
-          {/* Dirección */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <label className="flex flex-col">
@@ -144,7 +137,7 @@ export default function CalcularCostoPage() {
                 value={address.street}
                 onChange={(e) => setAddress({ ...address, street: e.target.value })}
                 className={inputStyle}
-                placeholder="Av. Siempre Viva 123" // CAMBIO CLAVE 2: Mover el texto a placeholder
+                placeholder="Av. Siempre Viva 123"
               />
             </label>
 
@@ -154,7 +147,7 @@ export default function CalcularCostoPage() {
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
                 className={inputStyle}
-                placeholder="Resistencia" // CAMBIO CLAVE 2: Mover el texto a placeholder
+                placeholder="Resistencia"
               />
             </label>
 
@@ -164,7 +157,7 @@ export default function CalcularCostoPage() {
                 value={address.state}
                 onChange={(e) => setAddress({ ...address, state: e.target.value })}
                 className={inputStyle}
-                placeholder="Chaco" // CAMBIO CLAVE 2: Mover el texto a placeholder
+                placeholder="Chaco"
               />
             </label>
 
@@ -174,14 +167,14 @@ export default function CalcularCostoPage() {
                 value={address.postal_code}
                 onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
                 className={inputStyle}
-                placeholder="3500" // CAMBIO CLAVE 2: Mover el texto a placeholder
+                placeholder="3500"
               />
             </label>
 
             <label className="flex flex-col">
               <span className={labelStyle}>País</span>
               <input
-                value={address.country} // Mantenemos el valor "AR" ya que es un valor fijo (readonly)
+                value={address.country}
                 onChange={(e) => setAddress({ ...address, country: e.target.value })}
                 className={inputStyle}
                 placeholder="AR"
@@ -190,7 +183,6 @@ export default function CalcularCostoPage() {
             </label>
           </div>
 
-          {/* Productos */}
           <div className="pt-4 border-t border-[var(--color-gray)]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-heading font-medium text-[var(--color-text-dark)]">Productos</h2>
@@ -207,19 +199,19 @@ export default function CalcularCostoPage() {
               {products.map((p, i) => (
                 <div
                   key={i}
-                  className="p-4 border border-[var(--color-gray)] rounded-lg grid grid-cols-5 md:grid-cols-5 gap-4 items-end bg-[var(--color-light)]/50" 
+                  className="p-4 border border-[var(--color-gray)] rounded-lg grid grid-cols-5 md:grid-cols-5 gap-4 items-end " 
                 >
                   <div className="col-span-2">
                     <label className="text-xs text-[var(--color-text-dark)] opacity-75">ID Producto</label>
                     <input
                       type="number"
                       min={1}
-                      value={p.id} // Mantenemos el valor inicial de "1" para ID y Cantidad si es necesario
+                      value={p.id}
                       onChange={(e) =>
                         updateProduct(i, { id: Math.max(1, Number(e.target.value)) })
                       }
                       className={inputStyle.replace('p-2', 'p-1')}
-                      placeholder="Ej: 456" // Añadimos placeholders aquí también
+                      placeholder="Ej: 456"
                     />
                   </div>
 
@@ -228,12 +220,12 @@ export default function CalcularCostoPage() {
                     <input
                       type="number"
                       min={1}
-                      value={p.quantity} // Mantenemos el valor inicial de "1" si es necesario
+                      value={p.quantity}
                       onChange={(e) =>
                         updateProduct(i, { quantity: Math.max(1, Number(e.target.value)) })
                       }
                       className={inputStyle.replace('p-2', 'p-1')}
-                      placeholder="Ej: 5" // Añadimos placeholders aquí también
+                      placeholder="Ej: 5"
                     />
                   </div>
                   
@@ -251,13 +243,10 @@ export default function CalcularCostoPage() {
             </div>
           </div>
           
-          {/* Mensajes y Botones de Acción */}
           {error && <div className="text-sm p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">{error}</div>}
 
-          {/* Distribución de botones: AMBOS A LA IZQUIERDA */}
           <div className="flex items-center gap-4 pt-4 border-t border-[var(--color-gray)]">
             
-            {/* Botón Limpiar (Izquierda) */}
             <button
               type="button"
               onClick={() => {
@@ -269,7 +258,6 @@ export default function CalcularCostoPage() {
               Limpiar resultado
             </button>
             
-            {/* Botón Calcular Costo (A su lado, con relleno) */}
             <button
               type="submit"
               disabled={loading}
@@ -281,10 +269,10 @@ export default function CalcularCostoPage() {
           </div>
         </form>
 
-        {/* Resultado */}
         {result && (
-          <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-[var(--color-light)] text-[var(--color-text-dark)]">
-            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Resultado de Simulación</h3>
+          // CAMBIO 4: Se reemplaza bg-[var(--color-light)] por bg-white
+          <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
+            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Costo Estimado del Envío</h3>
             <p className="text-lg">
               <strong>Total Estimado:</strong> <span className="text-[var(--color-secondary)] font-bold">{result.total_cost} {result.currency}</span>
             </p>
