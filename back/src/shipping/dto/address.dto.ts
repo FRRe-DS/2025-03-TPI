@@ -19,5 +19,5 @@ export class AddressDto {
 
     @IsInt()
     @IsOptional()
-    postalCode?: number;
+    postal_code?: number;
 }

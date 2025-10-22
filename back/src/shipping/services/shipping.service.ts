@@ -11,17 +11,20 @@ import { CreateShippmentDto } from '../dto/create-shippment.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
+import GetShipmentsRepository from '../repositories/get-shipments.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponse } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
-//import { PaginationDto } from '../../shared/dto/pagination.dto';
+import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
+
 
 @Injectable()
 export class ShippingService {
   constructor(
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
+    private readonly getShipmentsRepository: GetShipmentsRepository,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Address)
@@ -73,7 +76,7 @@ export class ShippingService {
       city: createShippmentDto.delivery_address.city,
       state: createShippmentDto.delivery_address.state,
       country: createShippmentDto.delivery_address.country,
-      postalCode: createShippmentDto.delivery_address.postalCode
+      postalCode: createShippmentDto.delivery_address.postal_code
     });
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
@@ -129,20 +132,85 @@ export class ShippingService {
     return result;
   }
 
-  async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
-    // TODO: Implementar lógica de paginación
-    throw new Error('Method not implemented');
+  async ShippingServicePagination(
+    page: number = 1,
+    itemsPerPage: number = 20,
+  ): Promise<ShippingListResponse> {
+    const [shipments, total] = await this.getShipmentsRepository.findAll(page, itemsPerPage);
+
+    const totalPages = Math.ceil(total / itemsPerPage);
+
+    return {
+      shipments: shipments.map(shipment => ({
+        shipping_id: shipment.id,
+        order_id: shipment.orderId,
+        user_id: shipment.user.id,
+        products: shipment.shipmentProducts.map(sp => ({
+          id: sp.product.id,
+          productId: sp.product.id,
+          quantity: sp.quantity
+        })),
+        status: shipment.status,
+        transport_type: shipment.transportMethod.type,
+        estimated_delivery_at: shipment.transportMethod.estimatedDays,
+        created_at: shipment.createdAt,
+      })),
+      pagination: {
+        current_page: page,
+        total_pages: totalPages,
+        total_items: total,
+        items_per_page: itemsPerPage,
+      },
+    };
   }
 
   async findById(id: number): Promise<ShippingDetailsResponseDto> {
-    const shipment = await this.shipmentRepository.findShipmentById(id);
+    const shipment = await this.getShipmentsRepository.findById(id);
 
     if (!shipment) {
-      throw new NotFoundException(`Shipment with id ${id} not found`);
+      throw new ShippingIdNotFoundException();
     }
 
-    // TODO: Mapear a ShippingDetailsResponseDto
-    throw new Error('Method not implemented');
+    return {
+      shipping_id: shipment.id,
+      order_id: shipment.orderId,
+      user_id: shipment.user.id,
+      delivery_Address: {
+        street: shipment.destinationAddress.street,
+        city: shipment.destinationAddress.city,
+        state: shipment.destinationAddress.state,
+        postal_code: shipment.destinationAddress.postalCode,
+        country: shipment.destinationAddress.country,
+      },
+      departure_Address: {
+        street: shipment.originAddress.street,
+        city: shipment.originAddress.city,
+        state: shipment.originAddress.state,
+        postal_code: shipment.originAddress.postalCode,
+        country: shipment.originAddress.country,
+      },
+      products: shipment.shipmentProducts.map(sp => ({
+        id: sp.product.id,
+        productId: sp.product.id,
+        quantity: sp.quantity
+      })),
+      status: shipment.status,
+      transport_type: {
+        type: shipment.transportMethod.type,
+      },
+      tracking_number: shipment.trackingNumber,
+      carrier_name: shipment.carrierName,
+      total_cost: shipment.totalCost,
+      currency: 'ARS',
+      estimated_delivery_at: shipment.transportMethod.estimatedDays,
+      created_at: shipment.createdAt,
+      updated_at: shipment.updatedAt,
+      logs: shipment.logs?.map(log => ({
+        timestamp: log.timestamp.toISOString(),
+        status: log.status,
+        message: log.message,
+      })),
+    };
   }
 
   async cancelShipment(id: number): Promise<any> {

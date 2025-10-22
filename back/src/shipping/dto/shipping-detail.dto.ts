@@ -8,28 +8,28 @@ import { ShippingLogDto } from "./shipping-log.dto";
 
 
 export class ShippingDetailsResponseDto {
-    @IsNumber() 
+    @IsNumber()
     @Min(1)
     @IsNotEmpty()
     shipping_id: number;
 
-    @IsNumber() 
+    @IsNumber()
     @Min(1)
     @IsNotEmpty()
     order_id: number;
 
-    @IsNumber() 
+    @IsNumber()
     @Min(1)
     @IsNotEmpty()
     user_id: number;
 
     @ValidateNested()
     @Type(() => AddressDto)
-    deliveryAddress: AddressDto;
+    delivery_Address: AddressDto;
 
     @ValidateNested()
     @Type(() => AddressDto)
-    departureAddress: AddressDto;
+    departure_Address: AddressDto;
 
     @IsArray()
     @ValidateNested({ each: true })
@@ -38,7 +38,7 @@ export class ShippingDetailsResponseDto {
 
     //shipping status
     @ValidateNested()
-    shippingStatus: ShippingStatus;
+    status: ShippingStatus;
 
     @ValidateNested()
     @Type(() => TransportDto)
@@ -47,7 +47,7 @@ export class ShippingDetailsResponseDto {
     @ValidateNested()
     @IsNotEmpty()
     tracking_number: string;
-    
+
     @ValidateNested()
     @IsNotEmpty()
     carrier_name: string;
@@ -64,10 +64,10 @@ export class ShippingDetailsResponseDto {
     estimated_delivery_at: string;
 
     @IsNotEmpty()
-    created_at: string;
+    created_at: Date;
 
     @IsNotEmpty()
-    updated_at: string;
+    updated_at: Date;
 
     @IsArray()
     @IsNotEmpty()
