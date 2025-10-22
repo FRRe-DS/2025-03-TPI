@@ -33,7 +33,8 @@ export class ShippingController {
 
   @Post()
   @HttpCode(200)
-  @Scopes('envios:write')
+  // @Scopes('envios:write')
+  @Public()
   async createShippingOrder(@Body() ship: CreateShippmentDto): Promise<Shipment> {
     return await this.shippingService.createShipment(ship);
   }
