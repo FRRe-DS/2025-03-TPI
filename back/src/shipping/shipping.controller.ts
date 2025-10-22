@@ -39,7 +39,8 @@ export class ShippingController {
   }
 
   @Get('transport-methods')
-  @Scopes('envios:write')
+  @Public()
+  // @Scopes('envios:write')
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
   }
