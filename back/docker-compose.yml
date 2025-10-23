@@ -17,6 +17,12 @@ services:
       - mysql_data:/var/lib/mysql        # Guarda datos aunque elimines el contenedor
     networks:
       - shipping_network
+    # Esto revisa si la DB está lista antes de permitir conexiones
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   
   # Servicio del backend NestJS
   back:
@@ -25,8 +31,10 @@ services:
       dockerfile: Dockerfile
     container_name: shipping_back
     restart: always
+    # Esto le dice al "back" que espere a que el "healthcheck" de mysql sea exitoso
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     env_file:
       - .env
     ports:
