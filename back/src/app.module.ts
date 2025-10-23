@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingModule } from './shipping/shipping.module';
 import { KeycloakModule } from './auth/keycloak.module';
+import { SeedModule } from './database/seed.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { KeycloakModule } from './auth/keycloak.module';
     }),
     KeycloakModule,
     ShippingModule,
+    SeedModule,
   ],
 })
 export class AppModule { }
