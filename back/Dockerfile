@@ -17,5 +17,5 @@ RUN npm run build
 # Exponemos el puerto del servidor
 EXPOSE 3010
 
-# Comando de inicio
-CMD ["node", "dist/main.js"]
+# Comando de inicio (ejecuta el seed y luego inicia el servidor)
+CMD ["sh", "-c", "node seed-transport-methods.js && node dist/main.js"]
