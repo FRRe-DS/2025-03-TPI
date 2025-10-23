@@ -161,7 +161,7 @@ export class ShippingService {
         status: shipment.status,
         transport_type: shipment.transportMethod.type,
         estimated_delivery_at: shipment.transportMethod.estimatedDays,
-        created_at: shipment.createdAt,
+        created_at: shipment.createdAt.toDateString(),
       })),
       pagination: {
         current_page: page,
