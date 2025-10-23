@@ -41,7 +41,7 @@ export default function CrearEnvioPage() {
   const [transportMethods, setTransportMethods] = useState<TransportMethod[]>([]);
 
   const [formInvalidMessage, setFormInvalidMessage] = useState<string | null>(null);
-
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     //llamada a la api de transportes       
@@ -75,54 +75,44 @@ export default function CrearEnvioPage() {
   };
 
   const getValidationError = (): string | null => {
+      if (!userId || Number(userId) < 1) return "Debe ingresar un ID de usuario válido.";
+      if (!address.street.trim()) return "El campo 'Calle' es obligatorio.";
+      if (!address.city.trim()) return "El campo 'Ciudad' es obligatorio.";
+      if (!address.state.trim()) return "El campo 'Provincia' es obligatorio.";
+      if (!address.country.trim()) return "El campo 'País' es obligatorio.";
+      if (!address.postal_code.trim()) return "El campo 'Código Postal' es obligatorio.";
+      if (!transportMethod.trim()) return "El campo 'Método de transporte' es obligatorio.";
+      if (products.length === 0) return "Agregue al menos un producto.";
+      for (const p of products) {
+          if (!p.id || p.id < 1) return "Debe ingresar un ID de producto válido.";
+      }
+      return null;
+  };
+
+  const getInvalidCharacterError = (): string | null => {
     const hasLettersRegex = /[a-zA-Z]/;
-    const isNumericOnlyRegex = /^\d+$/;
 
-    // 1. Validar ID de Usuario
-    if (!userId || Number(userId) < 1) return "Debe ingresar un ID de usuario válido.";
-
-    // 2. Validar Dirección
-    const streetTrim = address.street.trim();
-    if (!address.street.trim()) return "El campo 'Calle' es obligatorio.";
-    if (!hasLettersRegex.test(streetTrim)) return "El valor ingresado en el campo 'Calle' debe ser válido.";
-
-    const cityTrim = address.city.trim();
-    if (!address.city.trim()) return "El campo 'Ciudad' es obligatorio.";
-    if (!hasLettersRegex.test(cityTrim)) return "El valor ingresado en el campo 'Ciudad' debe ser válido.";
-
-    const stateTrim = address.state.trim();
-    if (!address.state.trim()) return "El campo 'Provincia' es obligatorio.";
-    if (!hasLettersRegex.test(stateTrim)) return "El valor ingresado en el campo 'Provincia' debe ser válido.";
-
-    const countryTrim = address.country.trim();
-    if (!address.country.trim()) return "El campo 'País' es obligatorio.";
-    if (!hasLettersRegex.test(countryTrim)) return "El valor ingresado en el campo 'País' debe ser válido.";
-
-    const postalCodeTrim = address.postal_code.trim();
-    if (!address.postal_code.trim()) return "El campo 'Código Postal' es obligatorio.";
-    if (!isNumericOnlyRegex.test(postalCodeTrim)) return "El valor ingresado en el campo 'Código Postal' debe ser válido.";
-
-    // 3. Validar Método de Transporte
-    if (!transportMethod.trim()) return "El campo 'Método de transporte' es obligatorio.";
-
-    // 4. Validar Productos
-    if (products.length === 0) return "Agregue al menos un producto.";
-    for (const p of products) {
-      if (!p.id || p.id < 1) return "Debe ingresar un ID de producto válido.";
-    //  if (!p.quantity || p.quantity < 1) return "La Cantidad del Producto debe ser un número >= 1.";
-    }
-    
+    if (!hasLettersRegex.test(address.street.trim())) return "El valor ingresado en el campo 'Calle' debe ser válido.";
+    if (!hasLettersRegex.test(address.city.trim())) return "El valor ingresado en el campo 'Ciudad' debe ser válido.";
+    if (!hasLettersRegex.test(address.state.trim())) return "El valor ingresado en el campo 'Provincia' debe ser válido.";
+    if (!hasLettersRegex.test(address.country.trim())) return "El valor ingresado en el campo 'País' debe ser válido.";
     return null;
   };
   
   useEffect(() => {
-    setFormInvalidMessage(getValidationError()); 
-  }, [userId, address, products, transportMethod]);
+  setFormInvalidMessage(getValidationError()); 
+  }, [userId, address, products, transportMethod]); 
 
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
     setResult(null);
+
+    const invalidCharError = getInvalidCharacterError();
+    if (invalidCharError) {
+        setSubmitError(invalidCharError);
+        return;
+    }
 
     const validationCheck = getValidationError();
     if (validationCheck) {
@@ -146,7 +136,7 @@ export default function CrearEnvioPage() {
       setResult(resp);
     } catch (err) {
       console.error(err);
-      setError("Error creating shipment. Try again.");
+      setError("Ocurrió un error al crear el envío. Intenta nuevamente mas tarde.");
     } finally {
       setLoading(false);
     }
@@ -327,10 +317,10 @@ export default function CrearEnvioPage() {
             </div>
           </div>
           
-          {/* Contenedor de errores con estilo de calcular-costo */}
-          {(formInvalidMessage || error) && (
+          {/* Contenedor de errores */}
+          {(error || submitError) && (
             <div className="text-sm p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
-              {formInvalidMessage || error}
+              {error || submitError}
             </div>
           )}
 
@@ -352,7 +342,7 @@ export default function CrearEnvioPage() {
             <button
               type="submit"
               disabled={loading || !!formInvalidMessage}
-              className={submitButton}
+              className={submitButton }
             >
               {loading ? "Creando..." : "Crear Envío"}
             </button>
