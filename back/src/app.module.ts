@@ -19,7 +19,7 @@ import { KeycloakModule } from './auth/keycloak.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || 'mysql', //antes estaba como localhost, ahora necesito definir el nombre porque el contenedor toma como que es dentro de si mismo
       port: parseInt(process.env.DB_PORT || '3306', 10),
       username: process.env.DB_USERNAME || '',
       password: process.env.DB_PASSWORD || '',
