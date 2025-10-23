@@ -1,4 +1,3 @@
-// src/services/logistica.ts
 import api from "./api";
 
 // Calcular costo
@@ -16,5 +15,10 @@ export async function crearEnvio(data: unknown) {
 // Consultar envío por ID
 export async function getEnvio(id: string) {
   const res = await api.get(`/shipping/${id}`);
+  return res.data;
+}
+
+export async function getShipments() {
+  const res = await api.get("/shipping");
   return res.data;
 }

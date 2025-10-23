@@ -3,6 +3,7 @@ import "./globals.css";
 import { Poppins, Inter } from "next/font/google";
 import Footer from "../components/footer";
 import NavBar from "@/components/NavBar";
+import { url } from "inspector";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -19,6 +20,11 @@ const inter = Inter({
 export const metadata = {
   title: "Mi Proyecto Logística",
   description: "Frontend de logística con diseño bordó/cherry",
+  icons: {
+    icon: [
+      {url: "/logo.ico"},
+    ],
+  },
 };
 
 

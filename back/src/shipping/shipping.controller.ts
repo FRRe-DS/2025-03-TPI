@@ -6,6 +6,8 @@ import {
   Param,
   Body,
   Query,
+  UsePipes,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
@@ -19,6 +21,9 @@ import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
 import { CreateShippingResponseDto } from './dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from './dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto';
+import { ContextValidationPipe } from 'src/common/exceptions/custom-validation-pipe.exception';
+import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
+import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shipping-order.exception';
 
 @Controller('shipping')
 export class ShippingController {
@@ -37,6 +42,7 @@ export class ShippingController {
   @HttpCode(200)
   // @Scopes('envios:write')
   @Public()
+  @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
   async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
   }
@@ -50,6 +56,7 @@ export class ShippingController {
 
   @Get()
   @Scopes('envios:read')
+  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
   ): Promise<ShippingListResponseDto> {
@@ -58,6 +65,7 @@ export class ShippingController {
 
   @Get(':id')
   @Scopes('envios:read')
+  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
   async getShippingOrderById(@Param('id') id: number): Promise<ShippingDetailsResponseDto> {
     return await this.shippingService.findById(id);
   }
@@ -65,6 +73,7 @@ export class ShippingController {
   @Post(':id/cancel')
   @HttpCode(200)
   @Scopes('envios:write')
+  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
   async cancelShippingOrder(@Param('id') id: number): Promise<CancelShippingResponseDto> {
     return await this.shippingService.cancelShipment(id);
   }
@@ -72,6 +81,7 @@ export class ShippingController {
   @Post('cost')
   @HttpCode(200)
   @Scopes('envios:write')
+  @UsePipes(new ContextValidationPipe(InvalidCostCalculationException))
   async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     return await this.shippingService.calculateCost(costRequest);
   }
