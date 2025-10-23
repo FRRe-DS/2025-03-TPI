@@ -1,4 +1,6 @@
-import { IsArray, IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { TransportDto } from './transport.dto';
 
 // DTO para cada producto en la respuesta (con su costo individual)
 export class ProductCostDto {
@@ -21,6 +23,11 @@ export class CostCalculationResponseDto {
   @IsNumber()
   @IsPositive()
   total_cost: number;
+
+   @IsNotEmpty()
+   @ValidateNested()
+   @Type(() => TransportDto)
+    transportMethod: TransportDto;
 
   @IsArray()
   @IsNotEmpty()
