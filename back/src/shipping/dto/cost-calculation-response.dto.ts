@@ -1,31 +1,37 @@
-import {ArrayNotEmpty, IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested} from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProductRequestDto } from './product-request.dto';
 import { TransportDto } from './transport.dto';
 
+// DTO para cada producto en la respuesta (con su costo individual)
+export class ProductCostDto {
+  @IsNumber()
+  @IsPositive()
+  id: number;
+
+  @IsNumber()
+  @IsPositive()
+  cost: number;
+}
+
+// DTO de respuesta para el cálculo de costos
 export class CostCalculationResponseDto {
-    //delivery address
-    @IsNotEmpty()
-    @IsString()
-    currency: string;
+  @IsNotEmpty()
+  @IsString()
+  currency: string;
 
-    //products
-    @IsNotEmpty()
-    @IsNumber()
-    totalCost: number;
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  total_cost: number;
 
-    @IsNotEmpty()
-    @ValidateNested()
-    @Type(() => TransportDto)
+   @IsNotEmpty()
+   @ValidateNested()
+   @Type(() => TransportDto)
     transportMethod: TransportDto;
 
-    @IsArray()
-    @ArrayNotEmpty()
-    @ValidateNested({ each: true })
-    @Type(() => ProductRequestDto)
-    products: ProductRequestDto[];
+  @IsArray()
+  @IsNotEmpty()
+  products: ProductCostDto[];
 
-    //estimated delivery date
-
-    //direction
+  //Ver si se agrega ESTIMATED DAYS y DIRECCIÓN DE ENVÍO
 }

@@ -19,6 +19,7 @@ import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
+import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
 import { ShippingLog } from '../entities/shipping-log.entity';
 import { create } from 'domain';
 
@@ -39,6 +40,7 @@ export class ShippingService {
     private readonly shipmentProductRepository: Repository<ShipmentProduct>,
     @InjectRepository(TransportMethod)
     private readonly transportMethodRepository: Repository<TransportMethod>,
+    private readonly costCalculatorService: CostCalculatorService
     @InjectRepository(ShippingLog)
     private readonly shippingLogRepository: Repository<ShippingLog>
   ) { }
@@ -252,7 +254,34 @@ export class ShippingService {
   }
 
   async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-    // TODO: Implementar lógica de cálculo de costo
-    throw new Error('Method not implemented');
+
+    //1) pagarle 
+    // TODO: Aquí deberías obtener los detalles completos de los productos desde la BD
+    // Por ahora usamos datos mock para demostración
+    const productsWithDetails: ProductWithDetails[] = costRequest.products.map((p) => ({
+      id: p.id,
+      quantity: p.quantity,
+      // Estos valores deberían venir de la peticion de la API de stock:
+      weight: 2.5, // kg por unidad
+      length: 30, // cm
+      width: 20, // cm
+      height: 15, // cm
+      warehouse_postal_code: 'C1000AAA', // CPA del almacén (CABA por defecto)
+      ubicacion_producto: {
+        street: "Av. Vélez Sársfield 123",
+        city: "Resistencia",
+        state: "Chaco",
+        postal_code: "H3500ABC",
+        country: "AR"
+      }
+      
+    })); // en vez de este const tengo que pedirle a la API de stock con fetch y el enlace de la API con un GET 
+
+    const destinationPostalCode = costRequest.deliveryAddress.postal_code;
+
+    return this.costCalculatorService.calculateCost(
+      productsWithDetails,
+      destinationPostalCode as any,
+    )
   }
 }
