@@ -79,8 +79,8 @@ const Footer = () => {
     quickLinks: [
       { name: 'Inicio', href: '/' },
       { name: 'Calcular Costo', href: '/calcular-costo' },
-      { name: 'Crear Envío', href: '#' },
-      { name: 'Consultar Envío', href: '#' },
+      { name: 'Crear Envío', href: '/crear-envio' },
+      { name: 'Consultar Envío', href: '/consultar-envio' },
     ],
     schedule: [ 
       { day: 'Lunes a Viernes', hours: '10:00 - 19:00' },
