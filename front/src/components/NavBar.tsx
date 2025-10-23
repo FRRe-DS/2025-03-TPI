@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); 
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,7 +23,7 @@ export default function Navbar() {
             : "bg-white"
       }`}
     >
-      <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-12 py-6 text-[var(--color-text-dark)]">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 sm:px-12 py-5 text-[var(--color-text-dark)]">
         {/* Logo + nombre */}
         <Link href="/">
         <div className="flex items-center gap-3">
@@ -31,7 +33,7 @@ export default function Navbar() {
         </Link>
 
         {/* Links */}
-        <div className="flex items-center justify-center gap-10 text-base font-medium">
+        <div className="hidden md:flex items-center gap-10 text-base font-medium">
           <Link
             href="/"
             className="hover:text-[var(--color-primary)] transform transition-transform duration-200 hover:scale-110"
@@ -57,7 +59,25 @@ export default function Navbar() {
             Consultar envío
           </Link>
         </div>
+
+         {/* Botón hamburguesa (mobile) */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden p-2 rounded-md text-[var(--color-text-dark)] hover:bg-gray-100 transition"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+      
+        {/* Menú móvil */}
+      {menuOpen && (
+        <div className="md:hidden bg-white shadow-md border-t border-gray-200 flex flex-col items-center space-y-4 py-6 text-lg font-medium text-[var(--color-text-dark)]">
+          <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+          <Link href="/calcular-costo" onClick={() => setMenuOpen(false)}>Calcular costo</Link>
+          <Link href="/crear-envio" onClick={() => setMenuOpen(false)}>Crear envío</Link>
+          <Link href="/consultar-envio" onClick={() => setMenuOpen(false)}>Consultar envío</Link>
+        </div>
+      )}
     </nav>
   );
 }
