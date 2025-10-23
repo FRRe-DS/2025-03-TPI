@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Shipment } from '../entities/shipment.entity';
 import { Address } from '../entities/address.entity';
 import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
@@ -153,15 +152,32 @@ export class ShippingService {
         shipping_id: shipment.id,
         order_id: shipment.orderId,
         user_id: shipment.user.id,
+        delivery_address: {
+          street: shipment.destinationAddress.street,
+          city: shipment.destinationAddress.city,
+          state: shipment.destinationAddress.state,
+          postal_code: shipment.destinationAddress.postalCode,
+          country: shipment.destinationAddress.country,
+        },
+        departure_address: {
+          street: shipment.originAddress.street,
+          city: shipment.originAddress.city,
+          state: shipment.originAddress.state,
+          postal_code: shipment.originAddress.postalCode,
+          country: shipment.originAddress.country,
+        },
         products: shipment.shipmentProducts.map(sp => ({
           id: sp.product.id,
-          productId: sp.product.id,
           quantity: sp.quantity
         })),
         status: shipment.status,
         transport_type: shipment.transportMethod.type,
         estimated_delivery_at: shipment.transportMethod.estimatedDays,
         created_at: shipment.createdAt.toDateString(),
+        tracking_number: shipment.trackingNumber,
+        carrier_name: shipment.carrierName,
+        total_cost: shipment.totalCost,
+        currency: 'ARS',
       })),
       pagination: {
         current_page: page,
