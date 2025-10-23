@@ -17,6 +17,9 @@ import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
+import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
+import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto'; 
+import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
 
 
 @Injectable()
@@ -49,7 +52,7 @@ export class ShippingService {
     };
   }
 
-  async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<Shipment> {
+  async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     // 1. Verificar o crear usuario
     let user = await this.userRepository.findOne({
       where: { id: createShippmentDto.user_id }
@@ -103,7 +106,7 @@ export class ShippingService {
       updatedAt: new Date()
     });
 
-    // 5. Verificar o crear produtos e criar relações
+    // 5. Verificar o crear produtos y crea relaciones 
     for (const productDto of createShippmentDto.products) {
       let product = await this.productRepository.findOne({
         where: { id: productDto.id }
@@ -129,7 +132,12 @@ export class ShippingService {
       throw new NotFoundException('Shipment created but not found');
     }
 
-    return result;
+    return {
+      shipping_id: result.id,
+      status: result.status,
+      transport_type: result.transportMethod.type,
+      estimated_delivery_at: result.transportMethod.estimatedDays,
+    };
   }
 
   async ShippingServicePagination(
@@ -213,7 +221,7 @@ export class ShippingService {
     };
   }
 
-  async cancelShipment(id: number): Promise<any> {
+  async cancelShipment(id: number): Promise<CancelShippingResponseDto> {
     const shipment = await this.shipmentRepository.findShipmentById(id);
 
     if (!shipment) {
@@ -224,7 +232,7 @@ export class ShippingService {
     throw new Error('Method not implemented');
   }
 
-  async calculateCost(costRequest: CostCalculationRequestDto): Promise<any> {
+  async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     // TODO: Implementar lógica de cálculo de costo
     throw new Error('Method not implemented');
   }
