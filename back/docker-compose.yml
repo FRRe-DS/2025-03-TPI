@@ -12,7 +12,7 @@ services:
       MYSQL_USER: shipping_user          # Usuario adicional
       MYSQL_PASSWORD: shipping_pass      # Contraseña del usuario
     ports:
-      - "3306:3306"                      # Puerto: tu_pc:contenedor
+      - "3307:3306"                      # Puerto: tu_pc:contenedor
     volumes:
       - mysql_data:/var/lib/mysql        # Guarda datos aunque elimines el contenedor
     networks:
