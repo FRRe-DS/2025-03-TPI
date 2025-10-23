@@ -26,7 +26,7 @@ const SearchIcon = ({ className }: { className?: string }) => (
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-slate-100 text-slate-900 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-100 text-slate-900 transition-colors duration-300">
       <section
         className="relative w-screen h-[100vh] flex items-center justify-center bg-cover bg-center"
         style={{ backgroundImage: "url('/heroBanner.png')" }}

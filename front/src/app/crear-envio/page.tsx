@@ -1,17 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { crearEnvio } from "../services/logistica-mock";
+import { useEffect, useState } from "react";
+import { crearEnvio } from "../services/logistica-backend";
 import type {
   Address,
   ProductItemInput,
   ShippingCreationRequest,
-  ShippingCreationResponse, 
+  ShippingResponse,
+  TransportMethod, 
 } from "@/types/logistica";
+import { getTransportMethodName } from "@/types/transport-methods";
+import { API_BASE_URL } from "@/config/api";
 
 function emptyProduct(id = 1): ProductItemInput {
-  return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
+  return { id, quantity: 1 };
 }
+
+const BackArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+);
 
 export default function CrearEnvioPage() {
   const [userId, setUserId] = useState<number | string>(456); 
@@ -25,8 +34,30 @@ export default function CrearEnvioPage() {
   const [products, setProducts] = useState<ProductItemInput[]>([emptyProduct(1)]);
   const [loading, setLoading] = useState(false);
   
-  const [result, setResult] = useState<ShippingCreationResponse | null>(null);
+  const [result, setResult] = useState<ShippingResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [transportMethod, setTransportMethod] = useState<string>("");
+  const [transportMethods, setTransportMethods] = useState<TransportMethod[]>([]);
+
+  const [formInvalidMessage, setFormInvalidMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    //llamada a la api de transportes       
+    const fetchTransportes = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/shipping/transport-methods`);
+        const data: { transportMethods: TransportMethod[] } = await response.json();
+        console.log("Tengo mis transportes!!", data);
+        setTransportMethods(data.transportMethods);
+      } catch (error) {
+        console.error("Error al cargar métodos de transporte:", error);
+      }
+    }
+
+    fetchTransportes();
+}, []);
   
   const updateProduct = (index: number, patch: Partial<ProductItemInput>) => {
     setProducts((prev) =>
@@ -43,44 +74,61 @@ export default function CrearEnvioPage() {
     setProducts((p) => p.filter((_, i) => i !== index));
   };
 
-  const validate = () => {
-    const baseValidation = validateBase(address, products);
-    if (baseValidation) return baseValidation;
-    
-    if (!userId || Number(userId) < 1) return "User ID must be a number >= 1";
-    
+  const getValidationError = (): string | null => {
+      if (!userId || Number(userId) < 1) return "Debe ingresar un ID de usuario válido.";
+      if (!address.street.trim()) return "El campo 'Calle' es obligatorio.";
+      if (!address.city.trim()) return "El campo 'Ciudad' es obligatorio.";
+      if (!address.state.trim()) return "El campo 'Provincia' es obligatorio.";
+      if (!address.country.trim()) return "El campo 'País' es obligatorio.";
+      if (!address.postal_code.trim()) return "El campo 'Código Postal' es obligatorio.";
+      if (!transportMethod.trim()) return "El campo 'Método de transporte' es obligatorio.";
+      if (products.length === 0) return "Agregue al menos un producto.";
+      for (const p of products) {
+          if (!p.id || p.id < 1) return "Debe ingresar un ID de producto válido.";
+      }
+      return null;
+  };
+
+  const getInvalidCharacterError = (): string | null => {
+    const hasLettersRegex = /[a-zA-Z]/;
+
+    if (!hasLettersRegex.test(address.street.trim())) return "El valor ingresado en el campo 'Calle' debe ser válido.";
+    if (!hasLettersRegex.test(address.city.trim())) return "El valor ingresado en el campo 'Ciudad' debe ser válido.";
+    if (!hasLettersRegex.test(address.state.trim())) return "El valor ingresado en el campo 'Provincia' debe ser válido.";
+    if (!hasLettersRegex.test(address.country.trim())) return "El valor ingresado en el campo 'País' debe ser válido.";
     return null;
   };
   
-  function validateBase(address: Address, products: ProductItemInput[]) {
-    if (!address.street.trim()) return "Street is required";
-    if (!address.city.trim()) return "City is required";
-    if (!address.postal_code.trim()) return "Postal code is required";
-    if (products.length === 0) return "Add at least one product";
-    for (const p of products) {
-      if (p.id < 1) return "Product ID must be >= 1";
-      if (p.quantity < 1) return "Product quantity must be >= 1";
-    }
-    return null;
-  }
-  
+  useEffect(() => {
+  setFormInvalidMessage(getValidationError()); 
+  }, [userId, address, products, transportMethod]); 
+
   const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
     setResult(null);
 
-    const v = validate();
-    if (v) {
-      setError(v);
+    const invalidCharError = getInvalidCharacterError();
+    if (invalidCharError) {
+        setSubmitError(invalidCharError);
+        return;
+    }
+
+    const validationCheck = getValidationError();
+    if (validationCheck) {
+      setError(validationCheck); 
       return;
     }
     
     const data: ShippingCreationRequest = {
+      order_id: Number("123" + Date.now().toString()),
       user_id: Number(userId), 
       delivery_address: address,
-      departure_postal_code: "1000", 
       products,
+      transport_type: transportMethod,
     };
+
+    console.log("On submit data", data);
 
     try {
       setLoading(true);
@@ -88,108 +136,146 @@ export default function CrearEnvioPage() {
       setResult(resp);
     } catch (err) {
       console.error(err);
-      setError("Error creating shipment. Try again.");
+      setError("Ocurrió un error al crear el envío. Intenta nuevamente mas tarde.");
     } finally {
       setLoading(false);
     }
   };
+  
+  const inputStyle = "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
+  const labelStyle = "text-sm text-[var(--color-text-dark)] font-medium";
+  const baseOutlineButton = "cursor-pointer border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60";
+  const submitButton = `cursor-pointer px-5 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold border-2 border-[var(--color-primary)] shadow-md hover:shadow-xl hover:scale-105 transform transition-all duration-300 disabled:opacity-60`;
+  const clearButton = `px-5 py-2 ${baseOutlineButton}`;
+  const smallButton = `px-3 py-1 text-xs ${baseOutlineButton}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
-        <h1 className="text-2xl font-semibold text-brand mb-2">Crear Nuevo Envío</h1>
-        <p className="text-sm text-gray-600 mb-6">
+    // 2. ESTRUCTURA PRINCIPAL ACTUALIZADA
+    <div 
+        className="min-h-screen bg-slate-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
+    >
+      <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-xl rounded-xl border border-[var(--color-gray)]">
+        
+        {/* TÍTULO ACTUALIZADO */}
+        <h1 className="text-3xl font-heading font-bold text-[var(--color-primary)]">Crear Nuevo Envío</h1>
+        <p className="text-sm text-[var(--color-text-dark)] opacity-80 mb-6">
           Complete los detalles y el ID de usuario para crear el envío.
         </p>
 
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-8">
         
+          {/* ID de Usuario */}
           <label className="flex flex-col">
             <span className="text-sm text-gray-700 font-bold">ID de Usuario (user_id)</span>
             <input
               type="number"
               min={1}
               value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="mt-1 p-2 border rounded"
+              onChange={(e) => { setUserId(e.target.value); setError(null); }}
+              className={inputStyle}
               placeholder="Ej: 456"
             />
           </label>
           
           {/* Address */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Calle */}
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Calle</span>
+              <span className={labelStyle}>Calle</span>
               <input
                 value={address.street}
-                onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                onChange={(e) => { setAddress({ ...address, street: e.target.value }); setError(null); }}
+                className={inputStyle}
                 placeholder="Av. Siempre Viva 123"
               />
             </label>
 
+            {/* Ciudad */}
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Ciudad</span>
+              <span className={labelStyle}>Ciudad</span>
               <input
                 value={address.city}
-                onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                onChange={(e) => { setAddress({ ...address, city: e.target.value }); setError(null); }}
+                className={inputStyle}
                 placeholder="Resistencia"
               />
             </label>
 
+            {/* Provincia */}
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Provincia</span>
+              <span className={labelStyle}>Provincia</span>
               <input
                 value={address.state}
-                onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                onChange={(e) => { setAddress({ ...address, state: e.target.value }); setError(null); }}
+                className={inputStyle}
                 placeholder="Chaco"
               />
             </label>
 
+            {/* Código Postal */}
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">Código Postal</span>
+              <span className={labelStyle}>Código Postal</span>
               <input
                 value={address.postal_code}
-                onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                onChange={(e) => { setAddress({ ...address, postal_code: e.target.value }); setError(null); }}
+                className={inputStyle}
                 placeholder="3500"
               />
             </label>
-
+            
+            {/* País */}
             <label className="flex flex-col">
-              <span className="text-sm text-gray-700">País</span>
+              <span className={labelStyle}>País</span>
               <input
                 value={address.country}
-                onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                className="mt-1 p-2 border rounded"
+                onChange={(e) => { setAddress({ ...address, country: e.target.value }); setError(null); }}
+                className={inputStyle}
                 placeholder="AR"
               />
+            </label>
+
+
+            {/* Método de transporte (Select) */}
+            <label className="flex flex-col">
+              <span className={labelStyle}>Método de transporte</span>
+              <select
+                value={transportMethod}
+                onChange={(e) => { setTransportMethod(e.target.value); setError(null); }}
+                className={inputStyle}
+              >
+                <option value="">Seleccione un método de transporte</option>
+                {transportMethods.map((method) => (
+                  <option key={method.id} value={method.type}>
+                    {getTransportMethodName(method.type)}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 
           {/* Products */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-medium">Productos</h2>
+          <div className="pt-4 border-t border-[var(--color-gray)]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-heading font-medium text-[var(--color-text-dark)]">Productos</h2>
               <button
                 type="button"
                 onClick={addProduct}
-                className="text-sm text-white bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+                className={smallButton}
               >
                 + Agregar producto
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {products.map((p, i) => (
                 <div
                   key={i}
-                  className="p-3 border rounded grid grid-cols-1 md:grid-cols-3 gap-2 items-end"
+                  // Contenedor de producto con estilos de tarjeta
+                  className="p-4 border border-[var(--color-gray)] rounded-lg grid grid-cols-5 md:grid-cols-5 gap-4 items-end "
                 >
-                  <div>
-                    <label className="text-xs text-gray-600">ID del Producto</label>
+                  <div className="col-span-2">
+                    <label className="text-xs text-[var(--color-text-dark)] opacity-75">ID Producto</label>
                     <input
                       type="number"
                       min={1}
@@ -197,12 +283,14 @@ export default function CrearEnvioPage() {
                       onChange={(e) =>
                         updateProduct(i, { id: Math.max(1, Number(e.target.value)) })
                       }
-                      className="mt-1 p-1 border rounded w-full"
+                      // Reemplazamos p-2 por p-1 para inputs más pequeños
+                      className={inputStyle.replace('p-2', 'p-1')} 
+                      placeholder="Ej: 456"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-xs text-gray-600">Cantidad</label>
+                  <div className="col-span-2">
+                    <label className="text-xs text-[var(--color-text-dark)] opacity-75">Cantidad</label>
                     <input
                       type="number"
                       min={1}
@@ -210,15 +298,16 @@ export default function CrearEnvioPage() {
                       onChange={(e) =>
                         updateProduct(i, { quantity: Math.max(1, Number(e.target.value)) })
                       }
-                      className="mt-1 p-1 border rounded w-full"
+                      className={inputStyle.replace('p-2', 'p-1')}
+                      placeholder="Ej: 5"
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="col-span-1 flex justify-end">
                     <button
                       type="button"
                       onClick={() => removeProduct(i)}
-                      className="text-sm text-white bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                      className={smallButton}
                     >
                       Eliminar
                     </button>
@@ -228,36 +317,57 @@ export default function CrearEnvioPage() {
             </div>
           </div>
           
-          {error && <div className="text-sm text-red-600">{error}</div>}
+          {/* Contenedor de errores */}
+          {(error || submitError) && (
+            <div className="text-sm p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
+              {error || submitError}
+            </div>
+          )}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pt-4 border-t border-[var(--color-gray)]">
+            
+            {/* Botón para Limpiar resultado (coherencia visual) */}
+             <button
+              type="button"
+              onClick={() => {
+                setResult(null);
+                setError(null);
+              }}
+              className={clearButton} 
+            >
+              Limpiar resultado
+            </button>
+            
+            {/* Botón de Submit (estilo principal de acción) */}
             <button
               type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60"
+              disabled={loading || !!formInvalidMessage}
+              className={submitButton }
             >
               {loading ? "Creando..." : "Crear Envío"}
             </button>
             
-            {/* ... Botón Limpiar resultado ... */}
           </div>
         </form>
 
-        {/* Resultado (Adaptado a la respuesta de creación) */}
+        {/* Resultado con estilo de calcular-costo */}
         {result && (
-          <div className="mt-6 p-4 border rounded bg-green-50">
-            <h3 className="text-lg font-medium text-green-700 mb-2">Envío Creado con Éxito</h3>
+          <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
+            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Envío Creado con Éxito</h3>
             <p>
-              <strong>ID del Envío:</strong> {result.shipping_id}
+              <strong>ID del Envío:</strong> {result.id}
             </p>
             <p>
               <strong>Estado:</strong> {result.status.toUpperCase()}
             </p>
             <p>
-              <strong>Tipo de Transporte:</strong> {result.transport_type}
+              <strong>Tipo de Transporte:</strong> {result.transportMethod.name}
             </p>
             <p>
-              <strong>Entrega Estimada (ETA):</strong> {new Date(result.estimated_delivery_at).toLocaleDateString()}
+              <strong>Costo Total:</strong> ${result.totalCost}
+            </p>
+            <p>
+              <strong>Fecha de Creación:</strong> {new Date(result.createdAt).toLocaleDateString()}
             </p>
           </div>
         )}

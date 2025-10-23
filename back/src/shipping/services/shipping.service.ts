@@ -7,21 +7,27 @@ import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
 import { User } from '../entities/user.entity';
 import { TransportMethod } from '../entities/transport-method.entity';
-import { CreateShippmentDto } from '../dto/create-shippment.dto';
+import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
+import GetShipmentsRepository from '../repositories/get-shipments.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
-import { ShippingListResponse } from '../dto/shipping-list.response';
+import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
-//import { PaginationDto } from '../../shared/dto/pagination.dto';
+import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
+import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
+import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto'; 
+import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
+
 
 @Injectable()
 export class ShippingService {
   constructor(
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
+    private readonly getShipmentsRepository: GetShipmentsRepository,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Address)
@@ -46,7 +52,7 @@ export class ShippingService {
     };
   }
 
-  async createShipment(createShippmentDto: CreateShippmentDto): Promise<Shipment> {
+  async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     // 1. Verificar o crear usuario
     let user = await this.userRepository.findOne({
       where: { id: createShippmentDto.user_id }
@@ -73,7 +79,7 @@ export class ShippingService {
       city: createShippmentDto.delivery_address.city,
       state: createShippmentDto.delivery_address.state,
       country: createShippmentDto.delivery_address.country,
-      postalCode: createShippmentDto.delivery_address.postalCode
+      postalCode: createShippmentDto.delivery_address.postal_code
     });
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
@@ -100,14 +106,14 @@ export class ShippingService {
       updatedAt: new Date()
     });
 
-    // 5. Verificar o crear produtos e criar relações
+    // 5. Verificar o crear produtos y crea relaciones 
     for (const productDto of createShippmentDto.products) {
       let product = await this.productRepository.findOne({
-        where: { id: productDto.productId }
+        where: { id: productDto.id }
       });
 
       if (!product) {
-        product = this.productRepository.create({ id: productDto.productId });
+        product = this.productRepository.create({ id: productDto.id });
         product = await this.productRepository.save(product);
       }
 
@@ -126,26 +132,96 @@ export class ShippingService {
       throw new NotFoundException('Shipment created but not found');
     }
 
-    return result;
+    return {
+      shipping_id: result.id,
+      status: result.status,
+      transport_type: result.transportMethod.type,
+      estimated_delivery_at: result.transportMethod.estimatedDays,
+    };
   }
 
-  async ShippingServicePagination(page: number, itemsPerPage: number): Promise<ShippingListResponse> {
-    // TODO: Implementar lógica de paginación
-    throw new Error('Method not implemented');
+  async ShippingServicePagination(
+    page: number = 1,
+    itemsPerPage: number = 20,
+  ): Promise<ShippingListResponseDto> {
+    const [shipments, total] = await this.getShipmentsRepository.findAll(page, itemsPerPage);
+
+    const totalPages = Math.ceil(total / itemsPerPage);
+
+    return {
+      shipments: shipments.map(shipment => ({
+        shipping_id: shipment.id,
+        order_id: shipment.orderId,
+        user_id: shipment.user.id,
+        products: shipment.shipmentProducts.map(sp => ({
+          id: sp.product.id,
+          productId: sp.product.id,
+          quantity: sp.quantity
+        })),
+        status: shipment.status,
+        transport_type: shipment.transportMethod.type,
+        estimated_delivery_at: shipment.transportMethod.estimatedDays,
+        created_at: shipment.createdAt,
+      })),
+      pagination: {
+        current_page: page,
+        total_pages: totalPages,
+        total_items: total,
+        items_per_page: itemsPerPage,
+      },
+    };
   }
 
   async findById(id: number): Promise<ShippingDetailsResponseDto> {
-    const shipment = await this.shipmentRepository.findShipmentById(id);
+    const shipment = await this.getShipmentsRepository.findById(id);
 
     if (!shipment) {
-      throw new NotFoundException(`Shipment with id ${id} not found`);
+      throw new ShippingIdNotFoundException();
     }
 
-    // TODO: Mapear a ShippingDetailsResponseDto
-    throw new Error('Method not implemented');
+    return {
+      shipping_id: shipment.id,
+      order_id: shipment.orderId,
+      user_id: shipment.user.id,
+      delivery_Address: {
+        street: shipment.destinationAddress.street,
+        city: shipment.destinationAddress.city,
+        state: shipment.destinationAddress.state,
+        postal_code: shipment.destinationAddress.postalCode,
+        country: shipment.destinationAddress.country,
+      },
+      departure_Address: {
+        street: shipment.originAddress.street,
+        city: shipment.originAddress.city,
+        state: shipment.originAddress.state,
+        postal_code: shipment.originAddress.postalCode,
+        country: shipment.originAddress.country,
+      },
+      products: shipment.shipmentProducts.map(sp => ({
+        id: sp.product.id,
+        productId: sp.product.id,
+        quantity: sp.quantity
+      })),
+      status: shipment.status,
+      transport_type: {
+        type: shipment.transportMethod.type,
+      },
+      tracking_number: shipment.trackingNumber,
+      carrier_name: shipment.carrierName,
+      total_cost: shipment.totalCost,
+      currency: 'ARS',
+      estimated_delivery_at: shipment.transportMethod.estimatedDays,
+      created_at: shipment.createdAt.toDateString(),
+      updated_at: shipment.updatedAt.toDateString(),
+      logs: shipment.logs?.map(log => ({
+        timestamp: log.timestamp.toISOString(),
+        status: log.status,
+        message: log.message,
+      })),
+    };
   }
 
-  async cancelShipment(id: number): Promise<any> {
+  async cancelShipment(id: number): Promise<CancelShippingResponseDto> {
     const shipment = await this.shipmentRepository.findShipmentById(id);
 
     if (!shipment) {
@@ -156,7 +232,7 @@ export class ShippingService {
     throw new Error('Method not implemented');
   }
 
-  async calculateCost(costRequest: CostCalculationRequestDto): Promise<any> {
+  async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     // TODO: Implementar lógica de cálculo de costo
     throw new Error('Method not implemented');
   }

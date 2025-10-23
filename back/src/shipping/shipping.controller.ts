@@ -9,14 +9,16 @@ import {
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
-import { CreateShippmentDto } from './dto/create-shippment.dto';
+import { CreateShippmentRequestDto } from './dto/create-shippment-request.dto';
 import { CostCalculationRequestDto } from './dto/cost-calculation-request.dto';
 import { TransportMethodsResponseDto } from './dto/transport-methods-response.dto';
-import { ShippingListResponse } from './dto/shipping-list.response';
+import { ShippingListResponseDto } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
 import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
-import { Shipment } from './entities/shipment.entity';
+import { CreateShippingResponseDto } from './dto/create-shipment-response.dto';
+import { CancelShippingResponseDto } from './dto/cancel-shipping-response.dto';
+import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto';
 
 @Controller('shipping')
 export class ShippingController {
@@ -35,7 +37,7 @@ export class ShippingController {
   @HttpCode(200)
   // @Scopes('envios:write')
   @Public()
-  async createShippingOrder(@Body() ship: CreateShippmentDto): Promise<Shipment> {
+  async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
   }
 
@@ -50,7 +52,7 @@ export class ShippingController {
   @Scopes('envios:read')
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
-  ): Promise<ShippingListResponse> {
+  ): Promise<ShippingListResponseDto> {
     return await this.shippingService.ShippingServicePagination(page, items_per_page);
   }
 
@@ -63,14 +65,14 @@ export class ShippingController {
   @Post(':id/cancel')
   @HttpCode(200)
   @Scopes('envios:write')
-  async cancelShippingOrder(@Param('id') id: number): Promise<any> {
+  async cancelShippingOrder(@Param('id') id: number): Promise<CancelShippingResponseDto> {
     return await this.shippingService.cancelShipment(id);
   }
 
   @Post('cost')
   @HttpCode(200)
   @Scopes('envios:write')
-  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<any> {
+  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     return await this.shippingService.calculateCost(costRequest);
   }
 }

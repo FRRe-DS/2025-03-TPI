@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { calcularCosto } from "../services/logistica-mock";
+import { calcularCosto } from "../services/logistica-backend";
 import type {
   Address,
   ProductItemInput,
@@ -11,9 +11,10 @@ import type {
   TransportMethod,
 } from "@/types/logistica";
 import { getTransportMethodName } from "@/types/transport-methods";
+import { API_BASE_URL } from "@/config/api";
 
 function emptyProduct(id = 1): ProductItemInput {
-  return { id, quantity: 1, weight: 1, length: 10, width: 10, height: 5 };
+  return { id, quantity: 1 };
 }
 
 // Componente de Flecha de Volver
@@ -42,7 +43,7 @@ export default function CalcularCostoPage() {
       //llamada a la api de transportes       
       const fetchTransportes = async () => {
         try {
-          const response = await fetch("http://localhost:3010/shipping/transport-methods");
+          const response = await fetch(`${API_BASE_URL}/shipping/transport-methods`);
           const data: { transportMethods: TransportMethod[] } = await response.json();
           console.log("Tengo mis transportes!!", data);
           setTransportMethods(data.transportMethods);
@@ -127,7 +128,7 @@ export default function CalcularCostoPage() {
 
   return (
     <div 
-      className="min-h-screen bg-slate-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
+      className="min-h-screen bg-gray-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center"
     >
       <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-xl rounded-xl border border-[var(--color-gray)]">
         

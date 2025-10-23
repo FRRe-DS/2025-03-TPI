@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
   return (
     <html lang="es" className={`${poppins.variable} ${inter.variable}`}>
        
-      <body className="bg-[var(--color-bg)] text-[var(--color-text-dark)]">
+      <body className="bg-gray-100 text-[var(--color-text-dark)]">
         <NavBar />
         <main className="pt-24">
           {children}

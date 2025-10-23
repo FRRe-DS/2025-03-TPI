@@ -12,16 +12,20 @@ import TransportMethodsRepository from './repositories/transport_methods.reposit
 import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transport_methods_repositories';
 import ShipmentRepository from './repositories/shipment.repository';
 import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.repository';
+import GetShipmentsRepository from './repositories/get-shipments.repository';
+import { MysqlGetShipmentsRepository } from './repositories/mysql/mysql_get_shipments.repository';
+import { ShippingLog } from './entities/shipping-log.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Shipment,
-      TransportMethod,
-      User,
       Address,
       Product,
-      ShipmentProduct
+      ShipmentProduct,
+      TransportMethod,
+      User,
+      ShippingLog
     ])
   ],
   controllers: [ShippingController],
@@ -34,6 +38,10 @@ import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.reposit
     {
       provide: ShipmentRepository,
       useClass: MySqlShipmentRepository
+    },
+    {
+      provide: GetShipmentsRepository,
+      useClass: MysqlGetShipmentsRepository
     }
   ]
 })

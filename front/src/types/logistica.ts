@@ -10,10 +10,6 @@ export interface Address {
 export interface ProductItemInput {
   id: number;
   quantity: number;
-  weight: number;
-  length: number;
-  width: number;
-  height: number;
 }
 
 export interface ShippingCostRequest {
@@ -38,8 +34,9 @@ export interface ShippingCostResponse {
 export interface ShippingCreationRequest {
   user_id: number; 
   delivery_address: Address;
-  departure_postal_code: string;
+  order_id: number;
   products: ProductItemInput[];
+  transport_type: string;
 }
 
 export interface ShippingCreationResponse {
@@ -54,4 +51,38 @@ export interface TransportMethod {
   name: string;
   type: string;
   estimatedDays: string;
+}
+
+export interface AddressWithId {
+  id: number;
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: number;
+}
+
+export interface ShipmentProduct {
+  idShipment: number;
+  idProduct: number;
+  quantity: number;
+  product: {
+    id: number;
+  };
+}
+
+export interface ShippingResponse {
+  id: number;
+  user: {
+    id: number;
+  };
+  originAddress: AddressWithId;
+  destinationAddress: AddressWithId;
+  date: string;
+  status: string;
+  transportMethod: TransportMethod;
+  totalCost: string;
+  createdAt: string;
+  updatedAt: string;
+  shipmentProducts: ShipmentProduct[];
 }

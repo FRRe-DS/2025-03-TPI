@@ -91,7 +91,7 @@ const Footer = () => {
       whatsapp: '+54 11 4567-8900',
       // Dirección simplificada para evitar desbordamiento:
       address: [
-        'Av. 9 de Julio 2830',
+        'Arazá 352',
         'Ciudad de Resistencia, Chaco',
         'Argentina',
       ],
