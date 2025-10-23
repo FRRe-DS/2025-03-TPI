@@ -17,7 +17,7 @@ import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
-import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto'; 
+import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
 
 
@@ -152,20 +152,6 @@ export class ShippingService {
         shipping_id: shipment.id,
         order_id: shipment.orderId,
         user_id: shipment.user.id,
-        delivery_address: {
-          street: shipment.destinationAddress.street,
-          city: shipment.destinationAddress.city,
-          state: shipment.destinationAddress.state,
-          postal_code: shipment.destinationAddress.postalCode,
-          country: shipment.destinationAddress.country,
-        },
-        departure_address: {
-          street: shipment.originAddress.street,
-          city: shipment.originAddress.city,
-          state: shipment.originAddress.state,
-          postal_code: shipment.originAddress.postalCode,
-          country: shipment.originAddress.country,
-        },
         products: shipment.shipmentProducts.map(sp => ({
           id: sp.product.id,
           quantity: sp.quantity
@@ -174,10 +160,6 @@ export class ShippingService {
         transport_type: shipment.transportMethod.type,
         estimated_delivery_at: shipment.transportMethod.estimatedDays,
         created_at: shipment.createdAt.toDateString(),
-        tracking_number: shipment.trackingNumber,
-        carrier_name: shipment.carrierName,
-        total_cost: shipment.totalCost,
-        currency: 'ARS',
       })),
       pagination: {
         current_page: page,
