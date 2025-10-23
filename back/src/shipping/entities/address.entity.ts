@@ -17,6 +17,6 @@ export class Address {
     @Column({ type: 'varchar', length: 100 })
     country: string;
 
-    @Column({ type: 'int' })
-    postalCode: number;
+    @Column({ type: 'varchar', length: 100 })
+    postalCode: string;
 }
