@@ -1,4 +1,3 @@
-// src/types/logistica.ts
 export interface Address {
   street: string;
   city: string;
