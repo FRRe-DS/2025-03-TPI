@@ -17,6 +17,22 @@ services:
       - mysql_data:/var/lib/mysql        # Guarda datos aunque elimines el contenedor
     networks:
       - shipping_network
+  
+  # Servicio del backend NestJS
+  back:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shipping_back
+    restart: always
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    ports:
+      - "3010:3010"
+    networks:
+      - shipping_network
 
 # Volumen para persistir datos
 volumes:
