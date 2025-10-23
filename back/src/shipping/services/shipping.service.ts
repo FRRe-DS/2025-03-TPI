@@ -69,7 +69,7 @@ export class ShippingService {
       city: "Springfield",
       state: "Illinois",
       country: "US",
-      postalCode: 62704
+      postalCode: "62704"
     });
     const savedOriginAddress = await this.addressRepository.save(originAddress);
 

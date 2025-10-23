@@ -29,12 +29,12 @@ export class Shipment {
     user: User;
 
     // Relación muchos a uno con Address (origen)
-    @ManyToOne(() => Address)
+    @ManyToOne(() => Address, { eager: true })
     @JoinColumn({ name: 'origin_address_id' })
     originAddress: Address;
 
     // Relación muchos a uno con Address (destino)
-    @ManyToOne(() => Address)
+    @ManyToOne(() => Address, { eager: true })
     @JoinColumn({ name: 'destination_address_id' })
     destinationAddress: Address;
 
