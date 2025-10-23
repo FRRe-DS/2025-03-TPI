@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DatabaseSeedService } from './seed.service';
+import { SeedService } from './seed.service';
 import { TransportMethod } from '../shipping/entities/transport-method.entity';
 import TransportMethodsRepository from '../shipping/repositories/transport_methods.repository';
 import MySqlTransportMethodsRepositories from '../shipping/repositories/mysql/mysql_transport_methods_repositories';
@@ -10,13 +10,13 @@ import MySqlTransportMethodsRepositories from '../shipping/repositories/mysql/my
     TypeOrmModule.forFeature([TransportMethod])
   ],
   providers: [
-    DatabaseSeedService,
+    SeedService,
     {
       provide: TransportMethodsRepository,
       useClass: MySqlTransportMethodsRepositories
     }
   ],
-  exports: [DatabaseSeedService]
+  exports: [SeedService]
 })
 export class SeedModule {}
 

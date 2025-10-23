@@ -3,8 +3,8 @@ import { TransportMethods } from '../shared/enums/transport-methods.enum';
 import TransportMethodsRepository from '../shipping/repositories/transport_methods.repository';
 
 @Injectable()
-export class DatabaseSeedService implements OnModuleInit {
-  private readonly logger = new Logger(DatabaseSeedService.name);
+export class SeedService implements OnModuleInit {
+  private readonly logger = new Logger(SeedService.name);
 
   constructor(
     private readonly transportMethodRepository: TransportMethodsRepository,
