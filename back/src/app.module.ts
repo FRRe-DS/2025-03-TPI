@@ -2,13 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingModule } from './shipping/shipping.module';
-import { Shipment } from './shipping/entities/shipment.entity';
-import { Address } from './shipping/entities/address.entity';
-import { User } from './shipping/entities/user.entity';
-import { Product } from './shipping/entities/product.entity';
-import { TransportMethod } from './shipping/entities/transport-method.entity';
-import { ShipmentProduct } from './shipping/entities/shipment-product.entity';
-import { ShippingLog } from './shipping/entities/shipping-log.entity';
 import { KeycloakModule } from './auth/keycloak.module';
 
 @Module({
@@ -24,15 +17,8 @@ import { KeycloakModule } from './auth/keycloak.module';
       username: process.env.DB_USERNAME || '',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'shipping_db',
-      entities: [
-        Shipment,
-        Address,
-        User,
-        Product,
-        TransportMethod,
-        ShipmentProduct,
-        ShippingLog,
-      ],
+
+      autoLoadEntities: true, // escanea todos los directorios de este proyecto y busca cualquier archivo que termine en .entity.ts
       synchronize: true,
       logging: true,
     }),
