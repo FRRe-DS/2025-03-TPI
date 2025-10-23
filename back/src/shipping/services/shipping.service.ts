@@ -17,8 +17,10 @@ import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
-import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto'; 
+import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
+import { ShippingLog } from '../entities/shipping-log.entity';
+import { create } from 'domain';
 
 
 @Injectable()
@@ -36,7 +38,9 @@ export class ShippingService {
     @InjectRepository(ShipmentProduct)
     private readonly shipmentProductRepository: Repository<ShipmentProduct>,
     @InjectRepository(TransportMethod)
-    private readonly transportMethodRepository: Repository<TransportMethod>
+    private readonly transportMethodRepository: Repository<TransportMethod>,
+    @InjectRepository(ShippingLog)
+    private readonly shippingLogRepository: Repository<ShippingLog>
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -73,6 +77,7 @@ export class ShippingService {
     });
     const savedOriginAddress = await this.addressRepository.save(originAddress);
 
+    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
     const destinationAddress = this.addressRepository.create({
       street: createShippmentDto.delivery_address.street,
       city: createShippmentDto.delivery_address.city,
@@ -94,13 +99,20 @@ export class ShippingService {
     // TODO: Implementar lógica de cálculo de costo
     const totalCost = 100;
     // 4. Crear shipment
+    // Generar tracking number aleatorio
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000); // 9 dígitos
+    const trackingNumber = `LOG-AR-${randomNumber}`;
+
     const savedShipment = await this.shipmentRepository.createShipment({
       user: user,
+      orderId: createShippmentDto.order_id,
       originAddress: savedOriginAddress,
       destinationAddress: savedDestinationAddress,
       transportMethod: transportMethod,
       status: ShippingStatus.PENDING,
       totalCost: totalCost,
+      trackingNumber: trackingNumber,
+      carrierName: 'Andreani',
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -116,6 +128,7 @@ export class ShippingService {
         product = await this.productRepository.save(product);
       }
 
+      //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
       const shipmentProduct = this.shipmentProductRepository.create({
         shipment: savedShipment,
         product: product,
@@ -123,6 +136,14 @@ export class ShippingService {
       });
       await this.shipmentProductRepository.save(shipmentProduct);
     }
+    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
+    const shippingLog = this.shippingLogRepository.create({
+      shipment: savedShipment,
+      status: ShippingStatus.PENDING,
+      message: 'Orden de envío creada',
+      timestamp: new Date()
+    });
+    await this.shippingLogRepository.save(shippingLog);
 
     // 6. Retornar shipment completo
     const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
@@ -152,20 +173,6 @@ export class ShippingService {
         shipping_id: shipment.id,
         order_id: shipment.orderId,
         user_id: shipment.user.id,
-        delivery_address: {
-          street: shipment.destinationAddress.street,
-          city: shipment.destinationAddress.city,
-          state: shipment.destinationAddress.state,
-          postal_code: shipment.destinationAddress.postalCode,
-          country: shipment.destinationAddress.country,
-        },
-        departure_address: {
-          street: shipment.originAddress.street,
-          city: shipment.originAddress.city,
-          state: shipment.originAddress.state,
-          postal_code: shipment.originAddress.postalCode,
-          country: shipment.originAddress.country,
-        },
         products: shipment.shipmentProducts.map(sp => ({
           id: sp.product.id,
           quantity: sp.quantity
@@ -174,10 +181,6 @@ export class ShippingService {
         transport_type: shipment.transportMethod.type,
         estimated_delivery_at: shipment.transportMethod.estimatedDays,
         created_at: shipment.createdAt.toDateString(),
-        tracking_number: shipment.trackingNumber,
-        carrier_name: shipment.carrierName,
-        total_cost: shipment.totalCost,
-        currency: 'ARS',
       })),
       pagination: {
         current_page: page,

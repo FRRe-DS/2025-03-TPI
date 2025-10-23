@@ -38,9 +38,6 @@ export class Shipment {
     @JoinColumn({ name: 'destination_address_id' })
     destinationAddress: Address;
 
-    @CreateDateColumn({ type: 'timestamp' })
-    date: Date;
-
     @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.PENDING })
     status: ShippingStatus;
 
@@ -63,6 +60,7 @@ export class Shipment {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
     createdAt: Date;
 
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'updated_at' })
     updatedAt: Date;
 
     // Relación uno a muchos con ShipmentProduct (tabla intermedia)
