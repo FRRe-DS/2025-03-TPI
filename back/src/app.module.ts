@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingModule } from './shipping/shipping.module';
 import { KeycloakModule } from './auth/keycloak.module';
-import { SeedModule } from './database/seed.module';
+import { SeedModule } from './seeds/seed.module';
 
 @Module({
   imports: [
