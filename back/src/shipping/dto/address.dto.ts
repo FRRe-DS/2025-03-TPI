@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Matches } from 'class-validator';
 
 export class AddressDto {
     @IsString()
@@ -15,7 +15,8 @@ export class AddressDto {
 
     @IsNumber()
     @IsNotEmpty()
-    postal_code: number;
+    @Matches(/^[A-Z]{1}\d{4}[A-Z]{3}$/) 
+    postal_code: string;
 
     @IsString()
     @IsNotEmpty()
