@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './common/exceptions/global-exception.filter.exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +19,8 @@ async function bootstrap() {
     forbidNonWhitelisted: true, // si aparece un campo extra => 400
     transform: true,            // castea tipos (query/params)
   }));
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const HOST = process.env.HOST || 'localhost';
   const PORT = process.env.PORT || 3010;

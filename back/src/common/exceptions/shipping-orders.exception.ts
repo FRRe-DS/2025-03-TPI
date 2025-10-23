@@ -2,10 +2,17 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ShippingOrdersException extends HttpException {
     constructor(message: string = 'Invalid Shipping Order', details?: any) {
+        const response: any = {
+            code: 'invalid_shipping_order',
+            message,
+        };
+
+        if (details !== undefined) {
+            response.details = details;
+        }
+
         super(
-            { code: 'invalid_shipping_order',
-            message, 
-            details },
+            response,
             HttpStatus.BAD_REQUEST);
     }
 }
