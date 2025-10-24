@@ -163,6 +163,9 @@ export class CostCalculatorService {
     return {
       currency: 'ARS',
       total_cost: parseFloat(totalCost.toFixed(2)),
+      transportMethod: {
+        type: 'road', // Por defecto usamos 'road', puede ajustarse según lógica de negocio
+      },
       products: finalProductCosts,
     };
   }
