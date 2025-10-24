@@ -1,4 +1,3 @@
-// src/types/logistica.ts
 export interface Address {
   street: string;
   city: string;
@@ -32,7 +31,7 @@ export interface ShippingCostResponse {
 }
 
 export interface ShippingCreationRequest {
-  user_id: number; 
+  user_id: number;
   delivery_address: Address;
   order_id: number;
   products: ProductItemInput[];
@@ -41,9 +40,9 @@ export interface ShippingCreationRequest {
 
 export interface ShippingCreationResponse {
   shipping_id: number;
-  status: string; 
-  transport_type: string; 
-  estimated_delivery_at: string; 
+  status: string;
+  transport_type: string;
+  estimated_delivery_at: string;
 }
 
 export interface TransportMethod {
@@ -72,17 +71,8 @@ export interface ShipmentProduct {
 }
 
 export interface ShippingResponse {
-  id: number;
-  user: {
-    id: number;
-  };
-  originAddress: AddressWithId;
-  destinationAddress: AddressWithId;
-  date: string;
+  shipping_id: number;
   status: string;
-  transportMethod: TransportMethod;
-  totalCost: string;
-  createdAt: string;
-  updatedAt: string;
-  shipmentProducts: ShipmentProduct[];
+  transport_type: string;
+  estimated_delivery_at: string;
 }

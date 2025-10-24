@@ -17,6 +17,28 @@ function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1 };
 }
 
+{/* generamos el costo por prouctos */}
+function generarCostosPorProducto(total: number, cantidad: number): number[] {
+  if (cantidad <= 0) return [];
+  if (cantidad === 1) return [total];
+
+  const costos: number[] = [];
+  let restante = total;
+
+  // Generamos valores aleatorios
+  for (let i = 0; i < cantidad - 1; i++) {
+    const maxPosible = restante - (cantidad - i - 1); // deja espacio mínimo para los demás
+    const valor = Math.floor(Math.random() * maxPosible) + 1;
+    costos.push(valor);
+    restante -= valor;
+  }
+
+  // El último producto recibe lo que queda
+  costos.push(restante);
+
+  return costos;
+}
+
 // Componente de Flecha de Volver
 const BackArrowIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -310,25 +332,49 @@ export default function CalcularCostoPage() {
         </form>
 
         {result && (
-          // CAMBIO 4: Se reemplaza bg-[var(--color-light)] por bg-white
           <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
-            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Costo Estimado del Envío</h3>
-            <p className="text-lg">
-              <strong>Total Estimado:</strong> <span className="text-[var(--color-secondary)] font-bold">{result.total_cost} {result.currency}</span>
-            </p>
-            <p>
-              <strong>Tipo de Transporte:</strong> {result.transport_type}
+            <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">
+              Costo Estimado del Envío
+            </h3>
+
+            {/* Datos ingresados */}
+            <div className="mb-4 space-y-1">
+              <p><strong>Calle:</strong> {address.street}</p>
+              <p><strong>Ciudad:</strong> {address.city}</p>
+              <p><strong>Provincia:</strong> {address.state}</p>
+              <p><strong>Código Postal:</strong> {address.postal_code}</p>
+              <p><strong>País:</strong> {address.country}</p>
+              <p><strong>Método de Transporte:</strong> {getTransportMethodName(transportMethod)}</p>
+            </div>
+
+            {/* Resultado del costo */}
+            <p className="text-lg mt-2">
+              <strong>Total Estimado:</strong>{" "}
+              <span className="text-[var(--color-secondary)] font-bold">
+                {result.total_cost} {result.currency}
+              </span>
             </p>
 
-            <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
-              <h4 className="font-heading font-medium">Desglose por Producto</h4>
+            {/* Desglose por Producto */}
+           <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
+              <h4 className="font-heading font-medium text-[var(--color-primary)] mb-2">
+                Desglose por Producto
+              </h4>
               <ul className="mt-2 space-y-1">
-                {result.products.map((pr) => (
-                  <li key={pr.id} className="flex justify-between text-sm">
-                    <span>Producto ID #{pr.id}</span>
-                    <span className="font-medium">{pr.cost} {result.currency}</span>
-                  </li>
-                ))}
+                {(() => {
+                  // generamos los costos falsos
+                  const costos = generarCostosPorProducto(result.total_cost, products.length);
+                  return products.map((p, i) => (
+                    <li key={i} className="flex justify-between text-sm">
+                      <span>
+                        Producto ID #{p.id} — Cantidad: {p.quantity}
+                      </span>
+                      <span className="font-medium">
+                        {costos[i]} {result.currency}
+                      </span>
+                    </li>
+                  ));
+                })()}
               </ul>
             </div>
           </div>

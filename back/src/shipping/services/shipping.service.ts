@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Shipment } from '../entities/shipment.entity';
 import { Address } from '../entities/address.entity';
 import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
@@ -18,9 +17,11 @@ import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
-import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto'; 
+import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
+import { ShippingLog } from '../entities/shipping-log.entity';
+import { create } from 'domain';
 
 
 @Injectable()
@@ -40,6 +41,8 @@ export class ShippingService {
     @InjectRepository(TransportMethod)
     private readonly transportMethodRepository: Repository<TransportMethod>,
     private readonly costCalculatorService: CostCalculatorService
+    @InjectRepository(ShippingLog)
+    private readonly shippingLogRepository: Repository<ShippingLog>
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -72,10 +75,11 @@ export class ShippingService {
       city: "Springfield",
       state: "Illinois",
       country: "US",
-      postalCode: 62704
+      postalCode: "62704"
     });
     const savedOriginAddress = await this.addressRepository.save(originAddress);
 
+    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
     const destinationAddress = this.addressRepository.create({
       street: createShippmentDto.delivery_address.street,
       city: createShippmentDto.delivery_address.city,
@@ -97,13 +101,20 @@ export class ShippingService {
     // TODO: Implementar lógica de cálculo de costo
     const totalCost = 100;
     // 4. Crear shipment
+    // Generar tracking number aleatorio
+    const randomNumber = Math.floor(100000000 + Math.random() * 900000000); // 9 dígitos
+    const trackingNumber = `LOG-AR-${randomNumber}`;
+
     const savedShipment = await this.shipmentRepository.createShipment({
       user: user,
+      orderId: createShippmentDto.order_id,
       originAddress: savedOriginAddress,
       destinationAddress: savedDestinationAddress,
       transportMethod: transportMethod,
       status: ShippingStatus.PENDING,
       totalCost: totalCost,
+      trackingNumber: trackingNumber,
+      carrierName: 'Andreani',
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -119,6 +130,7 @@ export class ShippingService {
         product = await this.productRepository.save(product);
       }
 
+      //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
       const shipmentProduct = this.shipmentProductRepository.create({
         shipment: savedShipment,
         product: product,
@@ -126,6 +138,14 @@ export class ShippingService {
       });
       await this.shipmentProductRepository.save(shipmentProduct);
     }
+    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
+    const shippingLog = this.shippingLogRepository.create({
+      shipment: savedShipment,
+      status: ShippingStatus.PENDING,
+      message: 'Orden de envío creada',
+      timestamp: new Date()
+    });
+    await this.shippingLogRepository.save(shippingLog);
 
     // 6. Retornar shipment completo
     const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
@@ -157,13 +177,12 @@ export class ShippingService {
         user_id: shipment.user.id,
         products: shipment.shipmentProducts.map(sp => ({
           id: sp.product.id,
-          productId: sp.product.id,
           quantity: sp.quantity
         })),
         status: shipment.status,
         transport_type: shipment.transportMethod.type,
         estimated_delivery_at: shipment.transportMethod.estimatedDays,
-        created_at: shipment.createdAt,
+        created_at: shipment.createdAt.toDateString(),
       })),
       pagination: {
         current_page: page,
