@@ -40,7 +40,7 @@ export class ShippingService {
     private readonly shipmentProductRepository: Repository<ShipmentProduct>,
     @InjectRepository(TransportMethod)
     private readonly transportMethodRepository: Repository<TransportMethod>,
-    private readonly costCalculatorService: CostCalculatorService
+    private readonly costCalculatorService: CostCalculatorService,
     @InjectRepository(ShippingLog)
     private readonly shippingLogRepository: Repository<ShippingLog>
   ) { }
