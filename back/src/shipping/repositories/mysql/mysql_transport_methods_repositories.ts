@@ -10,8 +10,17 @@ export default class MySqlTransportMethodsRepositories implements TransportMetho
         @InjectRepository(TransportMethod)
         private readonly itemsRepository: Repository<TransportMethod>
     ) { }
+    
     async getTransportMethods(): Promise<TransportMethod[]> {
         return await this.itemsRepository.find();
     }
-    async findOne()
+
+    async count(): Promise<number> {
+        return await this.itemsRepository.count();
+    }
+
+    async createTransportMethod(data: Partial<TransportMethod>): Promise<TransportMethod> {
+        const transportMethod = this.itemsRepository.create(data);
+        return await this.itemsRepository.save(transportMethod);
+    }
 }

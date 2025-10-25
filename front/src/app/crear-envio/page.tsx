@@ -121,7 +121,7 @@ export default function CrearEnvioPage() {
     }
     
     const data: ShippingCreationRequest = {
-      order_id: Number("123" + Date.now().toString()),
+      order_id: 123,
       user_id: Number(userId), 
       delivery_address: address,
       products,
@@ -355,19 +355,17 @@ export default function CrearEnvioPage() {
           <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
             <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-3">Envío Creado con Éxito</h3>
             <p>
-              <strong>ID del Envío:</strong> {result.id}
+              <strong>ID del Envío:</strong> {result?.shipping_id ?? ""}
             </p>
             <p>
-              <strong>Estado:</strong> {result.status.toUpperCase()}
+              <strong>Estado:</strong> {result?.status?.toUpperCase() ?? ""}
             </p>
             <p>
-              <strong>Tipo de Transporte:</strong> {result.transportMethod.name}
+              <strong>Tipo de Transporte:</strong> {getTransportMethodName(result?.transport_type ?? "")}
             </p>
             <p>
-              <strong>Costo Total:</strong> ${result.totalCost}
-            </p>
-            <p>
-              <strong>Fecha de Creación:</strong> {new Date(result.createdAt).toLocaleDateString()}
+              {/* <strong>Fecha de Creación:</strong> {new Date(result?.estimated_delivery_at ?? "").toLocaleDateString()} */}
+              <strong>Fecha de entrega estimada:</strong> {result?.estimated_delivery_at} dias
             </p>
           </div>
         )}

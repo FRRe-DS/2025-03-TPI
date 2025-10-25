@@ -29,17 +29,14 @@ export class Shipment {
     user: User;
 
     // Relación muchos a uno con Address (origen)
-    @ManyToOne(() => Address)
+    @ManyToOne(() => Address, { eager: true })
     @JoinColumn({ name: 'origin_address_id' })
     originAddress: Address;
 
     // Relación muchos a uno con Address (destino)
-    @ManyToOne(() => Address)
+    @ManyToOne(() => Address, { eager: true })
     @JoinColumn({ name: 'destination_address_id' })
     destinationAddress: Address;
-
-    @CreateDateColumn({ type: 'timestamp' })
-    date: Date;
 
     @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.PENDING })
     status: ShippingStatus;
@@ -63,6 +60,7 @@ export class Shipment {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
     createdAt: Date;
 
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'updated_at' })
     updatedAt: Date;
 
     // Relación uno a muchos con ShipmentProduct (tabla intermedia)
