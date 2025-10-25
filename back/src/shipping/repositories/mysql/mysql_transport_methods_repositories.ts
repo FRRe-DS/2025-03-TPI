@@ -13,4 +13,5 @@ export default class MySqlTransportMethodsRepositories implements TransportMetho
     async getTransportMethods(): Promise<TransportMethod[]> {
         return await this.itemsRepository.find();
     }
+    async findOne()
 }

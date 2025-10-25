@@ -35,8 +35,6 @@ export class ShippingService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(ShipmentProduct)
     private readonly shipmentProductRepository: Repository<ShipmentProduct>,
-    @InjectRepository(TransportMethod)
-    private readonly transportMethodRepository: Repository<TransportMethod>
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -83,7 +81,7 @@ export class ShippingService {
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
     // 3. Verificar método de transporte
-    const transportMethod = await this.transportMethodRepository.findOne({
+    const transportMethod = await this.transportMethodsRepository.findOne({
       where: { type: createShippmentDto.transport_type }
     });
 
