@@ -90,9 +90,7 @@ export class ShippingService {
     const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
 
     // 3. Verificar método de transporte
-    const transportMethod = await this.transportMethodsRepository.findOne({
-      where: { type: createShippmentDto.transport_type }
-    });
+    const transportMethod = await this.transportMethodsRepository.findOne(createShippmentDto.transport_type);
 
     if (!transportMethod) {
       throw new NotFoundException('Transport method not found');
