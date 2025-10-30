@@ -15,7 +15,7 @@ export class AddressDto {
 
     @IsString()
     @IsNotEmpty()
-    @Matches(/^[A-Z]{1}\d{4}[A-Z]{3}$/) 
+    //@Matches(/^[A-Z]{1}\d{4}[A-Z]{3}$/) 
     postal_code: string;
 
     @IsString()
