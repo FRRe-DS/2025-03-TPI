@@ -11,15 +11,12 @@ export default class MySqlAddressRepository implements AddressRepository {
         private readonly addressRepository: Repository<Address>,
     ) {}
 
-    async createAddress(address: Partial<Address>): Promise<Address> {
+    async saveAddress(address: Partial<Address>): Promise<Address> {
         return this.addressRepository.save(address);
     }
 
-    async getAllAddresses(): Promise<Address[]> {
-        return this.addressRepository.find();
+    createAddress(address:Partial<Address>): Address{
+        return this.addressRepository.create(address);
     }
 
-    async count(): Promise<number> {
-        return this.addressRepository.count();
-    }
 }

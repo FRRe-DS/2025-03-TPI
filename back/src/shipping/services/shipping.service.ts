@@ -68,24 +68,24 @@ export class ShippingService {
 
     //TODO esto se deberia buscar de los productos
     // 2. Crear direcciones (siempre se crean nuevas)
-    const originAddress = this.addressRepository.create({
+    const originAddress =  this.addressRepository.createAddress({
       street: "Av. Siempre Viva 742",
       city: "Springfield",
       state: "Illinois",
       country: "US",
       postalCode: "62704"
     });
-    const savedOriginAddress = await this.addressRepository.save(originAddress);
+    const savedOriginAddress = await this.addressRepository.saveAddress(originAddress);
 
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const destinationAddress = this.addressRepository.create({
+    const destinationAddress = this.addressRepository.createAddress({
       street: createShippmentDto.delivery_address.street,
       city: createShippmentDto.delivery_address.city,
       state: createShippmentDto.delivery_address.state,
       country: createShippmentDto.delivery_address.country,
       postalCode: createShippmentDto.delivery_address.postal_code
     });
-    const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
+    const savedDestinationAddress = await this.addressRepository.saveAddress(destinationAddress);
 
     // 3. Verificar método de transporte
     const transportMethod = await this.transportMethodsRepository.findOne(createShippmentDto.transport_type);
