@@ -8,18 +8,18 @@ import AddressRepository from '../address.repository';
 export default class MySqlAddressRepository implements AddressRepository {
     constructor(
         @InjectRepository(Address)
-        private readonly repository: Repository<Address>,
+        private readonly addressRepository: Repository<Address>,
     ) {}
 
     async createAddress(address: Partial<Address>): Promise<Address> {
-        return this.repository.save(address);
+        return this.addressRepository.save(address);
     }
 
     async getAllAddresses(): Promise<Address[]> {
-        return this.repository.find();
+        return this.addressRepository.find();
     }
 
     async count(): Promise<number> {
-        return this.repository.count();
+        return this.addressRepository.count();
     }
 }

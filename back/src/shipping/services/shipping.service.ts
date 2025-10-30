@@ -11,6 +11,8 @@ import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
 import GetShipmentsRepository from '../repositories/get-shipments.repository';
+import UserRepository from '../repositories/user.repository';
+import AddressRepository from '../repositories/address.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
@@ -30,19 +32,17 @@ export class ShippingService {
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
     private readonly getShipmentsRepository: GetShipmentsRepository,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Address)
-    private readonly addressRepository: Repository<Address>,
+    private readonly serRepository: UserRepository,
+    private readonly addressRepository: AddressRepository,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(ShipmentProduct)
     private readonly shipmentProductRepository: Repository<ShipmentProduct>,
-    @InjectRepository(TransportMethod)
-    private readonly transportMethodRepository: Repository<TransportMethod>,
     private readonly costCalculatorService: CostCalculatorService,
     @InjectRepository(ShippingLog)
     private readonly shippingLogRepository: Repository<ShippingLog>
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -59,12 +59,10 @@ export class ShippingService {
 
   async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     // 1. Verificar o crear usuario
-    let user = await this.userRepository.findOne({
-      where: { id: createShippmentDto.user_id }
-    });
+    let user = await this.userRepository.findOne(createShippmentDto.user_id);
 
     if (!user) {
-      user = this.userRepository.create({ id: createShippmentDto.user_id });
+      user = this.userRepository.create(createShippmentDto.user_id);
       user = await this.userRepository.save(user);
     }
 
