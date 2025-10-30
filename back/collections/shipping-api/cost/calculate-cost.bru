@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/shipping/cost
+  url: http://localhost:3010/shipping/cost
   body: json
   auth: none
 }
@@ -16,12 +16,12 @@ headers {
 
 body:json {
   {
-    "deliveryAddress": {
+    "delivery_address": {
       "street": "Av. Corrientes 1234",
       "city": "Buenos Aires",
       "state": "CABA",
       "country": "AR",
-      "postalCode": "C1043"
+      "postal_code": "C1043"
     },
     "products": [
       {
@@ -71,4 +71,3 @@ docs {
     - Total quantity
     - Selected transport method (if applicable)
 }
-
