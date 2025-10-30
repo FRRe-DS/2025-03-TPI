@@ -8,7 +8,7 @@ export class CostCalculationRequestDto {
     @IsNotEmpty()
     @ValidateNested()
     @Type(() => AddressDto)
-    deliveryAddress: AddressDto;
+    delivery_address: AddressDto;
 
     //products
     @IsArray()

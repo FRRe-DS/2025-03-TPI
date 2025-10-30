@@ -80,7 +80,8 @@ export class ShippingController {
 
   @Post('cost')
   @HttpCode(200)
-  @Scopes('envios:write')
+  //@Scopes('envios:write')
+  @Public()
   @UsePipes(new ContextValidationPipe(InvalidCostCalculationException))
   async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     return await this.shippingService.calculateCost(costRequest);
