@@ -17,8 +17,11 @@ export default class MySqlUserRepository implements UserRepository {
         })
     }
 
-    async create(idu:number):Promise<User>{
-        
+    create(idu:Partial<User>):User{
+        return this.userRepository.create(idu)
     }
 
+    async save(user:Partial<User>):Promise<User>{
+        return this.userRepository.save(user)
+    }
 }

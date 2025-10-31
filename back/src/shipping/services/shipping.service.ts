@@ -32,7 +32,7 @@ export class ShippingService {
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
     private readonly getShipmentsRepository: GetShipmentsRepository,
-    private readonly serRepository: UserRepository,
+    private readonly userRepository: UserRepository,
     private readonly addressRepository: AddressRepository,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
@@ -42,7 +42,7 @@ export class ShippingService {
     @InjectRepository(ShippingLog)
     private readonly shippingLogRepository: Repository<ShippingLog>
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly serRepository: Repository<User>,
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -62,7 +62,7 @@ export class ShippingService {
     let user = await this.userRepository.findOne(createShippmentDto.user_id);
 
     if (!user) {
-      user = this.userRepository.create(createShippmentDto.user_id);
+      user = this.userRepository.create({id: createShippmentDto.user_id});
       user = await this.userRepository.save(user);
     }
 
