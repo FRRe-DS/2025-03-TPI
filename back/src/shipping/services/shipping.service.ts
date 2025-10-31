@@ -26,6 +26,7 @@ import { CostCalculatorService, ProductWithDetails } from './cost-calculation-se
 import { ShippingLog } from '../entities/shipping-log.entity';
 import { create } from 'domain';
 import ShipmentProductRepository from '../repositories/shipment_product.repository';
+import shippingLogRepository from '../repositories/shipping-log.repository';
 
 @Injectable()
 export class ShippingService {
@@ -38,8 +39,7 @@ export class ShippingService {
     private readonly productRepository: ProductRepository,
     private readonly shipmentProductRepository: ShipmentProductRepository,
     private readonly costCalculatorService: CostCalculatorService,
-    @InjectRepository(ShippingLog)
-    private readonly shippingLogRepository: Repository<ShippingLog>
+    private readonly shippingLogRepository: shippingLogRepository
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -111,12 +111,7 @@ export class ShippingService {
     }
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
     //REVISAR
-    const shippingLog = this.shippingLogRepository.create({
-      shipment: savedShipment,
-      status: ShippingStatus.PENDING,
-      message: 'Orden de envío creada',
-      timestamp: new Date()
-    });
+    const shippingLog = this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
 
     // 6. Retornar shipment completo
