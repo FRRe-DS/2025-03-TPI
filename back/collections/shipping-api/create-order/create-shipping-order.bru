@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/shipping
+  url: http://localhost:3010/shipping
   body: json
   auth: none
 }
@@ -15,26 +15,28 @@ headers {
 }
 
 body:json {
-  "user_id": 1,
-  "order_id": 12345,
-  "delivery_address": {
-    "street": "Av. Corrientes 1234",
-    "city": "Buenos Aires",
-    "state": "CABA",
-    "country": "Argentina",
-    "postalCode": 1043
-  },
-  "transport_type": "air",
-  "products": [
-    {
-      "productId": 101,
-      "quantity": 2
+  {
+    "user_id": 1,
+    "order_id": 12345,
+    "delivery_address": {
+      "street": "Av. Corrientes 1234",
+      "city": "Buenos Aires",
+      "state": "CABA",
+      "country": "Argentina",
+      "postal_code": 1043
     },
-    {
-      "productId": 202,
-      "quantity": 1
-    }
-  ]
+    "transport_type": "air",
+    "products": [
+      {
+        "id": 101,
+        "quantity": 2
+      },
+      {
+        "id": 202,
+        "quantity": 1
+      }
+    ]
+  }
 }
 
 docs {
@@ -94,4 +96,3 @@ docs {
   - Transport type must be one of: 'air', 'sea', 'road', 'rail'
   - Product IDs and quantities must be integers >= 1
 }
-
