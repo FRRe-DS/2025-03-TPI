@@ -25,9 +25,8 @@ export class CostCalculationResponseDto {
   total_cost: number;
 
   @IsNotEmpty()
-  @ValidateNested()
-  @Type(() => TransportDto)
-    transportMethod: TransportDto;
+  @IsString()
+  transport_type: string;
 
   @IsArray()
   @IsNotEmpty()

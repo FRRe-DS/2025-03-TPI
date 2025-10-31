@@ -221,7 +221,6 @@ export class ShippingService {
   }
 
   async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-
     //1) pagarle 
     // TODO: Aquí deberías obtener los detalles completos de los productos desde la BD
     // Por ahora usamos datos mock para demostración
@@ -244,7 +243,7 @@ export class ShippingService {
       
     })); // en vez de este const tengo que pedirle a la API de stock con fetch y el enlace de la API con un GET 
 
-    const destinationPostalCode = costRequest.deliveryAddress.postal_code;
+    const destinationPostalCode = costRequest.delivery_address.postal_code;
 
     return this.costCalculatorService.calculateCost(
       productsWithDetails,
