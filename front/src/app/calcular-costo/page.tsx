@@ -117,9 +117,7 @@ export default function CalcularCostoPage() {
 
     const data: ShippingCostRequest = {
         delivery_address: address,
-        departure_postal_code: "1000",
         products,
-        transport_method: transportMethod,
     };
 
     try {

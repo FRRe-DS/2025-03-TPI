@@ -13,14 +13,27 @@ import type {
  * - devuelve un transporte elegido según distancia simple (postal code)
  */
 export async function calcularCosto(data: ShippingCostRequest): Promise<ShippingCostResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/shipping/cost`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  return {
-    currency: "ARS",
-    total_cost: 100,
-    transport_type: "air",
-    products: [{ id: 1, cost: 100 }],
-  };
+    if (!response.ok) {
+      throw new Error(`Error del servidor (${response.status})`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error al calcular el costo:", error);
+    throw error;
+  }
 }
+
 
 
 
