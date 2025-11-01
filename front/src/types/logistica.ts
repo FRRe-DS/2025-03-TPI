@@ -13,9 +13,7 @@ export interface ProductItemInput {
 
 export interface ShippingCostRequest {
   delivery_address: Address;
-  departure_postal_code: string;
   products: ProductItemInput[];
-  transport_method?: string;
 }
 
 export interface ProductCost {
