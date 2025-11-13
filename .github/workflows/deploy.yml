@@ -1,0 +1,32 @@
+# Pega esto dentro de .github/workflows/deploy.yml
+
+name: Deploy to Railway
+
+# Se activa cada vez que haces push a la rama 'main'
+on:
+  push:
+    branches:
+      - main  # (o master, prod, la que uses para desplegar)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga tu código de GitHub
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Instala la herramienta de Railway
+      - name: Setup Railway CLI
+        uses: railwayapp/setup-railway@v1
+
+      # 3. Ejecuta el despliegue
+      - name: Deploy
+        env:
+          # Usa el Secreto que ya configuraste
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        
+        # Este es el comando clave:
+        # Usa '--path ./back' para decirle dónde está tu Dockerfile
+        run: railway up --path ./back
