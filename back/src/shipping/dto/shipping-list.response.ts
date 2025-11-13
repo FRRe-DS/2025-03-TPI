@@ -5,13 +5,13 @@ import { ArrayNotEmpty, IsArray, IsNotEmpty, ValidateNested } from 'class-valida
 
 export class ShippingListResponseDto {
   
-  @IsArray()
-  @ArrayNotEmpty()
+  @IsArray( { message: 'The field "shipments" must be an array' })
+  @ArrayNotEmpty({ message: 'The field "shipments" cannot be empty' })
   @ValidateNested({ each: true })
   @Type(() => ShipmentSummaryDto)
   shipments: ShipmentSummaryDto[];
   
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'The field "pagination" cannot be empty' })
   @ValidateNested()
   @Type(() => PaginationDtoOut)
   pagination: PaginationDtoOut;

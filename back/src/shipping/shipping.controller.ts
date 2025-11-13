@@ -24,6 +24,9 @@ import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto'
 import { ContextValidationPipe } from 'src/common/exceptions/custom-validation-pipe.exception';
 import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
 import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shipping-order.exception';
+import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
+import { ShippingIdNotFoundException } from 'src/common/exceptions/shipping-id-notfound.exception';
+import { ShippingIdNonCancellableException } from 'src/common/exceptions/shipping-id-noncancellable.exception';
 
 @Controller('shipping')
 export class ShippingController {
@@ -50,13 +53,14 @@ export class ShippingController {
   @Get('transport-methods')
   @Public()
   // @Scopes('envios:write')
+  @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
   }
 
   @Get()
   @Scopes('envios:read')
-  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
+  @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
   ): Promise<ShippingListResponseDto> {
@@ -65,7 +69,7 @@ export class ShippingController {
 
   @Get(':id')
   @Scopes('envios:read')
-  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
+  @UsePipes(new ContextValidationPipe(ShippingIdNotFoundException))
   async getShippingOrderById(@Param('id') id: number): Promise<ShippingDetailsResponseDto> {
     return await this.shippingService.findById(id);
   }
@@ -73,7 +77,7 @@ export class ShippingController {
   @Post(':id/cancel')
   @HttpCode(200)
   @Scopes('envios:write')
-  @UsePipes(new ContextValidationPipe(UnprocessableEntityException))
+  @UsePipes(new ContextValidationPipe(ShippingIdNonCancellableException))
   async cancelShippingOrder(@Param('id') id: number): Promise<CancelShippingResponseDto> {
     return await this.shippingService.cancelShipment(id);
   }
