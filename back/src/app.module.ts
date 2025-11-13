@@ -22,9 +22,9 @@ import { SeedModule } from './seeds/seed.module';
         // Lee las variables desde ConfigService, no desde process.env
         host: configService.get<string>('DB_HOST'),
         port: +configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASS'),
+        database: configService.get<string>('DB_NAME'),
         
         autoLoadEntities: true,
         // Lee NODE_ENV también desde ConfigService
