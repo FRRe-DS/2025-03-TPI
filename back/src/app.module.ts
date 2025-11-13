@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config'; 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingModule } from './shipping/shipping.module';
 import { KeycloakModule } from './auth/keycloak.module';
@@ -9,29 +9,42 @@ import { SeedModule } from './seeds/seed.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env', // No se usa en Railway, pero está bien dejarlo
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '3306', 10),
-      username: process.env.DB_USERNAME || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_DATABASE || 'shipping_db',
+    
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], 
+      inject: [ConfigService], 
       
-      autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV !== 'production', // ⚠️ Importante: desactiva en producción
-      logging: process.env.NODE_ENV !== 'production',
-      
-      // Configuraciones adicionales para Railway/producción
-      extra: {
-        connectionLimit: 10,
-        connectTimeout: 60000,
-      },
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        
+        // Lee las variables desde ConfigService, no desde process.env
+        host: configService.get<string>('DB_HOST'),
+        port: +configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE'),
+        
+        autoLoadEntities: true,
+        // Lee NODE_ENV también desde ConfigService
+        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        logging: configService.get<string>('NODE_ENV') !== 'production',
+        
+        retryAttempts: 10,  // Reintenta la conexión 10 veces
+        retryDelay: 5000,   // Espera 5 segundos entre intentos
+        
+        extra: {
+          connectionLimit: 10,
+          connectTimeout: 60000,
+        },
+      }),
     }),
+    // --- FIN DE LA VERSIÓN CORREGIDA ---
+    
     KeycloakModule,
     ShippingModule,
     SeedModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
