@@ -5,25 +5,25 @@ import { ProductQtyDto } from './product-qty.dto';
 import { TransportMethods } from 'src/shared/enums/transport-methods.enum';
 
 export class CreateShippmentRequestDto {
-    @IsNumber({}, { message: 'El campo "user_id" debe ser un número' })
-    @IsNotEmpty({ message: 'El campo "user_id" no puede estar vacío' })
+    @IsNumber({}, { message: 'The field "user_id" must be a number' })
+    @IsNotEmpty({ message: 'The field "user_id" cannot be empty' })
     user_id: number;
 
-    @IsNumber({}, { message: 'El campo "order_id" debe ser un número' })
-    @IsNotEmpty({ message: 'El campo "order_id" no puede estar vacío' })
+    @IsNumber({}, { message: 'The field "order_id" must be a number' })
+    @IsNotEmpty({ message: 'The field "order_id" cannot be empty' })
     order_id: number;
 
     @ValidateNested()
     @Type(() => AddressDto)
-    @IsNotEmpty({ message: 'El campo "delivery_address" no puede estar vacío' })
+    @IsNotEmpty({ message: 'The field "delivery_address" cannot be empty' })
     delivery_address: AddressDto;
 
-    @IsEnum(TransportMethods, { message: 'El campo "transport_type" debe ser un valor válido de los siguientes: ' + Object.values(TransportMethods).join(', ') })
-    @IsNotEmpty({ message: 'El campo "transport_type" no puede estar vacío' })
+    @IsEnum(TransportMethods, { message: 'The field "transport_type" must be a valid value from the following: ' + Object.values(TransportMethods).join(', ') })
+    @IsNotEmpty({ message: 'The field "transport_type" cannot be empty' })
     transport_type: TransportMethods;
 
-    @IsArray({ message: 'El campo "products" debe ser un arreglo' })
-    @ArrayNotEmpty({ message: 'El campo "products" no puede estar vacío' })
+    @IsArray({ message: 'The field "products" must be an array' })
+    @ArrayNotEmpty({ message: 'The field "products" cannot be empty' })
     @ValidateNested({ each: true })
     @Type(() => ProductQtyDto)
     products: ProductQtyDto[];

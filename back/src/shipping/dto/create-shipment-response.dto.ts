@@ -10,22 +10,22 @@ import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 
 export class CreateShippingResponseDto {
 
-  @IsNumber({}, { message: 'El campo "shipping_id" debe ser un número' })
-  @IsNotEmpty({ message: 'El campo "shipping_id" no puede estar vacío' })
+  @IsNumber({}, { message: 'The field "shipping_id" must be a number' })
+  @IsNotEmpty({ message: 'The field "shipping_id" cannot be empty' })
   shipping_id: number;
 
   
-  @IsEnum(ShippingStatus, { message: 'El campo "status" debe ser un valor válido del enumerado ShippingStatus' })
-  @IsNotEmpty({ message: 'El campo "status" no puede estar vacío' })
+  @IsEnum(ShippingStatus, { message: 'The field "status" must be a valid value from the ShippingStatus enum' })
+  @IsNotEmpty({ message: 'The field "status" cannot be empty' })
   status: ShippingStatus;
 
 
-  @IsEnum(TransportMethods, { message: 'El campo "transport_type" debe ser un valor válido del enumerado TransportMethods' })
-  @IsNotEmpty({ message: 'El campo "transport_type" no puede estar vacío' })
+  @IsEnum(TransportMethods, { message: 'The field "transport_type" must be a valid value from the TransportMethods enum' })
+  @IsNotEmpty({ message: 'The field "transport_type" cannot be empty' })
   transport_type: TransportMethods;
 
 
-  @IsDateString({}, { message: 'El campo "estimated_delivery_at" debe ser una fecha válida' })
-  @IsNotEmpty({ message: 'El campo "estimated_delivery_at" no puede estar vacío' })
+  @IsDateString({}, { message: 'The field "estimated_delivery_at" must be a valid date' })
+  @IsNotEmpty({ message: 'The field "estimated_delivery_at" cannot be empty' })
   estimated_delivery_at: string;
 }

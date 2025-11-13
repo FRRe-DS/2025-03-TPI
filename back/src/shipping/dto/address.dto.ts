@@ -1,25 +1,25 @@
 import { IsString, IsNotEmpty, IsNumber, Matches } from 'class-validator';
 
 export class AddressDto {
-    @IsString({message: 'El campo "street" debe ser una cadena de texto' })
-    @IsNotEmpty({message: 'El campo "street" no puede estar vacío' })
+    @IsString({message: 'The field "street" must be a string' })
+    @IsNotEmpty({message: 'The field "street" cannot be empty' })
     street: string;
 
-    @IsString({message: 'El campo "city" debe ser una cadena de texto' })
-    @IsNotEmpty({message: 'El campo "city" no puede estar vacío' })
+    @IsString({message: 'The field "city" must be a string' })
+    @IsNotEmpty({message: 'The field "city" cannot be empty' })
     city: string;
 
-    @IsString({message: 'El campo "state" debe ser una cadena de texto' })
-    @IsNotEmpty({message: 'El campo "state" no puede estar vacío' })
+    @IsString({message: 'The field "state" must be a string' })
+    @IsNotEmpty({message: 'The field "state" cannot be empty' })
     state: string;
 
-    @IsString({message: 'El campo "postal_code" debe ser una cadena de texto' })
-    @IsNotEmpty({message: 'El campo "postal_code" no puede estar vacío' })
-    //@Matches(/^[A-Z]{1}\d{4}[A-Z]{3}$/) 
+    @IsString({message: 'The field "postal_code" must be a string' })
+    @IsNotEmpty({message: 'The field "postal_code" cannot be empty' })
+    @Matches(/^[A-Z]{1}\d{4}[A-Z]{3}$/, {message: 'The field "postal_code" must follow the format A1234ABC' }) 
     postal_code: string;
 
-    @IsString({message: 'El campo "country" debe ser una cadena de texto' })
-    @IsNotEmpty({message: 'El campo "country" no puede estar vacío' })
+    @IsString({message: 'The field "country" must be a string' })
+    @IsNotEmpty({message: 'The field "country" cannot be empty' })
     country: string;
 
 }
