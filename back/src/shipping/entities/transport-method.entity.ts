@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { TransportMethods } from 'src/shared/enums/transport-methods.enum';
+import { TransportMethods } from '../../shared/enums/transport-methods.enum';
 import { Shipment } from './shipment.entity';
 
 @Entity('transport_methods')

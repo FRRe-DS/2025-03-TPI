@@ -2,7 +2,7 @@ import { IsNotEmpty, IsNumber, IsArray, ValidateNested, IsEnum, ArrayNotEmpty } 
 import { Type } from 'class-transformer';
 import { AddressDto } from './address.dto';
 import { ProductQtyDto } from './product-qty.dto';
-import { TransportMethods } from 'src/shared/enums/transport-methods.enum';
+import { TransportMethods } from '../../shared/enums/transport-methods.enum';
 
 export class CreateShippmentRequestDto {
     @IsNumber({}, { message: 'The field "user_id" must be a number' })
