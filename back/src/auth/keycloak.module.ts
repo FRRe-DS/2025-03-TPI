@@ -12,10 +12,10 @@ import { KeycloakAuthGuard } from './keycloak-auth.guard';
 @Module({
   imports: [
     KeycloakConnectModule.register({
-      authServerUrl: 'http://localhost:8080',
-      realm: 'ds-2025-realm',
-      clientId: 'grupo-03',
-      secret: '21cd6616-6571-4ee7-be29-0f781f77c74e',
+      authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL || 'http://localhost:8080',
+      realm: process.env.KEYCLOAK_REALM || 'ds-2025-realm',
+      clientId: process.env.KEYCLOAK_CLIENT_ID || 'grupo-03',
+      secret: process.env.KEYCLOAK_CLIENT_SECRET || '21cd6616-6571-4ee7-be29-0f781f77c74e',
       tokenValidation: TokenValidation.ONLINE,
       bearerOnly: true,
     }),
