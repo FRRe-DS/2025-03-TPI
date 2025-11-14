@@ -22,4 +22,8 @@ export default class MySqlShipmentRepository implements ShipmentRepository {
             relations: ['user', 'transportMethod', 'originAddress', 'destinationAddress', 'shipmentProducts', 'shipmentProducts.product']
         });
     }
+
+    async updateShipment(shipment: Shipment): Promise<Shipment> {
+        return await this.shipmentRepository.save(shipment);
+    }
 }

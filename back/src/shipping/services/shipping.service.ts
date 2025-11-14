@@ -15,13 +15,13 @@ import { TransportMethodsResponseDto } from '../dto/transport-methods-response.d
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
+import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
-import { ShippingLog } from '../entities/shipping-log.entity';
-import { create } from 'domain';
+import { ShippingLogService } from './shipping-log.service';
 
 
 @Injectable()
@@ -41,8 +41,7 @@ export class ShippingService {
     @InjectRepository(TransportMethod)
     private readonly transportMethodRepository: Repository<TransportMethod>,
     private readonly costCalculatorService: CostCalculatorService,
-    @InjectRepository(ShippingLog)
-    private readonly shippingLogRepository: Repository<ShippingLog>
+    private readonly shippingLogService: ShippingLogService,
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -111,7 +110,7 @@ export class ShippingService {
       originAddress: savedOriginAddress,
       destinationAddress: savedDestinationAddress,
       transportMethod: transportMethod,
-      status: ShippingStatus.PENDING,
+      status: ShippingStatus.CREATED,
       totalCost: totalCost,
       trackingNumber: trackingNumber,
       carrierName: 'Andreani',
@@ -138,16 +137,16 @@ export class ShippingService {
       });
       await this.shipmentProductRepository.save(shipmentProduct);
     }
-    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const shippingLog = this.shippingLogRepository.create({
-      shipment: savedShipment,
-      status: ShippingStatus.PENDING,
-      message: 'Orden de envío creada',
-      timestamp: new Date()
-    });
-    await this.shippingLogRepository.save(shippingLog);
+    
+    // 6. Crear log inicial usando el servicio de logs
+    const initialMessage = this.shippingLogService.generateStatusMessage(
+      null,
+      ShippingStatus.CREATED,
+      `Tracking: ${trackingNumber}`
+    );
+    await this.shippingLogService.createLog(savedShipment, ShippingStatus.CREATED, initialMessage);
 
-    // 6. Retornar shipment completo
+    // 7. Retornar shipment completo
     const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
 
     if (!result) {
@@ -243,14 +242,48 @@ export class ShippingService {
   }
 
   async cancelShipment(id: number): Promise<CancelShippingResponseDto> {
+    // 1. Buscar el envío
     const shipment = await this.shipmentRepository.findShipmentById(id);
 
     if (!shipment) {
-      throw new NotFoundException(`Shipment with id ${id} not found`);
+      throw new ShippingIdNotFoundException();
     }
 
-    // TODO: Implementar lógica de cancelación
-    throw new Error('Method not implemented');
+    // 2. Validar si se puede cancelar usando la lógica del servicio de logs
+    const validation = this.shippingLogService.validateStatusTransition(
+      shipment.status,
+      ShippingStatus.CANCELLED,
+      shipment.updatedAt
+    );
+
+    if (!validation.valid) {
+      throw new ShippingIdNonCancellableException(
+        validation.reason || 'No se puede cancelar el envío en su estado actual'
+      );
+    }
+
+    // 3. Guardar estado anterior para el log
+    const previousStatus = shipment.status;
+
+    // 4. Actualizar el estado del shipment
+    shipment.status = ShippingStatus.CANCELLED;
+    shipment.updatedAt = new Date();
+    await this.shipmentRepository.updateShipment(shipment);
+
+    // 5. Crear log de cancelación con mensaje contextualizado
+    const cancelMessage = this.shippingLogService.generateStatusMessage(
+      previousStatus,
+      ShippingStatus.CANCELLED,
+      'Cancelación solicitada por el usuario'
+    );
+    await this.shippingLogService.createLog(shipment, ShippingStatus.CANCELLED, cancelMessage);
+
+    // 6. Retornar respuesta
+    return {
+      shipping_id: shipment.id,
+      status: ShippingStatus.CANCELLED,
+      cancelled_at: new Date().toISOString(),
+    };
   }
 
   async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
@@ -282,5 +315,27 @@ export class ShippingService {
       productsWithDetails,
       destinationPostalCode as any,
     )
+  }
+
+  async getShippingLogs(shipmentId: number) {
+    // Verificar que el envío exista
+    const shipment = await this.shipmentRepository.findShipmentById(shipmentId);
+    if (!shipment) {
+      throw new ShippingIdNotFoundException();
+    }
+
+    // Obtener todos los logs de ese envío
+    const logs = await this.shippingLogService.getLogsByShipmentId(shipmentId);
+
+    // Retornar en formato estructurado
+    return {
+      shipping_id: shipmentId,
+      total_logs: logs.length,
+      logs: logs.map(log => ({
+        timestamp: log.timestamp.toISOString(),
+        status: log.status,
+        message: log.message,
+      }))
+    };
   }
 }

@@ -90,4 +90,11 @@ export class ShippingController {
   async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     return await this.shippingService.calculateCost(costRequest);
   }
+
+  @Get(':id/logs')
+  @Scopes('envios:read')
+  @UsePipes(new ContextValidationPipe(ShippingIdNotFoundException))
+  async getShippingLogs(@Param('id') id: number) {
+    return await this.shippingService.getShippingLogs(id);
+  }
 }

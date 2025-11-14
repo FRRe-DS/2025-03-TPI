@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingController } from './shipping.controller';
 import { ShippingService } from './services/shipping.service';
 import { CostCalculatorService } from './services/cost-calculation-service';
+import { ShippingLogService } from './services/shipping-log.service';
 import { Shipment } from './entities/shipment.entity';
 import { TransportMethod } from './entities/transport-method.entity';
 import { User } from './entities/user.entity';
@@ -33,6 +34,7 @@ import { ShippingLog } from './entities/shipping-log.entity';
   providers: [
     ShippingService,
     CostCalculatorService,
+    ShippingLogService,
     {
       provide: TransportMethodsRepository,
       useClass: MySqlTransportMethodsRepositories
