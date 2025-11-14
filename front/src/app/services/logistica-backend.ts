@@ -7,11 +7,6 @@ import type {
   ShippingResponse,
 } from "@/types/logistica";
 
-/**
- * Mock simple que simula cálculo de costo.
- * - calcula coste por producto = base + peso * factor + volumen * factorVol
- * - devuelve un transporte elegido según distancia simple (postal code)
- */
 export async function calcularCosto(data: ShippingCostRequest): Promise<ShippingCostResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/shipping/cost`, {
