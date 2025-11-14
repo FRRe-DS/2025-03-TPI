@@ -21,7 +21,7 @@ import { SeedModule } from './seeds/seed.module';
         
         // Lee las variables desde ConfigService, no desde process.env
         host: configService.get<string>('DB_HOST'),
-        port: +configService.get<number>('DB_PORT'),
+        parseInt(configService.get<string>('DB_PORT', '3306'), 10),
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
@@ -40,7 +40,6 @@ import { SeedModule } from './seeds/seed.module';
         },
       }),
     }),
-    // --- FIN DE LA VERSIÓN CORREGIDA ---
     
     KeycloakModule,
     ShippingModule,
