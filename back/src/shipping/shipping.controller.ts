@@ -42,7 +42,8 @@ export class ShippingController {
 
   @Post()
   @HttpCode(200)
-  @Scopes('envios:write')
+  @Public()
+  // @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
   async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
@@ -65,7 +66,8 @@ export class ShippingController {
   }
 
   @Get(':id')
-  @Scopes('envios:read')
+  @Public()
+  // @Scopes('envios:read')
   @UsePipes(new ContextValidationPipe(ShippingIdNotFoundException))
   async getShippingOrderById(@Param('id') id: number): Promise<ShippingDetailsResponseDto> {
     return await this.shippingService.findById(id);

@@ -10,7 +10,6 @@ import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
-import GetShipmentsRepository from '../repositories/get-shipments.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
@@ -29,7 +28,6 @@ export class ShippingService {
   constructor(
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
-    private readonly getShipmentsRepository: GetShipmentsRepository,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Address)
@@ -111,7 +109,7 @@ export class ShippingService {
       originAddress: savedOriginAddress,
       destinationAddress: savedDestinationAddress,
       transportMethod: transportMethod,
-      status: ShippingStatus.PENDING,
+      status: ShippingStatus.CREATED,
       totalCost: totalCost,
       trackingNumber: trackingNumber,
       carrierName: 'Andreani',
@@ -166,7 +164,7 @@ export class ShippingService {
     page: number = 1,
     itemsPerPage: number = 20,
   ): Promise<ShippingListResponseDto> {
-    const [shipments, total] = await this.getShipmentsRepository.findAll(page, itemsPerPage);
+    const [shipments, total] = await this.shipmentRepository.findAll(page, itemsPerPage);
 
     const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -194,7 +192,7 @@ export class ShippingService {
   }
 
   async findById(id: number): Promise<ShippingDetailsResponseDto> {
-    const shipment = await this.getShipmentsRepository.findById(id);
+    const shipment = await this.shipmentRepository.findShipmentById(id);
 
     if (!shipment) {
       throw new ShippingIdNotFoundException();
