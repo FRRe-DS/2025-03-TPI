@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Or, Repository } from 'typeorm';
 import { Address } from '../entities/address.entity';
 import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
@@ -14,6 +14,7 @@ import { TransportMethodsResponseDto } from '../dto/transport-methods-response.d
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
+import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
@@ -241,14 +242,35 @@ export class ShippingService {
   }
 
   async cancelShipment(id: number): Promise<CancelShippingResponseDto> {
+    // 1. Buscar el shipment
     const shipment = await this.shipmentRepository.findShipmentById(id);
 
+    // 2b. Si no existe, lanzar error
     if (!shipment) {
-      throw new NotFoundException(`Shipment with id ${id} not found`);
+      throw new ShippingIdNotFoundException();
     }
 
-    // TODO: Implementar lógica de cancelación
-    throw new Error('Method not implemented');
+    // 2a. Verificar el estado actual
+    const cancellableStatuses = [
+      ShippingStatus.CREATED,
+      ShippingStatus.RESERVED,
+    ];
+
+    // 3b. Si no se puede cancelar, lanzar error
+    if (!cancellableStatuses.includes(shipment.status)) {
+      throw new ShippingIdNonCancellableException();
+    }
+
+    // 3a. Cancelar el shipment
+    await this.shipmentRepository.cancelById(id);
+
+    // Retornar respuesta
+    return {
+      shipping_id: id,
+      status: ShippingStatus.CANCELLED,
+      //Se pone la fecha y hora actual
+      cancelled_at: 'Shipment cancelled successfully',
+    };
   }
 
   async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
@@ -271,7 +293,7 @@ export class ShippingService {
         postal_code: "H3500ABC",
         country: "AR"
       }
-      
+
     })); // en vez de este const tengo que pedirle a la API de stock con fetch y el enlace de la API con un GET 
 
     const destinationPostalCode = costRequest.delivery_address.postal_code;

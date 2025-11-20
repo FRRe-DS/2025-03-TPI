@@ -14,6 +14,7 @@ import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transp
 import ShipmentRepository from './repositories/shipment.repository';
 import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.repository';
 import { ShippingLog } from './entities/shipping-log.entity';
+import { MysqlCancelShipmentRepository } from './repositories/mysql/mysql_cancel_shipment.repository';
 
 @Module({
   imports: [

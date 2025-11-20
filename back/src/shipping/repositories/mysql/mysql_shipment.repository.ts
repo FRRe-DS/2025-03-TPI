@@ -3,13 +3,17 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Shipment } from "../../entities/shipment.entity";
 import ShipmentRepository from "../shipment.repository";
+import { MysqlCancelShipmentRepository } from './mysql_cancel_shipment.repository';
 
 @Injectable()
-export default class MySqlShipmentRepository implements ShipmentRepository {
+export class MysqlShipmentRepository extends ShipmentRepository {
     constructor(
         @InjectRepository(Shipment)
-        private readonly shipmentRepository: Repository<Shipment>
-    ) { }
+        private readonly shipmentRepository: Repository<Shipment>,
+        private readonly cancelShipmentRepository: MysqlCancelShipmentRepository,
+    ) {
+        super();
+    }
 
     async createShipment(shipment: Partial<Shipment>): Promise<Shipment> {
         const newShipment = this.shipmentRepository.create(shipment);
