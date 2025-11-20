@@ -230,8 +230,26 @@ export class ShippingService {
     };
   }
 
-  async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-    //1) pagarle 
+  async calculateCost(costRequest: CostCalculationRequestDto, token: string): Promise<CostCalculationResponseDto> {
+    //1) pegarle
+    console.log("Datos recibidos de la API de stock:");
+
+    const response = await fetch("http://localhost:3099/api/productos", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.log("hola");
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    
+
     // TODO: Aquí deberías obtener los detalles completos de los productos desde la BD
     // Por ahora usamos datos mock para demostración
     const productsWithDetails: ProductWithDetails[] = costRequest.products.map((p) => ({
