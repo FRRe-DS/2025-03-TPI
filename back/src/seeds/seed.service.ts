@@ -10,7 +10,7 @@ export class SeedService implements OnModuleInit {
   constructor(
     private readonly transportMethodRepository: TransportMethodsRepository,
     private readonly addressRepository: AddressRepository,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     this.logger.log('🌱 Starting database seeding...');
@@ -22,7 +22,7 @@ export class SeedService implements OnModuleInit {
     try {
       // Check if transport methods already exist
       const count = await this.transportMethodRepository.count();
-      
+
       if (count > 0) {
         this.logger.log(`✅ Transport methods already seeded (${count} records found)`);
         return;
@@ -91,9 +91,9 @@ export class SeedService implements OnModuleInit {
 
       // datos de prueba
       const addresses = [
-        { street: '742 Evergreen Terrace', city: 'Springfield', state: 'IL', country: 'USA', postalCode: '62704' },
-        { street: '4 Privet Drive', city: 'Little Whinging', state: 'Surrey', country: 'UK', postalCode: 'CR3 0AA' },
-        { street: '221B Baker Street', city: 'London', state: 'England', country: 'UK', postalCode: 'NW1 6XE' },
+        { street: '742 Evergreen Terrace', city: 'Springfield', state: 'IL', country: 'USA', postal_code: '62704' },
+        { street: '4 Privet Drive', city: 'Little Whinging', state: 'Surrey', country: 'UK', postal_code: 'CR300AA' },
+        { street: '221B Baker Street', city: 'London', state: 'England', country: 'UK', postal_code: 'NW156XE' },
       ];
 
       for (const address of addresses) {

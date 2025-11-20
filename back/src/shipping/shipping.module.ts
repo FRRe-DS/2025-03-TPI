@@ -12,10 +12,18 @@ import { ShipmentProduct } from './entities/shipment-product.entity';
 import TransportMethodsRepository from './repositories/transport_methods.repository';
 import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transport_methods_repositories';
 import ShipmentRepository from './repositories/shipment.repository';
-import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.repository';
-import GetShipmentsRepository from './repositories/get-shipments.repository';
-import { MysqlGetShipmentsRepository } from './repositories/mysql/mysql_get_shipments.repository';
+import { MysqlShipmentRepository } from './repositories/mysql/mysql_shipment.repository';
 import { ShippingLog } from './entities/shipping-log.entity';
+import AddressRepository from './repositories/address.repository';
+import MySqlAddressRepository from './repositories/mysql/mysql_address_repository';
+import ProductRepository from './repositories/product.repository';
+import MySqlProductRepository from './repositories/mysql/mysql_product.repository';
+import ShipmentProductRepository from './repositories/shipment_product.repository';
+import MySqlShipmentProductRepository from './repositories/mysql/mysql_shipment_product.repository';
+import ShippingLogRepository from './repositories/shipping-log.repository';
+import MySqlShippingLogRepository from './repositories/mysql/mysql_shipping_log.repository';
+import UserRepository from './repositories/user.repository';
+import MySqlUserRepository from './repositories/mysql/mysql_user_repository';
 
 @Module({
   imports: [
@@ -39,12 +47,29 @@ import { ShippingLog } from './entities/shipping-log.entity';
     },
     {
       provide: ShipmentRepository,
-      useClass: MySqlShipmentRepository
+      useClass: MysqlShipmentRepository
     },
     {
-      provide: GetShipmentsRepository,
-      useClass: MysqlGetShipmentsRepository
-    }
+      provide: AddressRepository,
+      useClass: MySqlAddressRepository
+    },
+    {
+      provide: ProductRepository,
+      useClass: MySqlProductRepository
+    },
+    {
+      provide: ShipmentProductRepository,
+      useClass: MySqlShipmentProductRepository
+    },
+    {
+      provide: ShippingLogRepository,
+      useClass: MySqlShippingLogRepository
+    },
+    {
+      provide: UserRepository,
+      useClass: MySqlUserRepository
+    },
+
   ]
 })
 export class ShippingModule { }
