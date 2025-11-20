@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/shipping
+  url: https://2025-03-tpi-production.up.railway.app/shipping
   body: json
   auth: none
 }
@@ -15,26 +15,26 @@ headers {
 }
 
 body:json {
+  {
   "user_id": 1,
   "order_id": 12345,
   "delivery_address": {
     "street": "Av. Corrientes 1234",
     "city": "Buenos Aires",
     "state": "CABA",
-    "country": "Argentina",
-    "postalCode": 1043
+    "country": "AR",
+    "postal_code": "H3500ABC"
   },
   "transport_type": "air",
   "products": [
     {
-      "productId": 101,
+      "id": 101,
       "quantity": 2
     },
     {
-      "productId": 202,
+      "id": 202,
       "quantity": 1
-    }
-  ]
+    }]} 
 }
 
 docs {
@@ -94,4 +94,3 @@ docs {
   - Transport type must be one of: 'air', 'sea', 'road', 'rail'
   - Product IDs and quantities must be integers >= 1
 }
-
