@@ -26,8 +26,25 @@ export class MysqlShipmentRepository extends ShipmentRepository {
             relations: ['user', 'transportMethod', 'originAddress', 'destinationAddress', 'shipmentProducts', 'shipmentProducts.product']
         });
     }
+    
+    async findAll(page: number, itemsPerPage: number): Promise<[Shipment[], number]> {
+        const skip = (page - 1) * itemsPerPage;
 
-    async cancelById(id: number): Promise<void> {
-        await this.cancelShipmentRepository.cancelById(id);
+        return await this.shipmentRepository.findAndCount({
+            relations: [
+                'user',
+                'originAddress',
+                'destinationAddress',
+                'transportMethod',
+                'shipmentProducts',
+                'shipmentProducts.product',
+                'logs'
+            ],
+            skip,
+            take: itemsPerPage,
+            order: {
+                createdAt: 'DESC',
+            },
+        });
     }
 }
