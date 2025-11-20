@@ -233,6 +233,9 @@ export class ShippingService {
 
   async calculateCost(costRequest: CostCalculationRequestDto, token: string): Promise<CostCalculationResponseDto> {
     // 1. Obtener los detalles de los productos desde la API de stock
+
+    console.log(`---------------------------> Hacer request a servicio de stock: ${process.env.STOCK_SERVICE_URL}/api/productos`);
+    
     const promises = costRequest.products.map(async (p) => {
       const response = await fetch(`${process.env.STOCK_SERVICE_URL}/api/productos/${p.id}`, {
         method: "GET",
@@ -264,6 +267,9 @@ export class ShippingService {
         warehouse_postal_code: stockProduct.ubicacion.postal_code,
       };
     });
+
+    console.log(`---------------------------> Products with details: ${JSON.stringify(productsWithDetails)}`);
+
 
     const destinationPostalCode = costRequest.delivery_address.postal_code || 'C1000AAA';
 
