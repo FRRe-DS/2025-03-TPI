@@ -69,7 +69,7 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "3010:3010"
+      - "3010:3000"
 
 volumes:
   mysql_data:
