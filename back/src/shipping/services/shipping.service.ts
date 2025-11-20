@@ -18,6 +18,7 @@ import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
 import ShipmentProductRepository from '../repositories/shipment_product.repository';
 import shippingLogRepository from '../repositories/shipping-log.repository';
+import { StockProduct } from 'src/shared/types/stock-api';
 
 @Injectable()
 export class ShippingService {
@@ -230,30 +231,41 @@ export class ShippingService {
     };
   }
 
-  async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-    //1) pagarle 
-    // TODO: Aquí deberías obtener los detalles completos de los productos desde la BD
-    // Por ahora usamos datos mock para demostración
-    const productsWithDetails: ProductWithDetails[] = costRequest.products.map((p) => ({
-      id: p.id,
-      quantity: p.quantity,
-      // Estos valores deberían venir de la peticion de la API de stock:
-      weight: 2.5, // kg por unidad
-      length: 30, // cm
-      width: 20, // cm
-      height: 15, // cm
-      warehouse_postal_code: 'C1000AAA', // CPA del almacén (CABA por defecto)
-      ubicacion_producto: {
-        street: "Av. Vélez Sársfield 123",
-        city: "Resistencia",
-        state: "Chaco",
-        postal_code: "H3500ABC",
-        country: "AR"
+  async calculateCost(costRequest: CostCalculationRequestDto, token: string): Promise<CostCalculationResponseDto> {
+    // 1. Obtener los detalles de los productos desde la API de stock
+    const promises = costRequest.products.map(async (p) => {
+      const response = await fetch(`http://localhost:3099/api/productos/${p.id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error HTTP al obtener producto ${p.id}: ${response.status}`);
       }
+      
+      return response.json() as Promise<StockProduct>;
+    });
 
-    })); // en vez de este const tengo que pedirle a la API de stock con fetch y el enlace de la API con un GET 
+    const stockProducts: StockProduct[] = await Promise.all(promises);
 
-    const destinationPostalCode = costRequest.delivery_address.postal_code;
+    // 2. Mapear los productos de stock a ProductWithDetails
+    const productsWithDetails: ProductWithDetails[] = costRequest.products.map((p, index) => {
+      const stockProduct = stockProducts[index];
+      
+      return {
+        id: p.id,
+        quantity: p.quantity,
+        weight: stockProduct.pesoKg,
+        length: stockProduct.dimensiones.largoCm,
+        width: stockProduct.dimensiones.anchoCm,
+        height: stockProduct.dimensiones.altoCm,
+        warehouse_postal_code: stockProduct.ubicacion.postal_code,
+      };
+    });
+
+    const destinationPostalCode = costRequest.delivery_address.postal_code || 'C1000AAA';
 
     return this.costCalculatorService.calculateCost(
       productsWithDetails,

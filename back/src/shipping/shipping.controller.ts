@@ -8,6 +8,7 @@ import {
   Query,
   UsePipes,
   UnprocessableEntityException,
+  Req,
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
@@ -87,7 +88,11 @@ export class ShippingController {
   @HttpCode(200)
   @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidCostCalculationException))
-  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-    return await this.shippingService.calculateCost(costRequest);
+  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto, @Req() req: any): Promise<CostCalculationResponseDto> {
+    const authHeader = req.headers?.authorization || '';
+    const token = authHeader.startsWith('Bearer ') 
+      ? authHeader.replace('Bearer ', '') 
+      : authHeader;
+    return await this.shippingService.calculateCost(costRequest, token);
   }
 }
