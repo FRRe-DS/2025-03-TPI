@@ -13,13 +13,13 @@ import { SeedModule } from './seeds/seed.module';
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DB_HOST || 'mysql', //antes estaba como localhost, ahora necesito definir el nombre porque el contenedor toma como que es dentro de si mismo
+      host: process.env.DB_HOST || 'mysql', 
       port: parseInt(process.env.DB_PORT || '3306', 10),
       username: process.env.DB_USERNAME || '',
       password: process.env.DB_PASSWORD || '',
       database: process.env.DB_DATABASE || 'shipping_db',
 
-      autoLoadEntities: true, // escanea todos los directorios de este proyecto y busca cualquier archivo que termine en .entity.ts
+      autoLoadEntities: true, 
       synchronize: true,
       logging: true,
     }),

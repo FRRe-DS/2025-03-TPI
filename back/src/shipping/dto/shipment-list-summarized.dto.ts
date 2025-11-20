@@ -14,40 +14,40 @@ import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import { TransportMethods } from '../../shared/enums/transport-methods.enum';
 
 export class ShipmentSummaryDto {
-  @IsNumber()
-  @Min(1)
-  @IsNotEmpty()
+  @IsNumber({}, { message: 'The field "shipping_id" must be a number' })
+  @Min(1, { message: 'The field "shipping_id" must be at least 1' })
+  @IsNotEmpty({ message: 'The field "shipping_id" cannot be empty' })
   shipping_id: number;
 
-  @IsNumber()
-  @Min(1)
-  @IsNotEmpty()
+  @IsNumber({}, { message: 'The field "order_id" must be a number' })
+  @Min(1, { message: 'The field "order_id" must be at least 1' })
+  @IsNotEmpty({ message: 'The field "order_id" cannot be empty' })
   order_id: number;
 
-  @IsNumber()
-  @Min(1)
-  @IsNotEmpty()
+  @IsNumber({}, { message: 'The field "user_id" must be a number' })
+  @Min(1, { message: 'The field "user_id" must be at least 1' })
+  @IsNotEmpty({ message: 'The field "user_id" cannot be empty' })
   user_id: number;
 
-  @IsArray()
-  @ArrayNotEmpty()
+  @IsArray({ message: 'The field "products" must be an array' })
+  @ArrayNotEmpty({ message: 'The field "products" cannot be empty' })
   @ValidateNested({ each: true })
   @Type(() => ProductQtyDto)
   products: ProductQtyDto[];
 
   @IsEnum(ShippingStatus)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'The field "status" cannot be empty' })
   status: ShippingStatus;
 
   @IsEnum(TransportMethods)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'The field "transport_type" cannot be empty' })
   transport_type: TransportMethods;
 
-  @IsDateString()
-  @IsNotEmpty()
+  @IsDateString({}, { message: 'The field "estimated_delivery_at" must be a valid ISO 8601 date string' })
+  @IsNotEmpty({ message: 'The field "estimated_delivery_at" cannot be empty' })
   estimated_delivery_at: string;
 
-  @IsDateString()
-  @IsNotEmpty()
+  @IsDateString({}, { message: 'The field "created_at" must be a valid ISO 8601 date string' })
+  @IsNotEmpty({ message: 'The field "created_at" cannot be empty' })
   created_at: string;
 }

@@ -4,33 +4,32 @@ import { TransportDto } from './transport.dto';
 
 // DTO para cada producto en la respuesta (con su costo individual)
 export class ProductCostDto {
-  @IsNumber()
-  @IsPositive()
+  @IsNumber({}, { message: 'The field "id" must be a number' })
+  @IsPositive({ message: 'The field "id" must be a positive number' })
   id: number;
 
-  @IsNumber()
-  @IsPositive()
+  @IsNumber({}, { message: 'The field "cost" must be a number' })
+  @IsPositive({ message: 'The field "cost" must be a positive number' })
   cost: number;
 }
 
 // DTO de respuesta para el cálculo de costos
 export class CostCalculationResponseDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'The field "currency" cannot be empty' })
+  @IsString({ message: 'The field "currency" must be a string' })
   currency: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
+  @IsNotEmpty({ message: 'The field "total_cost" cannot be empty' })
+  @IsNumber({}, { message: 'The field "total_cost" must be a number' })
+  @IsPositive({ message: 'The field "total_cost" must be a positive number' })
   total_cost: number;
 
-  @IsNotEmpty()
-  @ValidateNested()
-  @Type(() => TransportDto)
-    transportMethod: TransportDto;
+  @IsNotEmpty({ message: 'The field "transport_type" cannot be empty' })
+  @IsString({ message: 'The field "transport_type" must be a string' })
+  transport_type: string;
 
-  @IsArray()
-  @IsNotEmpty()
+  @IsArray({ message: 'The field "products" must be an array' })
+  @IsNotEmpty({ message: 'The field "products" cannot be empty' })
   products: ProductCostDto[];
 
   //Ver si se agrega ESTIMATED DAYS y DELIVERY ADDRESS

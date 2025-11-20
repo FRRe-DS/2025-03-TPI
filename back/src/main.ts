@@ -33,9 +33,9 @@ async function bootstrap() {
   //  }),
   //);
 
-  const HOST = process.env.HOST || 'localhost';
-  const PORT = process.env.PORT || 3010;
-  await app.listen(PORT);
+  const HOST = process.env.HOST || '0.0.0.0';
+  const PORT = process.env.PORT || 3000;
+  await app.listen(PORT, HOST);
   console.log(`🚀  Server ready at http://${HOST}:${PORT}`)
 }
 bootstrap();
