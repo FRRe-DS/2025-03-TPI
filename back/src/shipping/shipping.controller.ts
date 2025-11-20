@@ -49,7 +49,9 @@ export class ShippingController {
   }
 
   @Get()
-  @Scopes('envios:read')
+  @Scopes('envios:read')  
+  @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
+>>>>>>> Stashed changes
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
   ): Promise<ShippingListResponseDto> {

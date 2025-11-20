@@ -24,6 +24,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "autoprefixer": "^10.4.21",
+<<<<<<< Updated upstream
+=======
+    "cypress": "^15.7.0",
+>>>>>>> Stashed changes
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "postcss": "^8.5.6",

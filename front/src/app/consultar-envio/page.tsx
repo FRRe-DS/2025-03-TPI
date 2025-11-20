@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ComponentProps } from "react";
 import Link from "next/link";
+import { getEnvio } from "../services/logistica-backend"; 
+import { ShippingResponse } from "@/types/logistica";
 
 const BackArrowIcon = (props: ComponentProps<"svg">) => (
   <svg
@@ -62,84 +64,17 @@ interface Envio {
 export default function ConsultarEnvioPage() {
   const [idEnvio, setIdEnvio] = useState<string>("");
   const [expandido, setExpandido] = useState<number | null>(null);
+  const [envios, setEnvios] = useState<ShippingResponse[]>([]);
 
-  const enviosMock: Envio[] = [
-    {
-      id_envio: 7633,
-      id_orden: 701,
-      id_usuario: 456,
-      direccion_entrega: {
-        calle: "Av. Siempre Viva 123",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3500ABC",
-        pais: "Argentina",
-      },
-      direccion_salida: {
-        calle: "Almacén Central",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3500XYZ",
-        pais: "Argentina",
-      },
-      productos: [
-        { id_producto: 12, cantidad: 2 },
-        { id_producto: 22, cantidad: 1 },
-      ],
-      estado: "En distribución",
-      tipo_transporte: "Aéreo",
-      numero_seguimiento: "LOG-AR-123456789",
-      transportista: "Express Logistics SA",
-      costo_total: 45.5,
-      moneda: "ARS",
-      fecha_entrega_estimado: "2025-10-23T00:00:00Z",
-      fecha_creacion: "2025-09-01T10:00:00Z",
-      fecha_actualizacion: "2025-09-15T09:29:00Z",
-      registros: [
-        { fecha: "2025-09-15T09:29:00Z", estado: "En distribución", mensaje: "El envío está en distribución" },
-        { fecha: "2025-09-12T09:27:00Z", estado: "Llegó al destino", mensaje: "Paquete llegó a la oficina de entrega" },
-      ],
-    },
-    {
-      id_envio: 7634,
-      id_orden: 702,
-      id_usuario: 456,
-      direccion_entrega: {
-        calle: "Calle Falsa 456",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3501ABC",
-        pais: "Argentina",
-      },
-      direccion_salida: {
-        calle: "Almacén Norte",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3502XYZ",
-        pais: "Argentina",
-      },
-      productos: [{ id_producto: 31, cantidad: 3 }],
-      estado: "Entregado",
-      tipo_transporte: "Terrestre",
-      numero_seguimiento: "LOG-AR-987654321",
-      transportista: "Transporte Seguro SA",
-      costo_total: 30.0,
-      moneda: "ARS",
-      fecha_entrega_estimado: "2025-10-22T00:00:00Z",
-      fecha_creacion: "2025-09-05T14:30:00Z",
-      fecha_actualizacion: "2025-09-22T11:00:00Z",
-      registros: [
-        { fecha: "2025-09-22T11:00:00Z", estado: "Entregado", mensaje: "El envío fue entregado" },
-        { fecha: "2025-09-20T08:00:00Z", estado: "En tránsito", mensaje: "El envío está en tránsito" },
-      ],
-    },
-  ];
+  useEffect(() => {
+      const data = getEnvio() 
+  }, []);
 
   const enviosFiltrados = idEnvio
-    ? enviosMock.filter((e) =>
-        e.id_envio.toString().includes(idEnvio.trim())
+    ? envios.filter((e) =>
+        e.shipping_id.toString().includes(idEnvio.trim())
       )
-    : enviosMock;
+    : envios;
 
   const alternarExpandido = (id: number) => {
     setExpandido(expandido === id ? null : id);
@@ -180,30 +115,30 @@ export default function ConsultarEnvioPage() {
           {enviosFiltrados.length > 0 ? (
             enviosFiltrados.map((envio) => (
               <div
-                key={envio.id_envio}
+                key={envio.shipping_id}
                 className="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transform transition-all duration-300 border border-gray-100 cursor-pointer"
-                onClick={() => alternarExpandido(envio.id_envio)}
+                onClick={() => alternarExpandido(envio.shipping_id)}
               >
                 {/* Línea resumida */}
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-[var(--color-primary)]">
-                    Envío #{envio.id_envio} - {envio.estado}
+                    Envío #{envio.shipping_id} - {envio.status}
                   </span>
                   <span className="text-gray-500">
-                    {new Date(envio.fecha_entrega_estimado).toLocaleDateString()}
+                    {new Date(envio.estimated_delivery_at).toLocaleDateString()}
                   </span>
                 </div>
 
                 {/* Detalles expandibles */}
-                {expandido === envio.id_envio && (
+                {expandido === envio.shipping_id && (
                   <div className="mt-4 space-y-2 text-sm text-[var(--color-text-dark)]">
-                    <p><strong>Orden:</strong> {envio.id_orden}</p>
-                    <p><strong>Tipo de transporte:</strong> {envio.tipo_transporte}</p>
-                    <p><strong>Dirección de entrega:</strong> {`${envio.direccion_entrega.calle}, ${envio.direccion_entrega.ciudad}, ${envio.direccion_entrega.provincia}, ${envio.direccion_entrega.codigo_postal}, ${envio.direccion_entrega.pais}`}</p>
+                    <p><strong>Orden:</strong> {envio.orden_id}</p>
+                    <p><strong>Tipo de transporte:</strong> {envio.transport_type}</p>
+    {/*                <p><strong>Dirección de entrega:</strong> {`${envio.direccion_entrega.calle}, ${envio.direccion_entrega.ciudad}, ${envio.direccion_entrega.provincia}, ${envio.direccion_entrega.codigo_postal}, ${envio.direccion_entrega.pais}`}</p>
                     <p><strong>Dirección de salida:</strong> {`${envio.direccion_salida.calle}, ${envio.direccion_salida.ciudad}, ${envio.direccion_salida.provincia}, ${envio.direccion_salida.codigo_postal}, ${envio.direccion_salida.pais}`}</p>
                     <p><strong>Total:</strong> {envio.costo_total} {envio.moneda}</p>
                     <p><strong>Número de seguimiento:</strong> {envio.numero_seguimiento}</p>
-                    <p><strong>Transportista:</strong> {envio.transportista}</p>
+                    <p><strong>Transportista:</strong> {envio.transportista}</p> 
 
                     <div>
                       <strong>Productos:</strong>
@@ -224,7 +159,9 @@ export default function ConsultarEnvioPage() {
                         ))}
                       </ul>
                     </div>
+                    */}
                   </div>
+                  
                 )}
               </div>
             ))

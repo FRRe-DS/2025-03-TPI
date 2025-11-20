@@ -79,9 +79,16 @@ export interface ShippingResponse {
   destinationAddress: AddressWithId;
   date: string;
   status: string;
+<<<<<<< Updated upstream
   transportMethod: TransportMethod;
   totalCost: string;
   createdAt: string;
   updatedAt: string;
   shipmentProducts: ShipmentProduct[];
 }
+=======
+  transport_type: string;
+  estimated_delivery_at: string;
+  orden_id: number;
+}
+>>>>>>> Stashed changes
