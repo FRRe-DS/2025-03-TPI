@@ -26,7 +26,7 @@ Follow these steps to pull our Docker image and run the backend with MySQL using
 
 - Go to the organization packages page: [FRRe-DS Packages](https://github.com/orgs/FRRe-DS/packages)
 - Our container image is published under the name: `2025-grupo-03-backend-logistica`.
-- Open the package and copy the Docker pull URL (we recommend using a specific tag, e.g., a commit SHA).
+- Open the package and copy the Docker pull URL 
 
 
 ## 2) Create a Docker Compose to run our Backend + MySQL
