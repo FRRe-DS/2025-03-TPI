@@ -12,22 +12,22 @@ export default class MySqlShippingLogRepository implements ShippingLogRepository
     constructor(
         @InjectRepository(ShippingLog)
         private readonly shipmentproductRepository: Repository<ShippingLog>,
-    ) {}    
+    ) { }
 
-    create(shipment:Shipment):ShippingLog{
+    create(shipment: Shipment): ShippingLog {
         return this.shipmentproductRepository.create({
             shipment: shipment,
-            status: ShippingStatus.PENDING,
+            status: ShippingStatus.CREATED,
             message: 'Orden de envío creada',
             timestamp: new Date()
         })
     }
 
-    async save(shippinglog:ShippingLog):Promise<ShippingLog>{
+    async save(shippinglog: ShippingLog): Promise<ShippingLog> {
         return this.shipmentproductRepository.save(shippinglog)
     }
 }
-    
-    
-    
-    
+
+
+
+

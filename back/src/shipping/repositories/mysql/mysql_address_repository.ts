@@ -10,13 +10,13 @@ export default class MySqlAddressRepository implements AddressRepository {
     constructor(
         @InjectRepository(Address)
         private readonly addressRepository: Repository<Address>,
-    ) {}
+    ) { }
 
     async saveAddress(address: Partial<Address>): Promise<Address> {
         return this.addressRepository.save(address);
     }
 
-    createAddress(address:AddressDto): Address{
+    createAddress(address: AddressDto): Address {
 
         return this.addressRepository.create({
             street: address.street,
@@ -28,4 +28,7 @@ export default class MySqlAddressRepository implements AddressRepository {
         });
     }
 
+    async count(): Promise<number> {
+        return this.addressRepository.count();
+    }
 }

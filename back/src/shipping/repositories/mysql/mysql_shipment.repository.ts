@@ -21,14 +21,14 @@ export class MysqlShipmentRepository extends ShipmentRepository {
         super();
     }
 
-    async createShipment(user:User, orderId:number, originAddress:Address, destinationAddress:Address,transport_method:TransportMethod,totalCost:number,trackingNumber:string,carrierName:string): Promise<Shipment> {
+    async createShipment(user: User, orderId: number, originAddress: Address, destinationAddress: Address, transport_method: TransportMethod, totalCost: number, trackingNumber: string, carrierName: string): Promise<Shipment> {
         const newShipment = this.shipmentRepository.create({
             user: user,
             orderId: orderId,
             originAddress: originAddress,
             destinationAddress: destinationAddress,
             transportMethod: transport_method,
-            status: ShippingStatus.PENDING,
+            status: ShippingStatus.CREATED,
             totalCost: totalCost,
             trackingNumber: trackingNumber,
             carrierName: carrierName,

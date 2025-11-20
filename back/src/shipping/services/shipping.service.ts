@@ -1,11 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Or, Repository } from 'typeorm';
-import { Address } from '../entities/address.entity';
-import { Product } from '../entities/product.entity';
-import { ShipmentProduct } from '../entities/shipment-product.entity';
-import { User } from '../entities/user.entity';
-import { TransportMethod } from '../entities/transport-method.entity';
 import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
@@ -23,8 +16,6 @@ import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
-import { ShippingLog } from '../entities/shipping-log.entity';
-import { create } from 'domain';
 import ShipmentProductRepository from '../repositories/shipment_product.repository';
 import shippingLogRepository from '../repositories/shipping-log.repository';
 
@@ -64,7 +55,7 @@ export class ShippingService {
 
     //TODO esto se deberia buscar de los productos
     // 2. Crear direcciones (siempre se crean nuevas)
-    const originAddress =  this.addressRepository.createAddress({
+    const originAddress = this.addressRepository.createAddress({
       street: "Av. Siempre Viva 742",
       city: "Springfield",
       state: "Illinois",
@@ -92,7 +83,7 @@ export class ShippingService {
     const randomNumber = Math.floor(100000000 + Math.random() * 900000000); // 9 dígitos
     const trackingNumber = `LOG-AR-${randomNumber}`;
     const carrierName = 'Andreani'
-    const savedShipment = await this.shipmentRepository.createShipment(user,createShippmentDto.order_id,savedOriginAddress,savedDestinationAddress,transportMethod,totalCost,trackingNumber,carrierName);
+    const savedShipment = await this.shipmentRepository.createShipment(user, createShippmentDto.order_id, savedOriginAddress, savedDestinationAddress, transportMethod, totalCost, trackingNumber, carrierName);
 
     // 5. Verificar o crear produtos y crea relaciones 
     for (const productDto of createShippmentDto.products) {
@@ -104,18 +95,11 @@ export class ShippingService {
       }
 
       //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-      const shipmentProduct = this.shipmentProductRepository.create(savedShipment,product,productDto.quantity);
+      const shipmentProduct = this.shipmentProductRepository.create(savedShipment, product, productDto.quantity);
 
       await this.shipmentProductRepository.save(shipmentProduct);
     }
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const shippingLog = this.shippingLogRepository.create({
-      shipment: savedShipment,
-      status: ShippingStatus.CREATED,
-      message: 'Orden de envío creada',
-      timestamp: new Date()
-    });
-    //REVISAR
     const shippingLog = this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
 

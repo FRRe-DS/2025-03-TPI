@@ -47,7 +47,7 @@ import MySqlUserRepository from './repositories/mysql/mysql_user_repository';
     },
     {
       provide: ShipmentRepository,
-      useClass: MySqlShipmentRepository
+      useClass: MysqlShipmentRepository
     },
     {
       provide: AddressRepository,
