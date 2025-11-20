@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Or, Repository } from 'typeorm';
 import { Address } from '../entities/address.entity';
 import { Product } from '../entities/product.entity';
 import { ShipmentProduct } from '../entities/shipment-product.entity';
@@ -10,7 +10,6 @@ import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
-import GetShipmentsRepository from '../repositories/get-shipments.repository';
 import UserRepository from '../repositories/user.repository';
 import AddressRepository from '../repositories/address.repository';
 import ProductRepository from '../repositories/product.repository';
@@ -18,6 +17,7 @@ import { TransportMethodsResponseDto } from '../dto/transport-methods-response.d
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
+import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
@@ -33,7 +33,6 @@ export class ShippingService {
   constructor(
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
-    private readonly getShipmentsRepository: GetShipmentsRepository,
     private readonly userRepository: UserRepository,
     private readonly addressRepository: AddressRepository,
     private readonly productRepository: ProductRepository,
@@ -110,6 +109,12 @@ export class ShippingService {
       await this.shipmentProductRepository.save(shipmentProduct);
     }
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
+    const shippingLog = this.shippingLogRepository.create({
+      shipment: savedShipment,
+      status: ShippingStatus.CREATED,
+      message: 'Orden de envío creada',
+      timestamp: new Date()
+    });
     //REVISAR
     const shippingLog = this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
@@ -133,7 +138,7 @@ export class ShippingService {
     page: number = 1,
     itemsPerPage: number = 20,
   ): Promise<ShippingListResponseDto> {
-    const [shipments, total] = await this.getShipmentsRepository.findAll(page, itemsPerPage);
+    const [shipments, total] = await this.shipmentRepository.findAll(page, itemsPerPage);
 
     const totalPages = Math.ceil(total / itemsPerPage);
 
@@ -161,7 +166,7 @@ export class ShippingService {
   }
 
   async findById(id: number): Promise<ShippingDetailsResponseDto> {
-    const shipment = await this.getShipmentsRepository.findById(id);
+    const shipment = await this.shipmentRepository.findShipmentById(id);
 
     if (!shipment) {
       throw new ShippingIdNotFoundException();
@@ -210,14 +215,35 @@ export class ShippingService {
   }
 
   async cancelShipment(id: number): Promise<CancelShippingResponseDto> {
+    // 1. Buscar el shipment
     const shipment = await this.shipmentRepository.findShipmentById(id);
 
+    // 2b. Si no existe, lanzar error
     if (!shipment) {
-      throw new NotFoundException(`Shipment with id ${id} not found`);
+      throw new ShippingIdNotFoundException();
     }
 
-    // TODO: Implementar lógica de cancelación
-    throw new Error('Method not implemented');
+    // 2a. Verificar el estado actual
+    const cancellableStatuses = [
+      ShippingStatus.CREATED,
+      ShippingStatus.RESERVED,
+    ];
+
+    // 3b. Si no se puede cancelar, lanzar error
+    if (!cancellableStatuses.includes(shipment.status)) {
+      throw new ShippingIdNonCancellableException();
+    }
+
+    // 3a. Cancelar el shipment
+    await this.shipmentRepository.cancelById(id);
+
+    // Retornar respuesta
+    return {
+      shipping_id: id,
+      status: ShippingStatus.CANCELLED,
+      //Se pone la fecha y hora actual
+      cancelled_at: new Date().toISOString(),
+    };
   }
 
   async calculateCost(costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
@@ -240,7 +266,7 @@ export class ShippingService {
         postal_code: "H3500ABC",
         country: "AR"
       }
-      
+
     })); // en vez de este const tengo que pedirle a la API de stock con fetch y el enlace de la API con un GET 
 
     const destinationPostalCode = costRequest.delivery_address.postal_code;

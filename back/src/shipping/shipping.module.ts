@@ -12,9 +12,7 @@ import { ShipmentProduct } from './entities/shipment-product.entity';
 import TransportMethodsRepository from './repositories/transport_methods.repository';
 import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transport_methods_repositories';
 import ShipmentRepository from './repositories/shipment.repository';
-import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.repository';
-import GetShipmentsRepository from './repositories/get-shipments.repository';
-import { MysqlGetShipmentsRepository } from './repositories/mysql/mysql_get_shipments.repository';
+import { MysqlShipmentRepository } from './repositories/mysql/mysql_shipment.repository';
 import { ShippingLog } from './entities/shipping-log.entity';
 import AddressRepository from './repositories/address.repository';
 import MySqlAddressRepository from './repositories/mysql/mysql_address_repository';
@@ -50,10 +48,6 @@ import MySqlUserRepository from './repositories/mysql/mysql_user_repository';
     {
       provide: ShipmentRepository,
       useClass: MySqlShipmentRepository
-    },
-    {
-      provide: GetShipmentsRepository,
-      useClass: MysqlGetShipmentsRepository
     },
     {
       provide: AddressRepository,
