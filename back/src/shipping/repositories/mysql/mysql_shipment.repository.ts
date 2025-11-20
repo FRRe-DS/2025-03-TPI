@@ -5,6 +5,10 @@ import { Shipment } from "../../entities/shipment.entity";
 import { ShippingLog } from "../../entities/shipping-log.entity";
 import { ShippingStatus } from "../../../shared/enums/shipping-status.enum";
 import ShipmentRepository from "../shipment.repository";
+import { TransportMethod } from "../../entities/transport-method.entity";
+import { User } from "../../entities/user.entity";
+import { Address } from "src/shipping/entities/address.entity";
+
 
 @Injectable()
 export class MysqlShipmentRepository extends ShipmentRepository {
@@ -17,8 +21,20 @@ export class MysqlShipmentRepository extends ShipmentRepository {
         super();
     }
 
-    async createShipment(shipment: Partial<Shipment>): Promise<Shipment> {
-        const newShipment = this.shipmentRepository.create(shipment);
+    async createShipment(user:User, orderId:number, originAddress:Address, destinationAddress:Address,transport_method:TransportMethod,totalCost:number,trackingNumber:string,carrierName:string): Promise<Shipment> {
+        const newShipment = this.shipmentRepository.create({
+            user: user,
+            orderId: orderId,
+            originAddress: originAddress,
+            destinationAddress: destinationAddress,
+            transportMethod: transport_method,
+            status: ShippingStatus.PENDING,
+            totalCost: totalCost,
+            trackingNumber: trackingNumber,
+            carrierName: carrierName,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
         return await this.shipmentRepository.save(newShipment);
     }
 

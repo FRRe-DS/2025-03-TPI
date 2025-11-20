@@ -3,23 +3,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Address } from '../../entities/address.entity';
 import AddressRepository from '../address.repository';
+import { AddressDto } from 'src/shipping/dto/address.dto';
 
 @Injectable()
 export default class MySqlAddressRepository implements AddressRepository {
     constructor(
         @InjectRepository(Address)
-        private readonly repository: Repository<Address>,
+        private readonly addressRepository: Repository<Address>,
     ) {}
 
-    async createAddress(address: Partial<Address>): Promise<Address> {
-        return this.repository.save(address);
+    async saveAddress(address: Partial<Address>): Promise<Address> {
+        return this.addressRepository.save(address);
     }
 
-    async getAllAddresses(): Promise<Address[]> {
-        return this.repository.find();
+    createAddress(address:AddressDto): Address{
+
+        return this.addressRepository.create({
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            postalCode: address.postal_code,
+            country: address.country,
+
+        });
     }
 
-    async count(): Promise<number> {
-        return this.repository.count();
-    }
 }

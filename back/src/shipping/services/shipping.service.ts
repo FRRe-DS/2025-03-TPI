@@ -10,6 +10,9 @@ import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
 import ShipmentRepository from '../repositories/shipment.repository';
+import UserRepository from '../repositories/user.repository';
+import AddressRepository from '../repositories/address.repository';
+import ProductRepository from '../repositories/product.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
@@ -22,26 +25,20 @@ import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
 import { ShippingLog } from '../entities/shipping-log.entity';
 import { create } from 'domain';
-
+import ShipmentProductRepository from '../repositories/shipment_product.repository';
+import shippingLogRepository from '../repositories/shipping-log.repository';
 
 @Injectable()
 export class ShippingService {
   constructor(
     private readonly transportMethodsRepository: TransportMethodsRepository,
     private readonly shipmentRepository: ShipmentRepository,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Address)
-    private readonly addressRepository: Repository<Address>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
-    @InjectRepository(ShipmentProduct)
-    private readonly shipmentProductRepository: Repository<ShipmentProduct>,
-    @InjectRepository(TransportMethod)
-    private readonly transportMethodRepository: Repository<TransportMethod>,
+    private readonly userRepository: UserRepository,
+    private readonly addressRepository: AddressRepository,
+    private readonly productRepository: ProductRepository,
+    private readonly shipmentProductRepository: ShipmentProductRepository,
     private readonly costCalculatorService: CostCalculatorService,
-    @InjectRepository(ShippingLog)
-    private readonly shippingLogRepository: Repository<ShippingLog>
+    private readonly shippingLogRepository: shippingLogRepository
   ) { }
 
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
@@ -58,40 +55,31 @@ export class ShippingService {
 
   async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     // 1. Verificar o crear usuario
-    let user = await this.userRepository.findOne({
-      where: { id: createShippmentDto.user_id }
-    });
+    let user = await this.userRepository.findOne(createShippmentDto.user_id);
 
     if (!user) {
-      user = this.userRepository.create({ id: createShippmentDto.user_id });
+      user = this.userRepository.create(createShippmentDto.user_id);
       user = await this.userRepository.save(user);
     }
 
     //TODO esto se deberia buscar de los productos
     // 2. Crear direcciones (siempre se crean nuevas)
-    const originAddress = this.addressRepository.create({
+    const originAddress =  this.addressRepository.createAddress({
       street: "Av. Siempre Viva 742",
       city: "Springfield",
       state: "Illinois",
-      country: "US",
-      postalCode: "62704"
+      postal_code: "62704",
+      country: "US"
     });
-    const savedOriginAddress = await this.addressRepository.save(originAddress);
+    const savedOriginAddress = await this.addressRepository.saveAddress(originAddress);
 
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const destinationAddress = this.addressRepository.create({
-      street: createShippmentDto.delivery_address.street,
-      city: createShippmentDto.delivery_address.city,
-      state: createShippmentDto.delivery_address.state,
-      country: createShippmentDto.delivery_address.country,
-      postalCode: createShippmentDto.delivery_address.postal_code
-    });
-    const savedDestinationAddress = await this.addressRepository.save(destinationAddress);
+    const destinationAddress = this.addressRepository.createAddress(createShippmentDto.delivery_address);
+
+    const savedDestinationAddress = await this.addressRepository.saveAddress(destinationAddress);
 
     // 3. Verificar método de transporte
-    const transportMethod = await this.transportMethodRepository.findOne({
-      where: { type: createShippmentDto.transport_type }
-    });
+    const transportMethod = await this.transportMethodsRepository.findOne(createShippmentDto.transport_type);
 
     if (!transportMethod) {
       throw new NotFoundException('Transport method not found');
@@ -103,38 +91,21 @@ export class ShippingService {
     // Generar tracking number aleatorio
     const randomNumber = Math.floor(100000000 + Math.random() * 900000000); // 9 dígitos
     const trackingNumber = `LOG-AR-${randomNumber}`;
-
-    const savedShipment = await this.shipmentRepository.createShipment({
-      user: user,
-      orderId: createShippmentDto.order_id,
-      originAddress: savedOriginAddress,
-      destinationAddress: savedDestinationAddress,
-      transportMethod: transportMethod,
-      status: ShippingStatus.CREATED,
-      totalCost: totalCost,
-      trackingNumber: trackingNumber,
-      carrierName: 'Andreani',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
+    const carrierName = 'Andreani'
+    const savedShipment = await this.shipmentRepository.createShipment(user,createShippmentDto.order_id,savedOriginAddress,savedDestinationAddress,transportMethod,totalCost,trackingNumber,carrierName);
 
     // 5. Verificar o crear produtos y crea relaciones 
     for (const productDto of createShippmentDto.products) {
-      let product = await this.productRepository.findOne({
-        where: { id: productDto.id }
-      });
+      let product = await this.productRepository.findOne(productDto.id);
 
       if (!product) {
-        product = this.productRepository.create({ id: productDto.id });
+        product = this.productRepository.create(productDto.id);
         product = await this.productRepository.save(product);
       }
 
       //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-      const shipmentProduct = this.shipmentProductRepository.create({
-        shipment: savedShipment,
-        product: product,
-        quantity: productDto.quantity
-      });
+      const shipmentProduct = this.shipmentProductRepository.create(savedShipment,product,productDto.quantity);
+
       await this.shipmentProductRepository.save(shipmentProduct);
     }
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
@@ -144,6 +115,8 @@ export class ShippingService {
       message: 'Orden de envío creada',
       timestamp: new Date()
     });
+    //REVISAR
+    const shippingLog = this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
 
     // 6. Retornar shipment completo
