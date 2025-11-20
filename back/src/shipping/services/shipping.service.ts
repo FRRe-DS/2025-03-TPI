@@ -140,7 +140,7 @@ export class ShippingService {
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
     const shippingLog = this.shippingLogRepository.create({
       shipment: savedShipment,
-      status: ShippingStatus.PENDING,
+      status: ShippingStatus.CREATED,
       message: 'Orden de envío creada',
       timestamp: new Date()
     });
@@ -269,7 +269,7 @@ export class ShippingService {
       shipping_id: id,
       status: ShippingStatus.CANCELLED,
       //Se pone la fecha y hora actual
-      cancelled_at: 'Shipment cancelled successfully',
+      cancelled_at: new Date().toISOString(),
     };
   }
 

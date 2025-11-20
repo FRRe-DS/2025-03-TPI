@@ -57,7 +57,8 @@ export class ShippingController {
   }
 
   @Get()
-  @Scopes('envios:read')
+  @Public()
+  //@Scopes('envios:read')
   @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
@@ -75,7 +76,8 @@ export class ShippingController {
 
   @Post(':id/cancel')
   @HttpCode(200)
-  @Scopes('envios:write')
+  @Public()
+  //@Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(ShippingIdNonCancellableException))
   async cancelShippingOrder(@Param('id') id: number): Promise<CancelShippingResponseDto> {
     return await this.shippingService.cancelShipment(id);

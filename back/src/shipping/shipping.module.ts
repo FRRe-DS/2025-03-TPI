@@ -12,9 +12,8 @@ import { ShipmentProduct } from './entities/shipment-product.entity';
 import TransportMethodsRepository from './repositories/transport_methods.repository';
 import MySqlTransportMethodsRepositories from './repositories/mysql/mysql_transport_methods_repositories';
 import ShipmentRepository from './repositories/shipment.repository';
-import MySqlShipmentRepository from './repositories/mysql/mysql_shipment.repository';
+import { MysqlShipmentRepository } from './repositories/mysql/mysql_shipment.repository';
 import { ShippingLog } from './entities/shipping-log.entity';
-import { MysqlCancelShipmentRepository } from './repositories/mysql/mysql_cancel_shipment.repository';
 
 @Module({
   imports: [
@@ -38,7 +37,7 @@ import { MysqlCancelShipmentRepository } from './repositories/mysql/mysql_cancel
     },
     {
       provide: ShipmentRepository,
-      useClass: MySqlShipmentRepository
+      useClass: MysqlShipmentRepository
     }
   ]
 })
