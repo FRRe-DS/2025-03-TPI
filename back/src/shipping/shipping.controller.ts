@@ -37,14 +37,12 @@ export class ShippingController {
   @Get('test')
   @Public()
   async getTransportMethodsTest(): Promise<any> {
-    //only for testing purposes
     return { message: 'Hello World' };
   }
 
   @Post()
   @HttpCode(200)
-  // @Scopes('envios:write')
-  @Public()
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
   async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
@@ -52,7 +50,6 @@ export class ShippingController {
 
   @Get('transport-methods')
   @Public()
-  // @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
@@ -84,8 +81,7 @@ export class ShippingController {
 
   @Post('cost')
   @HttpCode(200)
-  //@Scopes('envios:write')
-  @Public()
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidCostCalculationException))
   async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
     return await this.shippingService.calculateCost(costRequest);
