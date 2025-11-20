@@ -43,8 +43,7 @@ export class ShippingController {
 
   @Post()
   @HttpCode(200)
-  @Public()
-  // @Scopes('envios:write')
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
   async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
@@ -58,8 +57,7 @@ export class ShippingController {
   }
 
   @Get()
-  @Public()
-  //@Scopes('envios:read')
+  @Scopes('envios:read')
   @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getShippingOrders(
     @Query() { page, items_per_page }: PaginationInDto,
@@ -68,8 +66,7 @@ export class ShippingController {
   }
 
   @Get(':id')
-  @Public()
-  // @Scopes('envios:read')
+  @Scopes('envios:read')
   @UsePipes(new ContextValidationPipe(ShippingIdNotFoundException))
   async getShippingOrderById(@Param('id') id: number): Promise<ShippingDetailsResponseDto> {
     return await this.shippingService.findById(id);
@@ -77,8 +74,7 @@ export class ShippingController {
 
   @Post(':id/cancel')
   @HttpCode(200)
-  @Public()
-  //@Scopes('envios:write')
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(ShippingIdNonCancellableException))
   async cancelShippingOrder(@Param('id') id: number): Promise<CancelShippingResponseDto> {
     return await this.shippingService.cancelShipment(id);
