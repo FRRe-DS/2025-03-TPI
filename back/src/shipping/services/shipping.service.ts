@@ -234,7 +234,7 @@ export class ShippingService {
   async calculateCost(costRequest: CostCalculationRequestDto, token: string): Promise<CostCalculationResponseDto> {
     // 1. Obtener los detalles de los productos desde la API de stock
     const promises = costRequest.products.map(async (p) => {
-      const response = await fetch(`http://localhost:3099/api/productos/${p.id}`, {
+      const response = await fetch(`${process.env.STOCK_SERVICE_URL}/api/productos/${p.id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
