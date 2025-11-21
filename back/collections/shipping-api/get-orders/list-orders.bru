@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: http://localhost:3000/shipping?page=1&items_per_page=10
+  url: http://localhost:3010/shipping?page=1&items_per_page=10
   body: none
   auth: none
 }
@@ -13,6 +13,10 @@ get {
 params:query {
   page: 1
   items_per_page: 10
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJURXR0SmN1SzdFWWFIdnBCSWRSdXFSQjU3dTBQTFF0U19FM0tRS0ZwenNJIn0.eyJleHAiOjE3NjM2NTA3NDEsImlhdCI6MTc2MzY1MDQ0MSwianRpIjoiZTNkMDQyMGMtNjdmZS00MGNlLTkzYTItZDFiNDUwZjY3YTBmIiwiaXNzIjoiaHR0cDovL2tleWNsb2Fjazo4MDgwL3JlYWxtcy9kcy0yMDI1LXJlYWxtIiwic3ViIjoiOTZkYTgwMGYtYzk5Mi00YmJhLTlkZTItY2M2ZDczM2NkMWIyIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZ3J1cG8tMTEiLCJzY29wZSI6InByb2R1Y3Rvczp3cml0ZSBjb21wcmFzOndyaXRlIHN0b2NrOnJlYWQgZW52aW9zOnJlYWQgY29tcHJhczpyZWFkIGNhdGVnb3JpYXM6d3JpdGUgc3RvY2s6d3JpdGUgdXN1YXJpb3M6cmVhZCByZXNlcnZhczpyZWFkIHByb2R1Y3RvczpyZWFkIGVudmlvczp3cml0ZSBjYXRlZ29yaWFzOnJlYWQgdXN1YXJpb3M6d3JpdGUgcmVzZXJ2YXM6d3JpdGUiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsInJvbGVzIjpbInN0b2NrLWJlIiwic3RvY2stYmUiLCJzdG9jay1iZSIsInN0b2NrLWJlIiwic3RvY2stYmUiLCJzdG9jay1iZSIsInN0b2NrLWJlIiwic3RvY2stYmUiLCJzdG9jay1iZSIsInN0b2NrLWJlIiwic3RvY2stYmUiLCJzdG9jay1iZSIsInN0b2NrLWJlIiwic3RvY2stYmUiXSwiY2xpZW50QWRkcmVzcyI6IjE3Mi4xOS4wLjEiLCJjbGllbnRfaWQiOiJncnVwby0xMSJ9.0quUsR3_Lj-QpwNR7CIlsqv41i0A6-VTAo9D24_UJOsDY-ehqUKzhrwGKQtFpp_9sZ7VK6OO_rDN3bUX-4IpM0awhUO2jNP6NV1TdV-q-P8MugL2AWtF7d6P35nJd45txxM9jLbHL-so4-zoo_1OONq64dtGDM7W92AnZVyHjcnEPlfbbVvsLqMPDer80emz5ieZ7YDzHsgKsbWyBV49RcDevmOXW93ZYfR98wWwKeNWzEN6bZCtxNzI2jBg0XE_-3ZMM7HIo9viGdcMSTMpkg9uRjhFppD__4XtgYmo4NDUiITv8PiulvVaR0ED8-EbB1k1t_K0aGkGKyzoDEcWqQ
 }
 
 docs {
@@ -50,4 +54,3 @@ docs {
   }
   ```
 }
-
