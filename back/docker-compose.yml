@@ -38,7 +38,6 @@ services:
       DB_USERNAME: shipping_user
       DB_PASSWORD: shipping_pass
       DB_DATABASE: shipping_db
-    # Esto le dice al "back" que espere a que el "healthcheck" de mysql sea exitoso
     depends_on:
       mysql:
         condition: service_healthy
