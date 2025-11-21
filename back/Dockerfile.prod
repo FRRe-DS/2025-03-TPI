@@ -1,0 +1,92 @@
+# Imagen base con Node.js y MySQL
+FROM node:20-alpine
+
+# Instalar MySQL y dependencias necesarias
+RUN apk add --no-cache \
+    mysql \
+    mysql-client \
+    supervisor \
+    bash
+
+# Crear directorio de la aplicación
+WORKDIR /app
+
+# Copiar package files
+COPY package*.json ./
+
+# Instalar dependencias de Node.js
+RUN npm ci
+
+# Copiar código fuente
+COPY . .
+
+# Compilar la aplicación NestJS
+RUN npm run build
+
+# Eliminar dependencias de desarrollo
+RUN npm ci --only=production
+
+# Crear directorio para datos de MySQL
+RUN mkdir -p /var/lib/mysql /run/mysqld && \
+    chown -R mysql:mysql /var/lib/mysql /run/mysqld
+
+# Inicializar base de datos MySQL
+RUN mysql_install_db --user=mysql --datadir=/var/lib/mysql
+
+# Crear script de inicialización de MySQL
+RUN echo '#!/bin/bash' > /init-mysql.sh && \
+    echo 'mysqld --user=mysql --datadir=/var/lib/mysql &' >> /init-mysql.sh && \
+    echo 'sleep 5' >> /init-mysql.sh && \
+    echo 'mysql -u root <<EOF' >> /init-mysql.sh && \
+    echo 'CREATE DATABASE IF NOT EXISTS shipping_db;' >> /init-mysql.sh && \
+    echo 'CREATE USER IF NOT EXISTS "shipping_user"@"%" IDENTIFIED BY "shipping_pass";' >> /init-mysql.sh && \
+    echo 'GRANT ALL PRIVILEGES ON shipping_db.* TO "shipping_user"@"%";' >> /init-mysql.sh && \
+    echo 'FLUSH PRIVILEGES;' >> /init-mysql.sh && \
+    echo 'EOF' >> /init-mysql.sh && \
+    echo 'mysqladmin -u root shutdown' >> /init-mysql.sh && \
+    chmod +x /init-mysql.sh && \
+    /init-mysql.sh
+
+# Crear configuración de supervisor para ejecutar MySQL y NestJS juntos
+RUN echo '[supervisord]' > /etc/supervisord.conf && \
+    echo 'nodaemon=true' >> /etc/supervisord.conf && \
+    echo 'logfile=/dev/null' >> /etc/supervisord.conf && \
+    echo 'logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo '' >> /etc/supervisord.conf && \
+    echo '[program:mysql]' >> /etc/supervisord.conf && \
+    echo 'command=/usr/bin/mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0' >> /etc/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisord.conf && \
+    echo 'priority=1' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile=/dev/stdout' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo '' >> /etc/supervisord.conf && \
+    echo '[program:nestjs]' >> /etc/supervisord.conf && \
+    echo 'command=/usr/local/bin/node /app/dist/main.js' >> /etc/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisord.conf && \
+    echo 'priority=10' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile=/dev/stdout' >> /etc/supervisord.conf && \
+    echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
+    echo 'stderr_logfile_maxbytes=0' >> /etc/supervisord.conf
+
+# Variables de entorno por defecto
+ENV DB_HOST=localhost
+ENV DB_PORT=3306
+ENV DB_USERNAME=shipping_user
+ENV DB_PASSWORD=shipping_pass
+ENV DB_DATABASE=shipping_db
+ENV PORT=3000
+ENV HOST=0.0.0.0
+
+# Exponer puerto de la aplicación
+EXPOSE 3000
+
+# Volumen para persistencia de datos de MySQL
+VOLUME ["/var/lib/mysql"]
+
+# Comando de inicio: ejecuta supervisor que maneja MySQL y NestJS
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalamos dependencias
-RUN npm install
+RUN npm ci
 
 # Copiamos el resto del código fuente
 COPY . .
@@ -14,8 +14,21 @@ COPY . .
 # Compilamos el proyecto NestJS
 RUN npm run build
 
-# Exponemos el puerto del servidor
-EXPOSE 3010
+# Etapa 2: Production
+FROM node:20-alpine
+WORKDIR /app
 
-# Comando de inicio (el seed se ejecuta automáticamente con OnModuleInit)
+# Copiamos package.json y package-lock.json
+COPY package*.json ./
+
+# Instalamos solo dependencias de producción
+RUN npm ci --only=production
+
+# Copiamos el código compilado desde el builder
+COPY --from=builder /app/dist ./dist
+
+# Exponemos el puerto del servidor
+EXPOSE 3000
+
+# Comando de inicio
 CMD ["node", "dist/main.js"]

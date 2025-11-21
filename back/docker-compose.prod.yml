@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Backend de Logística con base de datos integrada
+  back-logistica:
+    image: ghcr.io/frre-ds/2025-grupo-03-backend-logistica:latest
+    container_name: back-logistica
+    restart: always
+    environment:
+      # Database (localhost porque MySQL está en el mismo contenedor)
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USERNAME: shipping_user
+      DB_PASSWORD: shipping_pass
+      DB_DATABASE: shipping_db
+      
+      # Server
+      HOST: 0.0.0.0
+      PORT: 3000
+      
+      # Keycloak (si está en el docker-compose general)
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: ds-2025-realm
+      
+      # Stock Service (si está en el docker-compose general)
+      STOCK_SERVICE_URL: http://backend-stock:3000
+      
+    ports:
+      - "3010:3000"   # Puerto de la aplicación
+    volumes:
+      - mysql_data:/var/lib/mysql   # Persistencia de datos de MySQL
+    networks:
+      - logistics-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "shipping_user", "-pshipping_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+# Volumen para persistir datos de MySQL
+volumes:
+  mysql_data:
+
+# Red para comunicación con otros servicios
+networks:
+  logistics-network:
+    driver: bridge
