@@ -16,9 +16,8 @@ export default class MySqlAddressRepository implements AddressRepository {
         return this.addressRepository.save(address);
     }
 
-    async createAddress(address: AddressDto): Promise<Address> { // <--- 1. async y Promise
+    async createAddress(address: AddressDto): Promise<Address> {
         
-        // 2. Primero creamos la instancia en memoria (como tenías)
         const newAddress = this.addressRepository.create({
             street: address.street,
             city: address.city,
@@ -27,7 +26,6 @@ export default class MySqlAddressRepository implements AddressRepository {
             country: address.country,
         });
 
-        // 3. ¡ESTO FALTABA! Guardamos en la DB y esperamos
         return await this.addressRepository.save(newAddress);
     }
 
