@@ -88,7 +88,7 @@ export class ShippingController {
     const authHeader = req.headers?.authorization || '';
     const token = authHeader.startsWith('Bearer ') 
       ? authHeader.replace('Bearer ', '') 
-      : authHeader;
+      : authHeader;
     return await this.shippingService.calculateCost(costRequest, token);
   }
 }
