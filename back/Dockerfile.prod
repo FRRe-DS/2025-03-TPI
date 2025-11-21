@@ -29,59 +29,76 @@ RUN npm ci --only=production
 # Crear directorio para datos de MySQL
 RUN mkdir -p /var/lib/mysql /run/mysqld
 
-# Crear script de inicialización y configuración de MySQL que se ejecuta al iniciar
-RUN echo '#!/bin/bash' > /entrypoint-mysql.sh && \
-    echo 'set -e' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '# Corregir permisos del directorio de datos (importante cuando se monta un volumen)' >> /entrypoint-mysql.sh && \
-    echo 'chown -R mysql:mysql /var/lib/mysql /run/mysqld 2>/dev/null || true' >> /entrypoint-mysql.sh && \
-    echo 'chmod 755 /var/lib/mysql' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '# Inicializar MySQL solo si no existe la base de datos' >> /entrypoint-mysql.sh && \
-    echo 'if [ ! -d "/var/lib/mysql/mysql" ]; then' >> /entrypoint-mysql.sh && \
-    echo '  echo "Inicializando base de datos MySQL..."' >> /entrypoint-mysql.sh && \
-    echo '  mysql_install_db --user=mysql --datadir=/var/lib/mysql --skip-test-db' >> /entrypoint-mysql.sh && \
-    echo '  NEED_SETUP=true' >> /entrypoint-mysql.sh && \
-    echo 'else' >> /entrypoint-mysql.sh && \
-    echo '  NEED_SETUP=false' >> /entrypoint-mysql.sh && \
-    echo 'fi' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '# Si necesitamos configuración inicial, hacerlo antes de iniciar MySQL normalmente' >> /entrypoint-mysql.sh && \
-    echo 'if [ "$NEED_SETUP" = "true" ]; then' >> /entrypoint-mysql.sh && \
-    echo '  echo "Configurando MySQL..."' >> /entrypoint-mysql.sh && \
-    echo '  mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking --socket=/run/mysqld/mysqld.sock &' >> /entrypoint-mysql.sh && \
-    echo '  MYSQL_PID=$!' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '  # Esperar a que MySQL esté listo' >> /entrypoint-mysql.sh && \
-    echo '  i=30' >> /entrypoint-mysql.sh && \
-    echo '  while [ $i -gt 0 ]; do' >> /entrypoint-mysql.sh && \
-    echo '    if mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent 2>/dev/null; then' >> /entrypoint-mysql.sh && \
-    echo '      break' >> /entrypoint-mysql.sh && \
-    echo '    fi' >> /entrypoint-mysql.sh && \
-    echo '    i=$((i-1))' >> /entrypoint-mysql.sh && \
-    echo '    sleep 1' >> /entrypoint-mysql.sh && \
-    echo '  done' >> /entrypoint-mysql.sh && \
-    echo '  if [ $i -eq 0 ]; then' >> /entrypoint-mysql.sh && \
-    echo '    echo "MySQL no respondió a tiempo"' >> /entrypoint-mysql.sh && \
-    echo '    exit 1' >> /entrypoint-mysql.sh && \
-    echo '  fi' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '  # Configurar base de datos y usuario' >> /entrypoint-mysql.sh && \
-    echo '  mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF' >> /entrypoint-mysql.sh && \
-    echo 'CREATE DATABASE IF NOT EXISTS shipping_db;' >> /entrypoint-mysql.sh && \
-    echo "CREATE USER IF NOT EXISTS 'shipping_user'@'%' IDENTIFIED BY 'shipping_pass';" >> /entrypoint-mysql.sh && \
-    echo 'GRANT ALL PRIVILEGES ON shipping_db.* TO "shipping_user"@"%";' >> /entrypoint-mysql.sh && \
-    echo 'FLUSH PRIVILEGES;' >> /entrypoint-mysql.sh && \
-    echo 'EOF' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '  # Detener MySQL temporal' >> /entrypoint-mysql.sh && \
-    echo '  mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown' >> /entrypoint-mysql.sh && \
-    echo '  wait $MYSQL_PID' >> /entrypoint-mysql.sh && \
-    echo 'fi' >> /entrypoint-mysql.sh && \
-    echo '' >> /entrypoint-mysql.sh && \
-    echo '# Iniciar MySQL normalmente' >> /entrypoint-mysql.sh && \
-    echo 'exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0' >> /entrypoint-mysql.sh && \
-    chmod +x /entrypoint-mysql.sh
+# Crear script de inicio usando printf para evitar problemas con heredoc (similar al ejemplo de PostgreSQL)
+RUN printf '#!/bin/sh\n\
+set -e\n\
+\n\
+echo "🚀 Starting MySQL..."\n\
+\n\
+# Crear directorios de runtime si no existen\n\
+mkdir -p /run/mysqld\n\
+chown -R mysql:mysql /var/lib/mysql /run/mysqld 2>/dev/null || true\n\
+chmod 755 /var/lib/mysql\n\
+\n\
+# Verificar si MySQL está correctamente inicializado (archivos críticos deben existir)\n\
+if [ ! -f /var/lib/mysql/ibdata1 ] || [ ! -d /var/lib/mysql/mysql ]; then\n\
+    echo "📦 Initializing MySQL database..."\n\
+    # Limpiar directorio si tiene datos parciales\n\
+    if [ -d /var/lib/mysql ] && [ "$(ls -A /var/lib/mysql 2>/dev/null)" ]; then\n\
+        echo "⚠️  Cleaning partial database files..."\n\
+        rm -rf /var/lib/mysql/*\n\
+    fi\n\
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql --skip-test-db --auth-root-authentication-method=normal\n\
+    NEED_SETUP=true\n\
+else\n\
+    echo "✅ MySQL database already initialized"\n\
+    NEED_SETUP=false\n\
+fi\n\
+\n\
+# Iniciar MySQL en background para configuración inicial (solo si es necesario)\n\
+if [ "$NEED_SETUP" = "true" ]; then\n\
+    echo "⏳ Starting MySQL server for initial setup..."\n\
+    su mysql -s /bin/sh -c "/usr/bin/mysqld --datadir=/var/lib/mysql --skip-networking --socket=/run/mysqld/mysqld.sock" &\n\
+    MYSQL_PID=$!\n\
+    \n\
+    echo "⏳ Waiting for MySQL to be ready..."\n\
+    sleep 3\n\
+    \n\
+    # Esperar a que MySQL esté listo\n\
+    i=30\n\
+    while [ $i -gt 0 ]; do\n\
+      if mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent 2>/dev/null; then\n\
+        break\n\
+      fi\n\
+      i=$((i-1))\n\
+      sleep 1\n\
+    done\n\
+    \n\
+    if [ $i -eq 0 ]; then\n\
+      echo "❌ MySQL did not respond in time"\n\
+      exit 1\n\
+    fi\n\
+    \n\
+    echo "✅ MySQL is ready for setup!"\n\
+    \n\
+    # Configurar base de datos y usuario\n\
+    echo "📦 Setting up database and user..."\n\
+    mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF\n\
+CREATE DATABASE IF NOT EXISTS shipping_db;\n\
+CREATE USER IF NOT EXISTS '"'"'shipping_user'"'"'@'"'"'%'"'"' IDENTIFIED BY '"'"'shipping_pass'"'"';\n\
+GRANT ALL PRIVILEGES ON shipping_db.* TO "shipping_user"@"%";\n\
+FLUSH PRIVILEGES;\n\
+EOF\n\
+    \n\
+    # Detener MySQL temporal\n\
+    echo "🛑 Stopping temporary MySQL instance..."\n\
+    mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown\n\
+    wait $MYSQL_PID\n\
+fi\n\
+\n\
+# Iniciar MySQL normalmente (este proceso reemplazará el script)\n\
+echo "🚀 Starting MySQL in production mode..."\n\
+exec su mysql -s /bin/sh -c "/usr/bin/mysqld --datadir=/var/lib/mysql --bind-address=0.0.0.0"\n' > /entrypoint-mysql.sh && chmod +x /entrypoint-mysql.sh
 
 # Crear configuración de supervisor para ejecutar MySQL y NestJS juntos
 RUN echo '[supervisord]' > /etc/supervisord.conf && \
