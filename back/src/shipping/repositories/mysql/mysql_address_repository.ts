@@ -16,19 +16,24 @@ export default class MySqlAddressRepository implements AddressRepository {
         return this.addressRepository.save(address);
     }
 
-    createAddress(address: AddressDto): Address {
-
-        return this.addressRepository.create({
+    async createAddress(address: AddressDto): Promise<Address> {
+        
+        const newAddress = this.addressRepository.create({
             street: address.street,
             city: address.city,
             state: address.state,
             postalCode: address.postal_code,
             country: address.country,
-
         });
+
+        return await this.addressRepository.save(newAddress);
     }
 
     async count(): Promise<number> {
         return this.addressRepository.count();
+    }
+
+    async findAll(): Promise<Address[]> {
+        return await this.addressRepository.find();
     }
 }

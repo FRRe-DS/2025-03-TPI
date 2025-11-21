@@ -89,4 +89,8 @@ export class MysqlShipmentRepository extends ShipmentRepository {
         });
         await this.shippingLogRepository.save(shippingLog);
     }
+
+    async count(): Promise<number> {
+        return await this.shipmentRepository.count();
+    }
 }

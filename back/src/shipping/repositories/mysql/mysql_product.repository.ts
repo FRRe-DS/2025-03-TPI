@@ -8,20 +8,24 @@ import ProductRepository from '../product.repository';
 export default class MySqlProductRepository implements ProductRepository {
     constructor(
         @InjectRepository(Product)
-        private readonly userRepository: Repository<Product>,
+        private readonly productRepository: Repository<Product>,
     ) {}
 
     async findOne (idp:number):Promise<Product|null>{
-        return this.userRepository.findOne({
+        return this.productRepository.findOne({
             where: { id: idp }
         })
     }
 
     create(idp:number):Product{
-        return this.userRepository.create({id:idp})
+        return this.productRepository.create({id:idp})
     }
 
-    async save(user:Partial<Product>):Promise<Product>{
-        return this.userRepository.save(user)
+    async save(product:Partial<Product>):Promise<Product>{
+        return this.productRepository.save(product)
+    }
+
+    async count():Promise<number>{
+        return this.productRepository.count();
     }
 }
