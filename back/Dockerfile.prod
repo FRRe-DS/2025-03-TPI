@@ -27,34 +27,71 @@ RUN npm run build
 RUN npm ci --only=production
 
 # Crear directorio para datos de MySQL
-RUN mkdir -p /var/lib/mysql /run/mysqld && \
-    chown -R mysql:mysql /var/lib/mysql /run/mysqld
+RUN mkdir -p /var/lib/mysql /run/mysqld
 
-# Inicializar base de datos MySQL
-RUN mysql_install_db --user=mysql --datadir=/var/lib/mysql
-
-# Crear script de inicialización de MySQL
-RUN echo '#!/bin/bash' > /init-mysql.sh && \
-    echo 'mysqld --user=mysql --datadir=/var/lib/mysql &' >> /init-mysql.sh && \
-    echo 'sleep 5' >> /init-mysql.sh && \
-    echo 'mysql -u root <<EOF' >> /init-mysql.sh && \
-    echo 'CREATE DATABASE IF NOT EXISTS shipping_db;' >> /init-mysql.sh && \
-    echo 'CREATE USER IF NOT EXISTS "shipping_user"@"%" IDENTIFIED BY "shipping_pass";' >> /init-mysql.sh && \
-    echo 'GRANT ALL PRIVILEGES ON shipping_db.* TO "shipping_user"@"%";' >> /init-mysql.sh && \
-    echo 'FLUSH PRIVILEGES;' >> /init-mysql.sh && \
-    echo 'EOF' >> /init-mysql.sh && \
-    echo 'mysqladmin -u root shutdown' >> /init-mysql.sh && \
-    chmod +x /init-mysql.sh && \
-    /init-mysql.sh
+# Crear script de inicialización y configuración de MySQL que se ejecuta al iniciar
+RUN echo '#!/bin/bash' > /entrypoint-mysql.sh && \
+    echo 'set -e' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '# Corregir permisos del directorio de datos (importante cuando se monta un volumen)' >> /entrypoint-mysql.sh && \
+    echo 'chown -R mysql:mysql /var/lib/mysql /run/mysqld 2>/dev/null || true' >> /entrypoint-mysql.sh && \
+    echo 'chmod 755 /var/lib/mysql' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '# Inicializar MySQL solo si no existe la base de datos' >> /entrypoint-mysql.sh && \
+    echo 'if [ ! -d "/var/lib/mysql/mysql" ]; then' >> /entrypoint-mysql.sh && \
+    echo '  echo "Inicializando base de datos MySQL..."' >> /entrypoint-mysql.sh && \
+    echo '  mysql_install_db --user=mysql --datadir=/var/lib/mysql --skip-test-db' >> /entrypoint-mysql.sh && \
+    echo '  NEED_SETUP=true' >> /entrypoint-mysql.sh && \
+    echo 'else' >> /entrypoint-mysql.sh && \
+    echo '  NEED_SETUP=false' >> /entrypoint-mysql.sh && \
+    echo 'fi' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '# Si necesitamos configuración inicial, hacerlo antes de iniciar MySQL normalmente' >> /entrypoint-mysql.sh && \
+    echo 'if [ "$NEED_SETUP" = "true" ]; then' >> /entrypoint-mysql.sh && \
+    echo '  echo "Configurando MySQL..."' >> /entrypoint-mysql.sh && \
+    echo '  mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking --socket=/run/mysqld/mysqld.sock &' >> /entrypoint-mysql.sh && \
+    echo '  MYSQL_PID=$!' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '  # Esperar a que MySQL esté listo' >> /entrypoint-mysql.sh && \
+    echo '  i=30' >> /entrypoint-mysql.sh && \
+    echo '  while [ $i -gt 0 ]; do' >> /entrypoint-mysql.sh && \
+    echo '    if mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent 2>/dev/null; then' >> /entrypoint-mysql.sh && \
+    echo '      break' >> /entrypoint-mysql.sh && \
+    echo '    fi' >> /entrypoint-mysql.sh && \
+    echo '    i=$((i-1))' >> /entrypoint-mysql.sh && \
+    echo '    sleep 1' >> /entrypoint-mysql.sh && \
+    echo '  done' >> /entrypoint-mysql.sh && \
+    echo '  if [ $i -eq 0 ]; then' >> /entrypoint-mysql.sh && \
+    echo '    echo "MySQL no respondió a tiempo"' >> /entrypoint-mysql.sh && \
+    echo '    exit 1' >> /entrypoint-mysql.sh && \
+    echo '  fi' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '  # Configurar base de datos y usuario' >> /entrypoint-mysql.sh && \
+    echo '  mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF' >> /entrypoint-mysql.sh && \
+    echo 'CREATE DATABASE IF NOT EXISTS shipping_db;' >> /entrypoint-mysql.sh && \
+    echo "CREATE USER IF NOT EXISTS 'shipping_user'@'%' IDENTIFIED BY 'shipping_pass';" >> /entrypoint-mysql.sh && \
+    echo 'GRANT ALL PRIVILEGES ON shipping_db.* TO "shipping_user"@"%";' >> /entrypoint-mysql.sh && \
+    echo 'FLUSH PRIVILEGES;' >> /entrypoint-mysql.sh && \
+    echo 'EOF' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '  # Detener MySQL temporal' >> /entrypoint-mysql.sh && \
+    echo '  mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown' >> /entrypoint-mysql.sh && \
+    echo '  wait $MYSQL_PID' >> /entrypoint-mysql.sh && \
+    echo 'fi' >> /entrypoint-mysql.sh && \
+    echo '' >> /entrypoint-mysql.sh && \
+    echo '# Iniciar MySQL normalmente' >> /entrypoint-mysql.sh && \
+    echo 'exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0' >> /entrypoint-mysql.sh && \
+    chmod +x /entrypoint-mysql.sh
 
 # Crear configuración de supervisor para ejecutar MySQL y NestJS juntos
 RUN echo '[supervisord]' > /etc/supervisord.conf && \
     echo 'nodaemon=true' >> /etc/supervisord.conf && \
+    echo 'user=root' >> /etc/supervisord.conf && \
     echo 'logfile=/dev/null' >> /etc/supervisord.conf && \
     echo 'logfile_maxbytes=0' >> /etc/supervisord.conf && \
     echo '' >> /etc/supervisord.conf && \
     echo '[program:mysql]' >> /etc/supervisord.conf && \
-    echo 'command=/usr/bin/mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0' >> /etc/supervisord.conf && \
+    echo 'command=/entrypoint-mysql.sh' >> /etc/supervisord.conf && \
     echo 'autostart=true' >> /etc/supervisord.conf && \
     echo 'autorestart=true' >> /etc/supervisord.conf && \
     echo 'priority=1' >> /etc/supervisord.conf && \
@@ -62,12 +99,16 @@ RUN echo '[supervisord]' > /etc/supervisord.conf && \
     echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
     echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
     echo 'stderr_logfile_maxbytes=0' >> /etc/supervisord.conf && \
+    echo 'startsecs=10' >> /etc/supervisord.conf && \
+    echo 'startretries=3' >> /etc/supervisord.conf && \
     echo '' >> /etc/supervisord.conf && \
     echo '[program:nestjs]' >> /etc/supervisord.conf && \
     echo 'command=/usr/local/bin/node /app/dist/main.js' >> /etc/supervisord.conf && \
     echo 'autostart=true' >> /etc/supervisord.conf && \
     echo 'autorestart=true' >> /etc/supervisord.conf && \
     echo 'priority=10' >> /etc/supervisord.conf && \
+    echo 'startsecs=5' >> /etc/supervisord.conf && \
+    echo 'startretries=10' >> /etc/supervisord.conf && \
     echo 'stdout_logfile=/dev/stdout' >> /etc/supervisord.conf && \
     echo 'stdout_logfile_maxbytes=0' >> /etc/supervisord.conf && \
     echo 'stderr_logfile=/dev/stderr' >> /etc/supervisord.conf && \
