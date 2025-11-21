@@ -21,8 +21,8 @@ export default class MySqlProductRepository implements ProductRepository {
         return this.productRepository.create({id:idp})
     }
 
-    async save(user:Partial<Product>):Promise<Product>{
-        return this.productRepository.save(user)
+    async save(product:Partial<Product>):Promise<Product>{
+        return this.productRepository.save(product)
     }
 
     async count():Promise<number>{

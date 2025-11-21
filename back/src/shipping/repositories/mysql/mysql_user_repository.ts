@@ -24,4 +24,12 @@ export default class MySqlUserRepository implements UserRepository {
     async save(user:Partial<User>):Promise<User>{
         return this.userRepository.save(user)
     }
+
+    async count():Promise<number>{
+        return this.userRepository.count();
+    }
+
+    async findAll(): Promise<User[]> {
+        return await this.userRepository.find();
+    }
 }

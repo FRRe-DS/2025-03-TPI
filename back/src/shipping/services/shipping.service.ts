@@ -56,7 +56,7 @@ export class ShippingService {
 
     //TODO esto se deberia buscar de los productos
     // 2. Crear direcciones (siempre se crean nuevas)
-    const originAddress = this.addressRepository.createAddress({
+    const originAddress = await this.addressRepository.createAddress({
       street: "Av. Siempre Viva 742",
       city: "Springfield",
       state: "Illinois",
@@ -66,7 +66,7 @@ export class ShippingService {
     const savedOriginAddress = await this.addressRepository.saveAddress(originAddress);
 
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const destinationAddress = this.addressRepository.createAddress(createShippmentDto.delivery_address);
+    const destinationAddress = await this.addressRepository.createAddress(createShippmentDto.delivery_address);
 
     const savedDestinationAddress = await this.addressRepository.saveAddress(destinationAddress);
 

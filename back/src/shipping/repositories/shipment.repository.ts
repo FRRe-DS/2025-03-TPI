@@ -9,4 +9,5 @@ export default abstract class ShipmentRepository {
     abstract findShipmentById(id: number): Promise<Shipment | null>;
     abstract findAll(page: number, itemsPerPage: number): Promise<[Shipment[], number]>;
     abstract cancelById(id: number): Promise<void>;
+    abstract count(): Promise<number>;
 }

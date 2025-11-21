@@ -13,9 +13,18 @@ import { Product } from '../shipping/entities/product.entity';
 import ProductRepository from '../shipping/repositories/product.repository';
 import MySqlProductRepository from '../shipping/repositories/mysql/mysql_product.repository';
 
+import { User } from '../shipping/entities/user.entity';
+import UserRepository from '../shipping/repositories/user.repository';
+import MySqlUserRepository from '../shipping/repositories/mysql/mysql_user_repository';
+
+import { Shipment } from '../shipping/entities/shipment.entity';
+import { ShippingLog } from '../shipping/entities/shipping-log.entity';
+import ShipmentRepository from '../shipping/repositories/shipment.repository';
+import { MysqlShipmentRepository } from '../shipping/repositories/mysql/mysql_shipment.repository';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TransportMethod, Address, Product])
+    TypeOrmModule.forFeature([TransportMethod, Address, Product, User, Shipment, ShippingLog])
   ],
   providers: [
     SeedService,
@@ -30,6 +39,14 @@ import MySqlProductRepository from '../shipping/repositories/mysql/mysql_product
     {
       provide: ProductRepository,
       useClass: MySqlProductRepository,
+    },
+    {
+      provide: UserRepository,
+      useClass: MySqlUserRepository,
+    },
+    {
+      provide: ShipmentRepository,
+      useClass: MysqlShipmentRepository,
     },
   ],
   exports: [SeedService]
