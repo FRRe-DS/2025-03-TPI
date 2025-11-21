@@ -38,7 +38,7 @@ export class Shipment {
     @JoinColumn({ name: 'destination_address_id' })
     destinationAddress: Address;
 
-    @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.PENDING })
+    @Column({ type: 'enum', enum: ShippingStatus, default: ShippingStatus.CREATED })
     status: ShippingStatus;
 
     // Relación muchos a uno con TransportMethod
