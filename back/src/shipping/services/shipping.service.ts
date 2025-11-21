@@ -268,7 +268,7 @@ export class ShippingService {
       };
     });
 
-    console.log(`---------------------------> Products with details: ${JSON.stringify(productsWithDetails)}`);
+    console.log(`-------------------------> Products with details: ${JSON.stringify(productsWithDetails)}`);
 
 
     const destinationPostalCode = costRequest.delivery_address.postal_code || 'C1000AAA';
