@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { TransportMethods } from '../shared/enums/transport-methods.enum';
 import TransportMethodsRepository from '../shipping/repositories/transport_methods.repository';
 import AddressRepository from '../shipping/repositories/address.repository';
+import ProductRepository from '../shipping/repositories/product.repository';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -10,12 +11,14 @@ export class SeedService implements OnModuleInit {
   constructor(
     private readonly transportMethodRepository: TransportMethodsRepository,
     private readonly addressRepository: AddressRepository,
+    private readonly productRepository: ProductRepository,
   ) { }
 
   async onModuleInit() {
     this.logger.log('🌱 Starting database seeding...');
     await this.seedTransportMethods();
     await this.seedAddresses();
+    await this.seedProducts();
   }
 
   private async seedTransportMethods() {
@@ -104,6 +107,32 @@ export class SeedService implements OnModuleInit {
       this.logger.log('🎉 Address seed completed successfully!');
     } catch (error) {
       this.logger.error('❌ Error seeding addresses:', error.message);
+    }
+  }
+
+  private async seedProducts() {
+    try {
+      const contador = await this.productRepository.count();
+
+      if (contador > 0) {
+        this.logger.log(`✅ Products already seeded (${contador} records found)`);
+        return;
+      }
+
+      this.logger.log('📝 Seeding products...');
+
+      // Crear 5 productos de ejemplo con IDs específicos
+      const productIds = [1, 2, 3, 4, 5];
+
+      for (const id of productIds) {
+        const product = this.productRepository.create(id);
+        await this.productRepository.save(product);
+        this.logger.log(`✅ Inserted product with ID: ${id}`);
+      }
+
+      this.logger.log('🎉 Products seed completed successfully!');
+    } catch (error) {
+      this.logger.error('❌ Error seeding products:', error.message);
     }
   }
 }

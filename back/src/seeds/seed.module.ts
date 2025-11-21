@@ -9,9 +9,13 @@ import { Address } from '../shipping/entities/address.entity';
 import AddressRepository from '../shipping/repositories/address.repository';
 import MySqlAddressRepository from '../shipping/repositories/mysql/mysql_address_repository';
 
+import { Product } from '../shipping/entities/product.entity';
+import ProductRepository from '../shipping/repositories/product.repository';
+import MySqlProductRepository from '../shipping/repositories/mysql/mysql_product.repository';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TransportMethod, Address])
+    TypeOrmModule.forFeature([TransportMethod, Address, Product])
   ],
   providers: [
     SeedService,
@@ -22,6 +26,10 @@ import MySqlAddressRepository from '../shipping/repositories/mysql/mysql_address
     {
       provide: AddressRepository,
       useClass: MySqlAddressRepository,
+    },
+    {
+      provide: ProductRepository,
+      useClass: MySqlProductRepository,
     },
   ],
   exports: [SeedService]
