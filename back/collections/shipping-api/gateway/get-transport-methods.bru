@@ -1,0 +1,23 @@
+meta {
+  name: Get Transport Methods via Gateway
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/shipping/transport-methods
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Returns transport methods", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("transport_methods");
+    expect(body.transport_methods).to.be.an("array");
+  });
+}

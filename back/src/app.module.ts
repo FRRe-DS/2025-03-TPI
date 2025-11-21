@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShippingModule } from './shipping/shipping.module';
 import { KeycloakModule } from './auth/keycloak.module';
 import { SeedModule } from './seeds/seed.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SeedModule } from './seeds/seed.module';
       logging: true,
     }),
     KeycloakModule,
+    GatewayModule,
     ShippingModule,
     SeedModule,
   ],
