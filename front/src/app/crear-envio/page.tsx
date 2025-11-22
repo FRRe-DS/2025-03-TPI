@@ -12,6 +12,7 @@ import type {
 import { getTransportMethodName } from "@/types/transport-methods";
 import { API_BASE_URL } from "@/config/api";
 import { ChevronDown, Check } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1 };
@@ -43,6 +44,9 @@ export default function CrearEnvioPage() {
 
   const [formInvalidMessage, setFormInvalidMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Obtener token del contexto de autenticación
+  const { token } = useAuth();
 
   // Estado para el Custom Select
   const [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -149,7 +153,7 @@ export default function CrearEnvioPage() {
 
     try {
       setLoading(true);
-      const resp = await crearEnvio(data); 
+      const resp = await crearEnvio(data, token); 
       setResult(resp);
     } catch (err: any) {
       console.error(err);

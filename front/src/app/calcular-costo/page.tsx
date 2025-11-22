@@ -13,6 +13,7 @@ import type {
 import { getTransportMethodName } from "@/types/transport-methods";
 import { API_BASE_URL } from "@/config/api";
 import { ChevronDown, Check } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 function emptyProduct(id = 1): ProductItemInput {
   return { id, quantity: 1 };
@@ -62,6 +63,8 @@ export default function CalcularCostoPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ShippingCostResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const { token, isAuthenticated, isLoading } = useAuth();
 
   // Estado para el Custom Select
   const [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -145,7 +148,7 @@ export default function CalcularCostoPage() {
 
     try {
       setLoading(true);
-      const resp = await calcularCosto(data);
+      const resp = await calcularCosto(data, token as string | null);
       setResult(resp);
     } catch (err) {
       console.error(err);
