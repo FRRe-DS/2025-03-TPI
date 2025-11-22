@@ -7,6 +7,14 @@ import type {
   ShippingResponse,
 } from "@/types/logistica";
 
+function traducirError(mensaje: string): string {
+  if (mensaje.includes("Authentication failed")) {
+    return "Algo salió mal al crear el envío. Intente nuevamente.";
+  }
+
+  return mensaje; 
+}
+
 export async function calcularCosto(data: ShippingCostRequest): Promise<ShippingCostResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/shipping/cost`, {
@@ -51,7 +59,7 @@ export async function crearEnvio(data: ShippingCreationRequest): Promise<Shippin
     const errorMessage = errorBody?.message || `Error al crear envío: ${response.status} ${response.statusText}`;
     
     console.error("Error al crear envío (backend):", errorMessage);
-    throw new Error(errorMessage);
+    throw new Error(traducirError(errorMessage));
   }
 
   const responseData: ShippingResponse = await response.json();
