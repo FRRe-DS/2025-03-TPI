@@ -16,7 +16,7 @@ import { KeycloakRoleGuard } from './keycloak-role.guard';
       realm: process.env.KEYCLOAK_REALM || 'ds-2025-realm',
       clientId: process.env.KEYCLOAK_CLIENT_ID || 'grupo-03',
       secret: process.env.KEYCLOAK_CLIENT_SECRET || '21cd6616-6571-4ee7-be29-0f781f77c74e',
-      tokenValidation: TokenValidation.ONLINE,
+      tokenValidation: TokenValidation.OFFLINE,
       bearerOnly: true,
     }),
   ],
