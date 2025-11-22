@@ -90,6 +90,33 @@ export class MysqlShipmentRepository extends ShipmentRepository {
         await this.shippingLogRepository.save(shippingLog);
     }
 
+    async updateStatus(id: number, newStatus: ShippingStatus, message: string): Promise<Shipment> {
+        const shipment = await this.shipmentRepository.findOne({
+            where: { id },
+            relations: ['logs']
+        });
+
+        if (!shipment) {
+            throw new Error('Shipment not found');
+        }
+
+        // Actualizar el estado del shipment
+        shipment.status = newStatus;
+        shipment.updatedAt = new Date();
+        const updatedShipment = await this.shipmentRepository.save(shipment);
+
+        // Crear log del cambio de estado
+        const shippingLog = this.shippingLogRepository.create({
+            shipment: updatedShipment,
+            status: newStatus,
+            message: message,
+            timestamp: new Date(),
+        });
+        await this.shippingLogRepository.save(shippingLog);
+
+        return updatedShipment;
+    }
+
     async count(): Promise<number> {
         return await this.shipmentRepository.count();
     }

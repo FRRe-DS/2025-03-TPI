@@ -26,6 +26,13 @@ export default class MySqlShippingLogRepository implements ShippingLogRepository
     async save(shippinglog: ShippingLog): Promise<ShippingLog> {
         return this.shipmentproductRepository.save(shippinglog)
     }
+
+    async findByShipmentId(shipmentId: number): Promise<ShippingLog[]> {
+        return this.shipmentproductRepository.find({
+            where: { shipmentId },
+            order: { timestamp: 'ASC' }
+        });
+    }
 }
 
 

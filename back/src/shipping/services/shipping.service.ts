@@ -15,10 +15,14 @@ import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
 import { CreateShippingResponseDto } from '../dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from '../dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from '../dto/cost-calculation-response.dto';
+import { ShippingStatementLogsRequestDto } from '../dto/shipping-statement-logs-request.dto';
+import { ShippingStatementLogsResponseDto } from '../dto/shipping-statement-logs-response.dto';
 import { CostCalculatorService, ProductWithDetails } from './cost-calculation-service';
 import ShipmentProductRepository from '../repositories/shipment_product.repository';
 import shippingLogRepository from '../repositories/shipping-log.repository';
 import { StockProduct } from 'src/shared/types/stock-api';
+import { ShippingStatusTransitionHelper } from '../helpers/shipping-status-transition.helper';
+import { BusinessRuleViolationException } from 'src/common/exceptions/business-rule-viol.exception';
 
 @Injectable()
 export class ShippingService {
@@ -277,5 +281,50 @@ export class ShippingService {
       productsWithDetails,
       destinationPostalCode as any,
     )
+  }
+
+  async updateShippingStatus(id: number, updateStatusDto: ShippingStatementLogsRequestDto): Promise<ShippingStatementLogsResponseDto> {
+    // 1. Buscar el shipment
+    const shipment = await this.shipmentRepository.findShipmentById(id);
+
+    // 2. Si no existe, lanzar error
+    if (!shipment) {
+      throw new ShippingIdNotFoundException();
+    }
+
+    // 3. Validar que la transición de estado sea permitida
+    const isValidTransition = ShippingStatusTransitionHelper.isValidTransition(
+      shipment.status,
+      updateStatusDto.newStatus
+    );
+
+    if (!isValidTransition) {
+      throw new BusinessRuleViolationException(
+        `No se puede cambiar del estado "${shipment.status}" al estado "${updateStatusDto.newStatus}". ` +
+        `Transiciones permitidas: ${ShippingStatusTransitionHelper.getAvailableNextStatuses(shipment.status).join(', ') || 'ninguna'}`
+      );
+    }
+
+    // 4. Actualizar el estado y crear log
+    const message = updateStatusDto.notes || `Estado actualizado a ${updateStatusDto.newStatus}`;
+    await this.shipmentRepository.updateStatus(id, updateStatusDto.newStatus, message);
+
+    // 5. Obtener todos los logs actualizados
+    const logs = await this.shippingLogRepository.findByShipmentId(id);
+
+    // 6. Obtener estados permitidos siguientes
+    const allowedNextStatuses = ShippingStatusTransitionHelper.getAvailableNextStatuses(updateStatusDto.newStatus);
+
+    // 7. Retornar respuesta
+    return {
+      orderId: id.toString(),
+      currentStatus: updateStatusDto.newStatus,
+      statusHistory: logs.map(log => ({
+        timestamp: log.timestamp.toISOString(),
+        status: log.status,
+        message: log.message,
+      })),
+      allowedNextStatuses: allowedNextStatuses,
+    };
   }
 }

@@ -2,6 +2,7 @@ import { Shipment } from "../entities/shipment.entity";
 import { TransportMethod } from "../entities/transport-method.entity";
 import { User } from "../entities/user.entity";
 import { Address } from "src/shipping/entities/address.entity";
+import { ShippingStatus } from "../../shared/enums/shipping-status.enum";
 
 
 export default abstract class ShipmentRepository {
@@ -9,5 +10,6 @@ export default abstract class ShipmentRepository {
     abstract findShipmentById(id: number): Promise<Shipment | null>;
     abstract findAll(page: number, itemsPerPage: number): Promise<[Shipment[], number]>;
     abstract cancelById(id: number): Promise<void>;
+    abstract updateStatus(id: number, newStatus: ShippingStatus, message: string): Promise<Shipment>;
     abstract count(): Promise<number>;
 }
