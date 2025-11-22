@@ -11,20 +11,27 @@ import { ShippingStatus } from 'src/shared/enums/shipping-status.enum';
 export default class MySqlShippingLogRepository implements ShippingLogRepository {
     constructor(
         @InjectRepository(ShippingLog)
-        private readonly shipmentproductRepository: Repository<ShippingLog>,
+        private readonly shippingLogRepository: Repository<ShippingLog>,
     ) { }
 
-    create(shipment: Shipment): ShippingLog {
-        return this.shipmentproductRepository.create({
+    async create(shipment: Shipment): Promise<ShippingLog> {
+
+        const newLog = this.shippingLogRepository.create({
             shipment: shipment,
             status: ShippingStatus.CREATED,
-            message: 'Orden de envío creada',
+            message: 'Orden de envio creada',
             timestamp: new Date()
-        })
+        });
+
+        return await this.shippingLogRepository.save(newLog);
     }
 
     async save(shippinglog: ShippingLog): Promise<ShippingLog> {
-        return this.shipmentproductRepository.save(shippinglog)
+        return this.shippingLogRepository.save(shippinglog)
+    }
+
+    async count(): Promise<number> {
+        return this.shippingLogRepository.count();
     }
 }
 

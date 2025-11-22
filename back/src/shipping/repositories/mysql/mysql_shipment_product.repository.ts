@@ -13,15 +13,22 @@ export default class MySqlShipmentProductRepository implements ShipmentProductRe
         private readonly shipmentproductRepository: Repository<ShipmentProduct>,
     ) {}
 
-    create(shipment: Shipment, product:Product,quantity:number): ShipmentProduct{
-        return this.shipmentproductRepository.create({
+    async create(shipment: Shipment, product:Product, quantity:number): Promise<ShipmentProduct> {
+        
+        const newShipmentProduct = this.shipmentproductRepository.create({
             shipment: shipment,
             product: product,
             quantity: quantity
-        })
+        });
+
+        return await this.shipmentproductRepository.save(newShipmentProduct);
     }
 
     async save(shipmentProduct:ShipmentProduct): Promise<ShipmentProduct>{
         return this.shipmentproductRepository.save(shipmentProduct)
+    }
+
+    async count(): Promise<number> {
+        return this.shipmentproductRepository.count();
     }
 }

@@ -28,4 +28,8 @@ export default class MySqlProductRepository implements ProductRepository {
     async count():Promise<number>{
         return this.productRepository.count();
     }
+
+    async findAll(): Promise<Product[]> {
+        return await this.productRepository.find();
+    }
 }
