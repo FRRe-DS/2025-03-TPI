@@ -38,7 +38,7 @@ services:
       DB_USERNAME: shipping_user
       DB_PASSWORD: shipping_pass
       DB_DATABASE: shipping_db
-      API_KEY_SECRET: 0AHgzM10nRnKLbsq49la4fHo7gM2PZ5r6DIlk
+      API_KEY_SECRET: api-secret
     depends_on:
       mysql:
         condition: service_healthy
