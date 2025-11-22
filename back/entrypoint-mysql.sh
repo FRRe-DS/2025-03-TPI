@@ -1,0 +1,68 @@
+#!/bin/sh
+set -e
+
+echo "🚀 Starting MySQL..."
+
+# Crear directorios de runtime si no existen
+mkdir -p /run/mysqld
+chown -R mysql:mysql /var/lib/mysql /run/mysqld 2>/dev/null || true
+chmod 755 /var/lib/mysql
+
+# Verificar si MySQL está correctamente inicializado (archivos críticos deben existir)
+if [ ! -f /var/lib/mysql/ibdata1 ] || [ ! -d /var/lib/mysql/mysql ]; then
+    echo "📦 Initializing MySQL database..."
+    # Limpiar directorio si tiene datos parciales
+    if [ -d /var/lib/mysql ] && [ "$(ls -A /var/lib/mysql 2>/dev/null)" ]; then
+        echo "⚠️  Cleaning partial database files..."
+        rm -rf /var/lib/mysql/*
+    fi
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql --skip-test-db --auth-root-authentication-method=normal
+    NEED_SETUP=true
+else
+    echo "✅ MySQL database already initialized"
+    NEED_SETUP=false
+fi
+
+# Iniciar MySQL en background para configuración inicial (solo si es necesario)
+if [ "$NEED_SETUP" = "true" ]; then
+    echo "⏳ Starting MySQL server for initial setup..."
+    su mysql -s /bin/sh -c "/usr/bin/mysqld --datadir=/var/lib/mysql --skip-networking --socket=/run/mysqld/mysqld.sock" &
+    MYSQL_PID=$!
+    
+    echo "⏳ Waiting for MySQL to be ready..."
+    sleep 3
+    
+    # Esperar a que MySQL esté listo
+    i=30
+    while [ $i -gt 0 ]; do
+      if mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent 2>/dev/null; then
+        break
+      fi
+      i=$((i-1))
+      sleep 1
+    done
+    
+    if [ $i -eq 0 ]; then
+      echo "❌ MySQL did not respond in time"
+      exit 1
+    fi
+    
+    echo "✅ MySQL is ready for setup!"
+    
+    # Configurar base de datos y usuario
+    echo "📦 Setting up database and user..."
+    mysql --socket=/run/mysqld/mysqld.sock -u root -e "CREATE DATABASE IF NOT EXISTS shipping_db;"
+    mysql --socket=/run/mysqld/mysqld.sock -u root -e "CREATE USER IF NOT EXISTS 'shipping_user'@'%' IDENTIFIED BY 'shipping_pass';"
+    mysql --socket=/run/mysqld/mysqld.sock -u root -e "GRANT ALL PRIVILEGES ON shipping_db.* TO 'shipping_user'@'%';"
+    mysql --socket=/run/mysqld/mysqld.sock -u root -e "FLUSH PRIVILEGES;"
+    
+    # Detener MySQL temporal
+    echo "🛑 Stopping temporary MySQL instance..."
+    mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown
+    wait $MYSQL_PID
+fi
+
+# Iniciar MySQL normalmente (este proceso reemplazará el script)
+echo "🚀 Starting MySQL in production mode..."
+exec su mysql -s /bin/sh -c "/usr/bin/mysqld --datadir=/var/lib/mysql --bind-address=0.0.0.0 --port=3306"
+

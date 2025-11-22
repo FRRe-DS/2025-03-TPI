@@ -38,13 +38,14 @@ services:
       DB_USERNAME: shipping_user
       DB_PASSWORD: shipping_pass
       DB_DATABASE: shipping_db
+      API_KEY_SECRET: 0AHgzM10nRnKLbsq49la4fHo7gM2PZ5r6DIlk
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env
     ports:
-      - "3000:3000"
+      - "3010:3001"
     networks:
       - shipping_network
 
