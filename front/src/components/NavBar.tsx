@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "react-oidc-context";
 
 export default function Navbar() {
+  const auth = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); 
 
@@ -32,7 +34,8 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Links */}
+        {/* Links - Only show when authenticated */}
+        {auth.isAuthenticated && (
         <div className="hidden md:flex items-center gap-10 text-base font-medium">
           <Link
             href="/"
@@ -58,24 +61,67 @@ export default function Navbar() {
           >
             Consultar envío
           </Link>
+          </div>
+        )}
+
+        {/* Auth buttons */}
+        <div className="hidden md:flex items-center gap-4">
+          {auth.isLoading ? (
+            <span className="text-sm text-gray-500">Cargando...</span>
+          ) : auth.isAuthenticated ? (
+            <button
+              onClick={() => void auth.signoutRedirect()}
+              className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold hover:bg-[var(--color-primary)]/90 transition-colors duration-200"
+            >
+              Cerrar sesión
+            </button>
+          ) : (
+            <button
+              onClick={() => void auth.signinRedirect()}
+              className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold hover:bg-[var(--color-primary)]/90 transition-colors duration-200"
+            >
+              Iniciar sesión
+            </button>
+          )}
         </div>
 
-         {/* Botón hamburguesa (mobile) */}
+         {/* Botón hamburguesa (mobile) - Only show when authenticated */}
+        {auth.isAuthenticated && (
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2 rounded-md text-[var(--color-text-dark)] hover:bg-gray-100 transition"
         >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
+        )}
+
+        {/* Mobile auth button */}
+        {!auth.isAuthenticated && !auth.isLoading && (
+          <button
+            onClick={() => void auth.signinRedirect()}
+            className="md:hidden px-4 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold text-sm"
+          >
+            Iniciar sesión
+          </button>
+        )}
       </div>
       
         {/* Menú móvil */}
-      {menuOpen && (
+      {menuOpen && auth.isAuthenticated && (
         <div className="md:hidden bg-white shadow-md border-t border-gray-200 flex flex-col items-center space-y-4 py-6 text-lg font-medium text-[var(--color-text-dark)]">
           <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link href="/calcular-costo" onClick={() => setMenuOpen(false)}>Calcular costo</Link>
           <Link href="/crear-envio" onClick={() => setMenuOpen(false)}>Crear envío</Link>
           <Link href="/consultar-envio" onClick={() => setMenuOpen(false)}>Consultar envío</Link>
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              void auth.signoutRedirect();
+            }}
+            className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold mt-2"
+          >
+            Cerrar sesión
+          </button>
         </div>
       )}
     </nav>

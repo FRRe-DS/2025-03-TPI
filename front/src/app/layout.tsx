@@ -3,7 +3,7 @@ import "./globals.css";
 import { Poppins, Inter } from "next/font/google";
 import Footer from "../components/footer";
 import NavBar from "@/components/NavBar";
-import { url } from "inspector";
+import AuthProvider from "@/providers/AuthProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,13 +31,14 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode; }) {
   return (
     <html lang="es" className={`${poppins.variable} ${inter.variable}`}>
-       
       <body className="bg-gray-100 text-[var(--color-text-dark)]">
+        <AuthProvider>
         <NavBar />
         <main className="pt-24">
           {children}
         </main>
          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
