@@ -164,10 +164,10 @@ export default function CrearEnvioPage() {
       setLoading(true);
       const resp = await crearEnvio(data, token); 
       setResult(resp);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       // Muestra el mensaje de error capturado desde el servicio
-      setError(err.message || "Ocurrió un error al crear el envío. Intenta nuevamente más tarde.");
+      setError((err as Error)?.message || "Ocurrió un error al crear el envío. Intenta nuevamente más tarde.");
     } finally {
       setLoading(false);
     }
