@@ -15,13 +15,21 @@ function traducirError(mensaje: string): string {
   return mensaje; 
 }
 
-export async function calcularCosto(data: ShippingCostRequest): Promise<ShippingCostResponse> {
+export async function calcularCosto(data: ShippingCostRequest, token: string | null): Promise<ShippingCostResponse> {
+
   try {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    // Agregar token si está disponible
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/shipping/cost`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(data),
     });
 
@@ -39,16 +47,21 @@ export async function calcularCosto(data: ShippingCostRequest): Promise<Shipping
   }
 }
 
-export async function crearEnvio(data: ShippingCreationRequest): Promise<ShippingResponse> {
+export async function crearEnvio(data: ShippingCreationRequest, token: string | null): Promise<ShippingResponse> {
   console.log("Crear envio data", data);
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  // Agregar token si está disponible
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_BASE_URL}/shipping`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // NOTA: Si tu backend requiere auth, aquí deberías agregar el header Authorization
-      // "Authorization": `Bearer ${token}` 
-    },
+    headers,
     body: JSON.stringify(data),
   });
 
