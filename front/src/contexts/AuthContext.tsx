@@ -3,25 +3,23 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import Keycloak from "keycloak-js";
 
-// Configuración del cliente de Keycloak
 const keycloakClient = new Keycloak({
   url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || "",
   realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || "",
   clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || "",
 });
 
-// Tipo para el contexto
 interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   keycloak: Keycloak;
   isLoading: boolean;
+  login: () => void;
+  logout: () => void;
 }
 
-// Crear el contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider del contexto
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,10 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     isInitialized.current = true;
 
-    // Inicializar Keycloak
     keycloakClient
       .init({
-        onLoad: "login-required",
+        onLoad: "check-sso",
         pkceMethod: "S256",
         checkLoginIframe: false,
       })
@@ -45,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(keycloakClient.token || null);
         setIsLoading(false);
 
-        // Configurar actualización automática del token
         keycloakClient.onTokenExpired = () => {
           keycloakClient
             .updateToken(30)
@@ -55,8 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             })
             .catch(() => {
-              // Si falla la actualización, forzar login
-              keycloakClient.login();
+              setIsAuthenticated(false);
+              setToken(null);
             });
         };
       })
@@ -66,17 +62,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
+  const login = () => {
+    keycloakClient.login();
+  };
+
+  const logout = () => {
+    keycloakClient.logout();
+  };
+
   const value: AuthContextType = {
     token,
     isAuthenticated,
     keycloak: keycloakClient,
     isLoading,
+    login,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook para usar el contexto
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -85,6 +90,5 @@ export function useAuth() {
   return context;
 }
 
-// Exportar el cliente de Keycloak por si se necesita acceso directo
 export { keycloakClient };
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { calcularCosto } from "../services/logistica-backend";
 import type {
   Address,
@@ -49,6 +50,7 @@ const BackArrowIcon = () => (
 );
 
 export default function CalcularCostoPage() {
+  const router = useRouter();
   const [address, setAddress] = useState<Address>({
     street: "", 
     city: "",
@@ -65,6 +67,13 @@ export default function CalcularCostoPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { token, isAuthenticated, isLoading } = useAuth();
+
+  // Protección de ruta - redirigir si no está autenticado
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   // Estado para el Custom Select
   const [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -169,6 +178,17 @@ export default function CalcularCostoPage() {
   const clearButton = `px-5 py-2 ${baseOutlineButton}`;
   const smallButton = `px-3 py-1 text-xs ${baseOutlineButton}`; 
 
+  // Mostrar loading mientras se verifica la autenticación
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto"></div>
+          <p className="mt-4 text-[var(--color-text-dark)]">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 text-[var(--color-text-dark)] flex items-center justify-center">
