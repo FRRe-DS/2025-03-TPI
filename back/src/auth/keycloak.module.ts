@@ -3,11 +3,11 @@ import { APP_GUARD } from '@nestjs/core';
 import {
   KeycloakConnectModule,
   TokenValidation,
-  RoleGuard,
 } from 'nest-keycloak-connect';
 
 import { KeycloakResourceGuard } from './keycloak-resource.guard';
 import { KeycloakAuthGuard } from './keycloak-auth.guard';
+import { KeycloakRoleGuard } from './keycloak-role.guard';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { KeycloakAuthGuard } from './keycloak-auth.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: RoleGuard,
+      useClass: KeycloakRoleGuard,
     },
   ],
   exports: [KeycloakConnectModule],
