@@ -100,12 +100,12 @@ export class ShippingService {
       }
 
       //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-      const shipmentProduct = this.shipmentProductRepository.create(savedShipment, product, productDto.quantity);
+      const shipmentProduct = await this.shipmentProductRepository.create(savedShipment, product, productDto.quantity);
 
       await this.shipmentProductRepository.save(shipmentProduct);
     }
     //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
-    const shippingLog = this.shippingLogRepository.create(savedShipment);
+    const shippingLog = await this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
 
     // 6. Retornar shipment completo

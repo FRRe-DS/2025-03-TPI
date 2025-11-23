@@ -5,6 +5,9 @@ import AddressRepository from '../shipping/repositories/address.repository';
 import ProductRepository from '../shipping/repositories/product.repository';
 import UserRepository from '../shipping/repositories/user.repository';
 import ShipmentRepository from '../shipping/repositories/shipment.repository';
+import ShipmentProductRepository from '../shipping/repositories/shipment_product.repository';
+import ShippingLogRepository from '../shipping/repositories/shipping-log.repository';
+import { ShippingStatus } from '../shared/enums/shipping-status.enum';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -16,6 +19,8 @@ export class SeedService implements OnModuleInit {
     private readonly productRepository: ProductRepository,
     private readonly userRepository: UserRepository,
     private readonly shipmentRepository: ShipmentRepository,
+    private readonly shipmentProductRepository: ShipmentProductRepository,
+    private readonly shippingLogRepository: ShippingLogRepository,
   ) { }
 
   async onModuleInit() {
@@ -25,6 +30,8 @@ export class SeedService implements OnModuleInit {
     await this.seedProducts();
     await this.seedUsers();
     await this.seedShipments();
+    await this.seedShipmentProducts();
+    await this.seedShippingLogs();
   }
 
   private async seedTransportMethods() {
@@ -245,6 +252,80 @@ export class SeedService implements OnModuleInit {
       this.logger.log('🎉 Shipments seed completed successfully!');
     } catch (error) {
       this.logger.error('❌ Error seeding shipments:', error.message);
+    }
+  }
+
+  private async seedShipmentProducts() {
+    try {
+      const count = await this.shipmentProductRepository.count();
+
+      if (count > 0) {
+        this.logger.log(`✅ Shipment Products already seeded (${count} records found)`);
+        return;
+      }
+
+      this.logger.log('📝 Seeding shipment products...');
+
+      // Obtener todos los envíos y productos
+      const [shipments] = await this.shipmentRepository.findAll(1, 100);
+      const products = await this.productRepository.findAll();
+
+      this.logger.log(`🔍 Debug: Shipments found: ${shipments.length}`);
+      this.logger.log(`🔍 Debug: Products found: ${products.length}`);
+
+      if (shipments.length === 0 || products.length === 0) {
+        this.logger.warn('⚠️ Not enough data to seed shipment products. Skipping...');
+        return;
+      }
+
+      // Crear relaciones entre envíos y productos
+      for (let i = 0; i < shipments.length; i++) {
+        const shipment = shipments[i];
+        // Seleccionar un producto (el primero o uno al azar)
+        const product = products[i % products.length];
+        const quantity = Math.floor(Math.random() * 5) + 1; // Cantidad entre 1 y 5
+
+        await this.shipmentProductRepository.create(shipment, product, quantity);
+        this.logger.log(`✅ Inserted shipment product: Shipment ${shipment.id} - Product ${product.id} - Qty: ${quantity}`);
+      }
+
+      this.logger.log('🎉 Shipment Products seed completed successfully!');
+    } catch (error) {
+      this.logger.error('❌ Error seeding shipment products:', error.message);
+    }
+  }
+
+  private async seedShippingLogs() {
+    try {
+      const count = await this.shippingLogRepository.count();
+
+      if (count > 0) {
+        this.logger.log(`✅ Shipping Logs already seeded (${count} records found)`);
+        return;
+      }
+
+      this.logger.log('📝 Seeding shipping logs...');
+
+      // Obtenemos los envíos para crearles logs
+      // Usamos desestructuración [shipments] porque tu findAll devuelve [data, count]
+      const [shipments] = await this.shipmentRepository.findAll(1, 100);
+
+      if (shipments.length === 0) {
+        this.logger.warn('⚠️ No shipments found to create logs. Skipping...');
+        return;
+      }
+
+      for (const shipment of shipments) {
+        // Creamos el log inicial (CREATED)
+        // Tu repositorio MySqlShippingLogRepository.create ya maneja el status y timestamp internamente
+        await this.shippingLogRepository.create(shipment);
+        
+        this.logger.log(`✅ Inserted log for Shipment ID: ${shipment.id}`);
+      }
+
+      this.logger.log('🎉 Shipping Logs seed completed successfully!');
+    } catch (error) {
+      this.logger.error('❌ Error seeding shipping logs:', error.message);
     }
   }
 }
