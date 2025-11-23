@@ -28,9 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isInitialized.current) return;
-
     isInitialized.current = true;
-
+    
     keycloakClient
       .init({
         onLoad: "check-sso",
