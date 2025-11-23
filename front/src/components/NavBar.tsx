@@ -36,8 +36,8 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled
-            ? "bg-white shadow-md"
-            : "bg-white"
+            ? "bg-white shadow-md py-2"
+            : "bg-white py-3"
       }`}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 sm:px-12 py-5 text-[var(--color-text-dark)]">
@@ -54,9 +54,9 @@ export default function Navbar() {
           // Usuario NO autenticado - solo botón Login
           <button
             onClick={login}
-            className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+            className="cursor-pointer px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-red-800 transition-colors duration-200"
           >
-            Login
+            Iniciar Sesión
           </button>
         ) : (
           // Usuario autenticado - Links + botón Logout
@@ -65,7 +65,7 @@ export default function Navbar() {
               href="/"
               className="hover:text-[var(--color-primary)] transform transition-transform duration-200 hover:scale-110"
             >
-              Home
+              Inicio
             </Link>
             <Link
               href="/calcular-costo"
@@ -87,9 +87,9 @@ export default function Navbar() {
             </Link>
             <button
               onClick={logout}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-200"
+              className="cursor-pointer px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-red-800 transition-colors duration-200"
             >
-              Logout
+              Cerrar Sesión
             </button>
           </div>
         )}
