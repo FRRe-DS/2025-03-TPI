@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ComponentProps } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BackArrowIcon = (props: ComponentProps<"svg">) => (
   <svg
@@ -60,8 +62,18 @@ interface Envio {
 }
 
 export default function ConsultarEnvioPage() {
+  const router = useRouter();
   const [idEnvio, setIdEnvio] = useState<string>("");
   const [expandido, setExpandido] = useState<number | null>(null);
+  
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Protección de ruta - redirigir si no está autenticado
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const enviosMock: Envio[] = [
     {
@@ -148,6 +160,18 @@ export default function ConsultarEnvioPage() {
   const estiloInput =
     "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
   const estiloLabel = "text-sm text-[var(--color-text-dark)] font-medium";
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto"></div>
+          <p className="mt-4 text-[var(--color-text-dark)]">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 py-12 text-[var(--color-text-dark)] flex justify-center">

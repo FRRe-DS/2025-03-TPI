@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   HttpCode,
   Param,
   Body,
@@ -22,6 +23,8 @@ import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
 import { CreateShippingResponseDto } from './dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from './dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto';
+import { ShippingStatementLogsRequestDto } from './dto/shipping-statement-logs-request.dto';
+import { ShippingStatementLogsResponseDto } from './dto/shipping-statement-logs-response.dto';
 import { ContextValidationPipe } from 'src/common/exceptions/custom-validation-pipe.exception';
 import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
 import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shipping-order.exception';
@@ -90,5 +93,16 @@ export class ShippingController {
       ? authHeader.replace('Bearer ', '') 
       : authHeader;
     return await this.shippingService.calculateCost(costRequest, token);
+  }
+
+  @Patch(':id/status')
+  @HttpCode(200)
+  @Scopes('envios:write')
+  @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
+  async updateShippingStatus(
+    @Param('id') id: number, 
+    @Body() updateStatusDto: ShippingStatementLogsRequestDto
+  ): Promise<ShippingStatementLogsResponseDto> {
+    return await this.shippingService.updateShippingStatus(id, updateStatusDto);
   }
 }

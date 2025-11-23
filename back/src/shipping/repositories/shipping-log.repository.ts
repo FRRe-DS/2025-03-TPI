@@ -5,4 +5,5 @@ export default abstract class ShippingLogRepository {
     abstract create(shipment:Shipment):Promise<ShippingLog>;
     abstract save (shippingLog: ShippingLog):Promise<ShippingLog>;
     abstract count(): Promise<number>
+    abstract findByShipmentId(shipmentId: number): Promise<ShippingLog[]>;
 }

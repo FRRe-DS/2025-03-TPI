@@ -33,8 +33,11 @@ export default class MySqlShippingLogRepository implements ShippingLogRepository
     async count(): Promise<number> {
         return this.shippingLogRepository.count();
     }
+
+    async findByShipmentId(shipmentId: number): Promise<ShippingLog[]> {
+        return this.shippingLogRepository.find({
+            where: { shipmentId },
+            order: { timestamp: 'ASC' }
+        });
+    }
 }
-
-
-
-
