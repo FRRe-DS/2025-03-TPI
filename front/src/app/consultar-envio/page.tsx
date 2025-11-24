@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ShippingDetail } from "@/types/logistica";
 import { consultarEnvio } from "../services/logistica-backend";
+import { API_BASE_URL } from "@/config/api";
 
 const BackArrowIcon = (props: ComponentProps<"svg">) => (
   <svg
@@ -82,7 +83,7 @@ export default function ConsultarEnvioPage() {
       setListError(null);
       try {
         const authHeader = token?.startsWith("Bearer ") ? token : `Bearer ${token}`;
-        const res = await fetch("http://localhost:3010/shipping?page=1&items_per_page=50", {
+        const res = await fetch(`${API_BASE_URL}/shipping?page=1&items_per_page=50`, {
         headers: { Authorization: authHeader },
         });
         if (!res.ok) throw new Error("No se pudo obtener la lista de envíos.");
