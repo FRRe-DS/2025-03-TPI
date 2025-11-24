@@ -72,6 +72,7 @@ export interface ShippingResponse {
   shipping_id: number;
   status: string;
   transport_type: string;
+  estimated_delivery_at: string;
   
 }
 
@@ -83,7 +84,7 @@ export interface ShippingDetail {
   departure_Address: Address;
   products: ShipmentProduct[];
   status: string;
-  transport_type: string;
+  transport_type: TransportMethod;
   tracking_number: string;
   carrier: string;
   total_cost: number;
