@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarEnvio, actualizarEstadoEnvio } from "@/app/services/logistica-backend";
 import { ChevronDown, Check } from "lucide-react";
-import { useRef } from "react";
 
 
 const allowedTransitions: Record<string, string[]> = {
@@ -19,7 +18,7 @@ const allowedTransitions: Record<string, string[]> = {
 };
 
 
-export default function ActualizarEstadoPage() {
+function ActualizarEstadoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -95,8 +94,8 @@ export default function ActualizarEstadoPage() {
         router.push(`/consultar-envio`);
       }, 2000);
 
-    } catch (err: any) {
-      setError(err.message || "Error al actualizar el estado.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Error al actualizar el estado.");
     } finally {
       setLoading(false);
     }
@@ -242,5 +241,13 @@ export default function ActualizarEstadoPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ActualizarEstadoPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Cargando...</div>}>
+      <ActualizarEstadoContent />
+    </Suspense>
   );
 }
