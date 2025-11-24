@@ -97,14 +97,21 @@ export default function ConsultarEnvioPage() {
             [];
 
         // Normalizar a ShortShipping (shipping_id como string)
-        setShipments(
-          items.map((it: any) => ({
-            shipping_id: String(it.shipping_id ?? it.id ?? ""),
-            order_id: it.order_id,
-            status: (it.status ?? "").toString(),
-            tracking_number: it.tracking_number,
-          }))
-        );
+        type BackendShipment = {
+        shipping_id?: string | number;
+        id?: string | number;
+        order_id?: string;
+        status?: string;
+        tracking_number?: string;
+      };
+
+      items.map((it: BackendShipment) => ({
+        shipping_id: String(it.shipping_id ?? it.id ?? ""),
+        order_id: it.order_id,
+        status: it.status ?? "",
+        tracking_number: it.tracking_number,
+      }));
+
       } catch (err) {
         setListError((err as Error).message || "Error al cargar envíos.");
       } finally {
