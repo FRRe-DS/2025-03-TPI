@@ -4,6 +4,7 @@ import type {
   ShippingCostRequest,
   ShippingCostResponse,
   ShippingCreationRequest,
+  ShippingDetail,
   ShippingResponse,
 } from "@/types/logistica";
 
@@ -78,6 +79,36 @@ export async function crearEnvio(data: ShippingCreationRequest, token: string | 
   const responseData: ShippingResponse = await response.json();
 
   console.log("Crear envio response", responseData);
+
+  return responseData;
+}
+
+export async function consultarEnvio(shippingId: string, token: string | null): Promise<ShippingDetail> {
+  console.log(`Consultar envío ID: ${shippingId}`);
+
+  const headers: HeadersInit = {};
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/shipping/${shippingId}`, {
+    method: "GET",
+    headers,
+  });
+
+  // VERIFICACIÓN DE ERROR
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    const errorMessage = errorBody?.message || `Error al consultar envío: ${response.status} ${response.statusText}`;
+    
+    console.error("Error al consultar envío (backend):", errorMessage);
+    throw new Error(traducirError(errorMessage)); 
+  }
+
+  const responseData: ShippingDetail = await response.json();
+
+  console.log("Consultar envio response", responseData);
 
   return responseData;
 }
