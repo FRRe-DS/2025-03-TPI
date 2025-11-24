@@ -1,13 +1,11 @@
-describe("Flujo completo de cálculo de costo", () => {
+describe("Full cost calculation flow", () => {
 
-  it("debería ir al formulario, completar datos, agregar productos y calcular costo", () => {
-
+  it("should navigate to the form, fill in the data, add products, and calculate the shipment", () => {
     cy.visit("http://localhost:3000/");
 
     cy.contains("Calcular costo").click();
 
     cy.url().should("include", "/calcular-costo");
-
 
     cy.get('input[placeholder="Av. Siempre Viva 123"]')
       .clear().type("Luis Braille");
