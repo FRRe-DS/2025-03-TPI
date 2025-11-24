@@ -87,7 +87,7 @@ export default function ActualizarEstadoPage() {
   };
 
   if (!shippingId) {
-    return <div className="p-8">❌ No se recibió un ID válido.</div>;
+    return <div className="p-8"> No se recibió un ID válido.</div>;
   }
 
   if (isLoading || currentStatus === null) {
