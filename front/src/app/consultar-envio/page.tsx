@@ -185,11 +185,14 @@ export default function ConsultarEnvioPage() {
         {result && (
             <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
                 <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-4">
-                    Detalles del Envío #{result.order_id} 
+                    Detalles del Envío #{result.shipping_id} 
                 </h3>
 
                 <div className="space-y-3">
-                    <p className="flex justify-between">
+                  <p>
+                    <strong>Número de Orden:</strong> {result.order_id}
+                  </p>
+                    <p className="flex items-center gap-2">
                         <strong>Estado Actual:</strong>
                         <span className={`font-bold ${result.status === 'DELIVERED' ? 'text-green-600' : result.status === 'CANCELLED' ? 'text-red-600' : 'text-orange-600'}`}>
                             {getStatusName(result.status)}
@@ -197,7 +200,7 @@ export default function ConsultarEnvioPage() {
                     </p>
                     <p>
                         <strong>Método de Transporte:</strong> {getTransportMethodName(result.transport_type.type)}
-                    </p> 
+                    </p>  
                     <p className="pt-2">
                         <strong>Costo Total:</strong> 
                         <span className="text-[var(--color-secondary)] font-bold ml-1">
