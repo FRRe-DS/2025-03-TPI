@@ -112,3 +112,41 @@ export async function consultarEnvio(shippingId: string, token: string | null): 
 
   return responseData;
 }
+
+export async function actualizarEstadoEnvio(
+  shippingId: string,
+  newStatus: string,
+  notes: string | null,
+  token: string | null
+) {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const body = {
+    newStatus,
+    ...(notes ? { notes } : {})
+  };
+
+  const response = await fetch(`${API_BASE_URL}/shipping/${shippingId}/status`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    const errorMessage =
+      errorBody?.message ||
+      `Error al actualizar estado: ${response.status} ${response.statusText}`;
+
+    throw new Error(errorMessage);
+  }
+
+  const data = await response.json();
+  return data;
+}

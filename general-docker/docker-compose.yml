@@ -25,7 +25,9 @@ services:
       - shared_net
 
   back-logistica:
-    image: ghcr.io/frre-ds/2025-grupo-03-backend-logistica:18630c76d0bf6579dabab26bbc6f249f6206e943
+    build:
+          context: ../back
+          dockerfile: Dockerfile
     container_name: shipping_back
     restart: always
     environment:
