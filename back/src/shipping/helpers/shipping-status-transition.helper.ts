@@ -19,9 +19,9 @@ export class ShippingStatusTransitionHelper {
   private static readonly ALLOWED_TRANSITIONS: Record<ShippingStatus, ShippingStatus[]> = {
     [ShippingStatus.CREATED]: [ShippingStatus.RESERVED, ShippingStatus.CANCELLED],
     [ShippingStatus.RESERVED]: [ShippingStatus.IN_TRANSIT, ShippingStatus.CANCELLED],
-    [ShippingStatus.IN_TRANSIT]: [ShippingStatus.ARRIVED],
-    [ShippingStatus.ARRIVED]: [ShippingStatus.IN_DISTRIBUTION],
-    [ShippingStatus.IN_DISTRIBUTION]: [ShippingStatus.DELIVERED],
+    [ShippingStatus.IN_TRANSIT]: [ShippingStatus.IN_DISTRIBUTION],
+    [ShippingStatus.ARRIVED]: [ShippingStatus.DELIVERED],
+    [ShippingStatus.IN_DISTRIBUTION]: [ShippingStatus.ARRIVED],
     [ShippingStatus.DELIVERED]: [], // Estado final, no hay transiciones
     [ShippingStatus.CANCELLED]: [], // Estado final, llegó aquí mediante /cancel
   };

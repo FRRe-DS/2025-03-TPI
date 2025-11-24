@@ -185,7 +185,7 @@ export default function ConsultarEnvioPage() {
         {result && (
             <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
                 <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-4">
-                    Detalles del Envío #{result.order_id} 
+                    Detalles del Envío #{result.shipping_id} 
                 </h3>
 
                 <div className="space-y-3">
@@ -237,9 +237,21 @@ export default function ConsultarEnvioPage() {
                         ))}
                     </ul>
                 </div>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => router.push(`/actualizar-estado?id=${result.shipping_id}`)}
+                    className="
+                      px-5 py-2 rounded-full font-semibold shadow 
+                      bg-[var(--color-primary)] text-[var(--color-light)]
+                      hover:scale-105
+                      transition-all duration-300
+                    "
+                  >
+                    Actualizar Estado
+                  </button>
+                </div>
             </div>
         )}
-
       </div>
     </div>
   );
