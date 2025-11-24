@@ -22,10 +22,7 @@ describe("Full cost calculation flow", () => {
     cy.get('input[placeholder="AR"]')  // readOnly
       .should("have.value", "AR");
 
-
-
     cy.get("select").select(1);
-
 
     cy.get('input[placeholder="Ej: 456"]').first()
       .clear().type("1");
@@ -33,9 +30,7 @@ describe("Full cost calculation flow", () => {
     cy.get('input[placeholder="Ej: 5"]').first()
       .clear().type("2");
 
-
     cy.contains("+ Agregar producto").click();
-
 
     cy.get('input[placeholder="Ej: 456"]').eq(1)
       .clear().type("2");
@@ -43,12 +38,7 @@ describe("Full cost calculation flow", () => {
     cy.get('input[placeholder="Ej: 5"]').eq(1)
       .clear().type("1");
 
-
-
     cy.get('button[type="submit"]').click({ force: true });
-
-
-
 
     cy.contains("Costo Estimado del Envío", { timeout: 10000 })
     .should("exist");
