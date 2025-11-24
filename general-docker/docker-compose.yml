@@ -25,7 +25,7 @@ services:
       - shared_net
 
   back-logistica:
-    image: ghcr.io/frre-ds/2025-grupo-03-backend-logistica:latest
+    image: ghcr.io/frre-ds/2025-grupo-03-backend-logistica:18630c76d0bf6579dabab26bbc6f249f6206e943
     container_name: shipping_back
     restart: always
     environment:
@@ -34,6 +34,7 @@ services:
       DB_USERNAME: shipping_user
       DB_PASSWORD: shipping_pass
       DB_DATABASE: shipping_db
+      PORT: 3010
       KEYCLOAK_AUTH_SERVER_URL: https://keycloak-production-7751.up.railway.app
       KEYCLOAK_REALM: ds-2025-realm
       STOCK_SERVICE_URL: http://api-gateway:80
@@ -70,7 +71,7 @@ services:
       - shared_net
 
   backend-stock:
-    image: ghcr.io/frre-ds/2025-grupo-11-backend-stock:latest
+    image: ghcr.io/frre-ds/2025-grupo-11-backend-stock:f5ff36db6851a291c436acc38baae82805c39c67
     container_name: backend-stock
     environment:
       DB_HOST: postgres-stock
@@ -95,7 +96,7 @@ services:
       - shared_net
 
   backend-compras:
-    image: ghcr.io/frre-ds/backend-compras-g01:latest
+    image: ghcr.io/frre-ds/backend-compras-g01:7ac7a4efec1f0551fbb8267e391989126ff6b82d
     container_name: backend-compras
     ports:
       - "3081:8081"
