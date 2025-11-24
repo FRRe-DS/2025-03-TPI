@@ -1,7 +1,7 @@
 describe("Full shipment creation flow", () => {
 
   it("should navigate to the form, fill in the data, add products, and create the shipment", () => {
-
+    
     cy.visit("http://localhost:3000/");
 
     cy.contains("Crear envío").click();
