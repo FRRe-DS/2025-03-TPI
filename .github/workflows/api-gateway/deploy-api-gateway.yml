@@ -1,0 +1,53 @@
+name: Build and Publish API Gateway Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'general-docker/api-gateway/prod/**'
+      - '.github/workflows/api-gateway/api-gateway-docker-package-deploy.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set image name (lowercase)
+        id: vars
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="$OWNER/2025-grupo-03-api-gateway"
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./general-docker/api-gateway/prod
+          file: ./general-docker/api-gateway/prod/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Output image details
+        run: |
+          echo "✅ Image published successfully!"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "🏷️  Tag: ${{ github.sha }}"

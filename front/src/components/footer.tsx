@@ -130,7 +130,7 @@ const Footer = () => {
           </div>
 
           {/* Columna 2: Enlaces Rápidos */}
-          <div>
+          <div className="ml-12">
             <h3 className="text-lg font-semibold text-[var(--color-secondary)] mb-4 font-[var(--font-heading)]">
               Enlaces Rápidos
             </h3>

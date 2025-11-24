@@ -1,0 +1,135 @@
+services:
+  # ============================================
+  # Logística: Backend con base de datos integrada
+  # ============================================
+  mysql-logistica:
+    image: mysql:8.0
+    container_name: shipping_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: shipping_db
+      MYSQL_USER: shipping_user
+      MYSQL_PASSWORD: shipping_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_logistica_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "shipping_user", "-pshipping_pass"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - shared_net
+
+  back-logistica:
+    image: ghcr.io/frre-ds/2025-grupo-03-backend-logistica:18630c76d0bf6579dabab26bbc6f249f6206e943
+    container_name: shipping_back
+    restart: always
+    environment:
+      DB_HOST: mysql-logistica
+      DB_PORT: 3306
+      DB_USERNAME: shipping_user
+      DB_PASSWORD: shipping_pass
+      DB_DATABASE: shipping_db
+      PORT: 3010
+      KEYCLOAK_AUTH_SERVER_URL: https://keycloak-production-7751.up.railway.app
+      KEYCLOAK_REALM: ds-2025-realm
+      STOCK_SERVICE_URL: http://api-gateway:80
+    depends_on:
+      mysql-logistica:
+        condition: service_healthy
+    ports:
+      - "3010:3010"
+    networks:
+      - shared_net
+
+  # ============================================
+  # Stock: PostgreSQL y Backend
+  # ============================================
+  postgres-stock:
+    image: postgres:16.2
+    container_name: postgres_main
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_stock_data:/var/lib/postgresql/data
+      - ./stock/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./stock/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shared_net
+
+  backend-stock:
+    image: ghcr.io/frre-ds/2025-grupo-11-backend-stock:f5ff36db6851a291c436acc38baae82805c39c67
+    container_name: backend-stock
+    environment:
+      DB_HOST: postgres-stock
+      DB_NAME: stock_management
+      DB_USER: postgres
+      DB_PASS: postgres
+      KEYCLOAK_CLIENT_ID: grupo-11
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ds2025
+      KEYCLOAK_DB: keycloak_db
+      KEYCLOAK_DB_USER: keycloak_db_user
+      KEYCLOAK_DB_PASS: keycloak_db_user_password
+      KEYCLOAK_ISSUER: https://keycloak-production-7751.up.railway.app/realms/ds-2025-realm
+      KEYCLOAK_CLIENT_SECRET: ef7f0900-8de5-46c0-b813-ce76d61e0158
+      KEYCLOAK_REALM: ds-2025-realm
+    ports:
+      - "3099:3000"
+    depends_on:
+      postgres-stock:
+        condition: service_healthy
+    networks:
+      - shared_net
+
+  backend-compras:
+    image: ghcr.io/frre-ds/backend-compras-g01:7ac7a4efec1f0551fbb8267e391989126ff6b82d
+    container_name: backend-compras
+    ports:
+      - "3081:8081"
+    networks:
+      - shared_net
+
+  # ============================================
+  # API Gateway (Nginx)
+  # ============================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "3088:80"
+      - "443:443"
+    depends_on:
+      - backend-compras
+      - backend-stock
+      - back-logistica
+    volumes:
+      - ./api-gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - shared_net
+
+volumes:
+  mysql_logistica_data:
+    driver: local
+  postgres_stock_data:
+    driver: local
+
+networks:
+  shared_net:
+    external: true

@@ -2,12 +2,14 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   HttpCode,
   Param,
   Body,
   Query,
   UsePipes,
   UnprocessableEntityException,
+  Req,
 } from '@nestjs/common';
 import { Public, Scopes } from 'nest-keycloak-connect';
 
@@ -21,6 +23,8 @@ import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
 import { CreateShippingResponseDto } from './dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from './dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto';
+import { ShippingStatementLogsRequestDto } from './dto/shipping-statement-logs-request.dto';
+import { ShippingStatementLogsResponseDto } from './dto/shipping-statement-logs-response.dto';
 import { ContextValidationPipe } from 'src/common/exceptions/custom-validation-pipe.exception';
 import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
 import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shipping-order.exception';
@@ -37,14 +41,12 @@ export class ShippingController {
   @Get('test')
   @Public()
   async getTransportMethodsTest(): Promise<any> {
-    //only for testing purposes
     return { message: 'Hello World' };
   }
 
   @Post()
   @HttpCode(200)
-  // @Scopes('envios:write')
-  @Public()
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
   async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
     return await this.shippingService.createShipment(ship);
@@ -52,7 +54,6 @@ export class ShippingController {
 
   @Get('transport-methods')
   @Public()
-  // @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
   async getTransportMethods(): Promise<TransportMethodsResponseDto> {
     return await this.shippingService.getTransportMethods();
@@ -84,10 +85,24 @@ export class ShippingController {
 
   @Post('cost')
   @HttpCode(200)
-  //@Scopes('envios:write')
-  @Public()
+  @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidCostCalculationException))
-  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto): Promise<CostCalculationResponseDto> {
-    return await this.shippingService.calculateCost(costRequest);
+  async calculateShippingCost(@Body() costRequest: CostCalculationRequestDto, @Req() req: any): Promise<CostCalculationResponseDto> {
+    const authHeader = req.headers?.authorization || '';
+    const token = authHeader.startsWith('Bearer ') 
+      ? authHeader.replace('Bearer ', '') 
+      : authHeader;
+    return await this.shippingService.calculateCost(costRequest, token);
+  }
+
+  @Patch(':id/status')
+  @HttpCode(200)
+  @Scopes('envios:write')
+  @UsePipes(new ContextValidationPipe(UnexpectedErrorException))
+  async updateShippingStatus(
+    @Param('id') id: number, 
+    @Body() updateStatusDto: ShippingStatementLogsRequestDto
+  ): Promise<ShippingStatementLogsResponseDto> {
+    return await this.shippingService.updateShippingStatus(id, updateStatusDto);
   }
 }

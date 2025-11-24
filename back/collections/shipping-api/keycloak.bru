@@ -1,0 +1,25 @@
+meta {
+  name: keycloak
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8080/realms/ds-2025-realm/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  client_id: grupo-03
+  client_secret: 21cd6616-6571-4ee7-be29-0f781f77c74e
+}
+
+settings {
+  encodeUrl: false
+}

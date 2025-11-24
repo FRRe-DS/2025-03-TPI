@@ -1,7 +1,9 @@
+import { AddressDto } from '../dto/address.dto';
 import { Address } from '../entities/address.entity';
 
 export default abstract class AddressRepository {
-    abstract createAddress(address: Partial<Address>): Promise<Address>;
-    abstract getAllAddresses(): Promise<Address[]>;
+    abstract saveAddress(address: Partial<Address>): Promise<Address>;
+    abstract createAddress(address: AddressDto): Promise<Address>;
     abstract count(): Promise<number>;
+    abstract findAll(): Promise<Address[]>;
 }

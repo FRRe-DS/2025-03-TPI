@@ -73,4 +73,23 @@ export interface ShippingResponse {
   status: string;
   transport_type: string;
   estimated_delivery_at: string;
+  
+}
+
+export interface ShippingDetail {
+  shipping_id: number;
+  order_id: number;
+  user_id: number;
+  delivery_Address: Address;
+  departure_Address: Address;
+  products: ShipmentProduct[];
+  status: string;
+  transport_type: TransportMethod;
+  tracking_number: string;
+  carrier: string;
+  total_cost: number;
+  currency: string;
+  estimated_delivery_at: string;
+  created_at: string;
+  updated_at: string;
 }

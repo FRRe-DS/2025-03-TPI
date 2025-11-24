@@ -1,9 +1,9 @@
 export enum ShippingStatus {
-    PENDING = 'pending',
     CREATED = 'created',
     RESERVED = 'reserved',
     IN_TRANSIT = 'in_transit',
+    ARRIVED = 'arrived',
+    IN_DISTRIBUTION = 'in_distribution',
     DELIVERED = 'delivered',
     CANCELLED = 'cancelled',
-    RETURNED = 'returned'
 }

@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ComponentProps } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import type { ShippingDetail } from "@/types/logistica";
+import { consultarEnvio } from "../services/logistica-backend";
 
 const BackArrowIcon = (props: ComponentProps<"svg">) => (
   <svg
@@ -21,136 +25,107 @@ const BackArrowIcon = (props: ComponentProps<"svg">) => (
   </svg>
 );
 
-interface Direccion {
-  calle: string;
-  ciudad: string;
-  provincia: string;
-  codigo_postal: string;
-  pais: string;
-}
+// Helper para formatear el estado de envío (asumiendo los estados comunes)
+const getStatusName = (status: string) => {
+    switch (status) {
+        case 'PENDING': return 'Pendiente de Procesamiento';
+        case 'IN_TRANSIT': return 'En Tránsito';
+        case 'DELIVERED': return 'Entregado';
+        case 'CANCELLED': return 'Cancelado';
+        default: return status;
+    }
+};
 
-interface Producto {
-  id_producto: number;
-  cantidad: number;
-}
+const getTransportMethodName = (type: string) => {
+    switch (type) {
+        case 'air': return 'Aéreo';
+        case 'sea': return 'Marítimo';
+        case 'road': return 'Terrestre (Carretera)';
+        case 'rail': return 'Ferroviario';
+        default: return type;
+    }
+};
 
-interface Registro {
-  fecha: string;
-  estado: string;
-  mensaje: string;
-}
-
-interface Envio {
-  id_envio: number;
-  id_orden: number;
-  id_usuario: number;
-  direccion_entrega: Direccion;
-  direccion_salida: Direccion;
-  productos: Producto[];
-  estado: string;
-  tipo_transporte: string;
-  numero_seguimiento: string;
-  transportista: string;
-  costo_total: number;
-  moneda: string;
-  fecha_entrega_estimado: string;
-  fecha_creacion: string;
-  fecha_actualizacion: string;
-  registros: Registro[];
+// Helper para formatear la fecha
+const formatDate = (dateString: string) => {
+    try {
+        return new Date(dateString).toLocaleDateString('es-AR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return dateString;
+    }
 }
 
 export default function ConsultarEnvioPage() {
-  const [idEnvio, setIdEnvio] = useState<string>("");
-  const [expandido, setExpandido] = useState<number | null>(null);
+  const router = useRouter();
+  const [shippingId, setShippingId] = useState<string>("");
+  const [result, setResult] = useState<ShippingDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { token, isAuthenticated, isLoading } = useAuth();
 
-  const enviosMock: Envio[] = [
-    {
-      id_envio: 7633,
-      id_orden: 701,
-      id_usuario: 456,
-      direccion_entrega: {
-        calle: "Av. Siempre Viva 123",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3500ABC",
-        pais: "Argentina",
-      },
-      direccion_salida: {
-        calle: "Almacén Central",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3500XYZ",
-        pais: "Argentina",
-      },
-      productos: [
-        { id_producto: 12, cantidad: 2 },
-        { id_producto: 22, cantidad: 1 },
-      ],
-      estado: "En distribución",
-      tipo_transporte: "Aéreo",
-      numero_seguimiento: "LOG-AR-123456789",
-      transportista: "Express Logistics SA",
-      costo_total: 45.5,
-      moneda: "ARS",
-      fecha_entrega_estimado: "2025-10-23T00:00:00Z",
-      fecha_creacion: "2025-09-01T10:00:00Z",
-      fecha_actualizacion: "2025-09-15T09:29:00Z",
-      registros: [
-        { fecha: "2025-09-15T09:29:00Z", estado: "En distribución", mensaje: "El envío está en distribución" },
-        { fecha: "2025-09-12T09:27:00Z", estado: "Llegó al destino", mensaje: "Paquete llegó a la oficina de entrega" },
-      ],
-    },
-    {
-      id_envio: 7634,
-      id_orden: 702,
-      id_usuario: 456,
-      direccion_entrega: {
-        calle: "Calle Falsa 456",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3501ABC",
-        pais: "Argentina",
-      },
-      direccion_salida: {
-        calle: "Almacén Norte",
-        ciudad: "Resistencia",
-        provincia: "Chaco",
-        codigo_postal: "H3502XYZ",
-        pais: "Argentina",
-      },
-      productos: [{ id_producto: 31, cantidad: 3 }],
-      estado: "Entregado",
-      tipo_transporte: "Terrestre",
-      numero_seguimiento: "LOG-AR-987654321",
-      transportista: "Transporte Seguro SA",
-      costo_total: 30.0,
-      moneda: "ARS",
-      fecha_entrega_estimado: "2025-10-22T00:00:00Z",
-      fecha_creacion: "2025-09-05T14:30:00Z",
-      fecha_actualizacion: "2025-09-22T11:00:00Z",
-      registros: [
-        { fecha: "2025-09-22T11:00:00Z", estado: "Entregado", mensaje: "El envío fue entregado" },
-        { fecha: "2025-09-20T08:00:00Z", estado: "En tránsito", mensaje: "El envío está en tránsito" },
-      ],
-    },
-  ];
+  // Protección de ruta - redirigir si no está autenticado
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
-  const enviosFiltrados = idEnvio
-    ? enviosMock.filter((e) =>
-        e.id_envio.toString().includes(idEnvio.trim())
-      )
-    : enviosMock;
+  const validate = () => {
+    if (!shippingId.trim()) return "El ID del envío es requerido.";
+    return null;
+  };
 
-  const alternarExpandido = (id: number) => {
-    setExpandido(expandido === id ? null : id);
+  const onSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setError(null);
+    setResult(null);
+
+    const v = validate();
+    if (v) {
+        setError(v);
+        return;
+    }
+
+    try {
+        setLoading(true);
+        // 🟢 Llama a la función del servicio con el ID ingresado
+        const resp = await consultarEnvio(shippingId, token as string | null); 
+        setResult(resp);
+    } catch (err) {
+        console.error(err);
+        setError((err as Error).message || "Error al consultar el envío. Verifique el ID e intente nuevamente.");
+    } finally {
+        setLoading(false);
+    }
   };
 
   const estiloInput =
     "mt-1 p-2 border border-[var(--color-gray)] rounded-md focus:ring-0 focus:border-[var(--color-primary)] transition-colors duration-200 w-full bg-white";
+  const estiloErrorInput = estiloInput.replace('border-[var(--color-gray)]', 'border-red-500'); 
   const estiloLabel = "text-sm text-[var(--color-text-dark)] font-medium";
+  const calculateButton = `cursor-pointer px-5 py-2 bg-[var(--color-primary)] text-[var(--color-light)] rounded-full font-semibold border-2 border-[var(--color-primary)] shadow-md hover:shadow-xl hover:scale-105 transform transition-all duration-300 disabled:opacity-60`;
+  const clearButton = `cursor-pointer border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-[var(--color-light)] transition-colors duration-300 disabled:opacity-60 px-5 py-2`;
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto"></div>
+          <p className="mt-4 text-[var(--color-text-dark)]">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-100 py-12 text-[var(--color-text-dark)] flex justify-center">
+    <div className="min-h-screen bg-gray-100 py-12 text-[var(--color-text-dark)] flex justify-center">
       <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-xl rounded-xl border border-[var(--color-gray)]">
         <div className="flex items-center mb-4">
           <Link href="/" passHref className="mr-4">
@@ -158,82 +133,113 @@ export default function ConsultarEnvioPage() {
               className="p-2 rounded-full text-[var(--color-primary)] hover:bg-gray-200/75 hover:scale-110 transform transition-all duration-300 cursor-pointer"
               aria-label="Volver a la página de inicio"
             >
-              <BackArrowIcon className="w-6 h-6" />
+              <BackArrowIcon />
             </button>
           </Link>
           <h1 className="text-3xl font-heading font-bold text-[var(--color-primary)]">
-            Consultar Envío
+            Consultar Estado de Envío
           </h1>
         </div>
 
-        <label className="flex flex-col mb-6">
-          <span className={estiloLabel}>Buscar por ID de Envío</span>
-          <input
-            value={idEnvio}
-            onChange={(e) => setIdEnvio(e.target.value)}
-            className={estiloInput}
-            placeholder="Ej: 7633"
-          />
-        </label>
+        {/* 🟢 Formulario de consulta */}
+        <form onSubmit={onSubmit} className="space-y-6">
+            <label className="flex flex-col">
+                <span className={estiloLabel}>Buscar por ID de Envío</span>
+                <input
+                    value={shippingId}
+                    onChange={(e) => setShippingId(e.target.value)}
+                    className={error && !shippingId.trim() ? estiloErrorInput : estiloInput}
+                    placeholder="Ej: 7633"
+                    disabled={loading}
+                />
+                {error && !shippingId.trim() && (
+                    <span className="text-xs text-red-500 mt-1">{error}</span>
+                )}
+            </label>
 
-        <div className="mt-8 space-y-2">
-          {enviosFiltrados.length > 0 ? (
-            enviosFiltrados.map((envio) => (
-              <div
-                key={envio.id_envio}
-                className="p-4 bg-white rounded-xl shadow-md hover:shadow-lg transform transition-all duration-300 border border-gray-100 cursor-pointer"
-                onClick={() => alternarExpandido(envio.id_envio)}
-              >
-                {/* Línea resumida */}
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-[var(--color-primary)]">
-                    Envío #{envio.id_envio} - {envio.estado}
-                  </span>
-                  <span className="text-gray-500">
-                    {new Date(envio.fecha_entrega_estimado).toLocaleDateString()}
-                  </span>
+            {error && shippingId.trim() && <div className="text-sm p-3 bg-red-100 border border-red-300 text-red-700 rounded-md font-medium">{error}</div>}
+
+            <div className="flex items-center gap-4 pt-4 border-t border-[var(--color-gray)]">
+                <button
+                    type="button"
+                    onClick={() => {
+                        setResult(null);
+                        setError(null);
+                        setShippingId("");
+                    }}
+                    className={clearButton} 
+                    disabled={loading}
+                >
+                    Limpiar
+                </button>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className={calculateButton}
+                >
+                    {loading ? "Consultando..." : "Consultar Envío"}
+                </button>
+            </div>
+        </form>
+
+        {result && (
+            <div className="mt-8 p-6 border-2 border-[var(--color-primary)] rounded-xl bg-white text-[var(--color-text-dark)]">
+                <h3 className="text-xl font-heading font-bold text-[var(--color-primary)] mb-4">
+                    Detalles del Envío #{result.order_id} 
+                </h3>
+
+                <div className="space-y-3">
+                    <p className="flex justify-between">
+                        <strong>Estado Actual:</strong>
+                        <span className={`font-bold ${result.status === 'DELIVERED' ? 'text-green-600' : result.status === 'CANCELLED' ? 'text-red-600' : 'text-orange-600'}`}>
+                            {getStatusName(result.status)}
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Método de Transporte:</strong> {getTransportMethodName(result.transport_type.type)}
+                    </p> 
+                    <p className="pt-2">
+                        <strong>Costo Total:</strong> 
+                        <span className="text-[var(--color-secondary)] font-bold ml-1">
+                            {result.total_cost} {result.currency}
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Fecha de Entrega Estimada:</strong> {formatDate(result.estimated_delivery_at)}
+                    </p>
+                    <p>
+                        <strong>Número de seguimiento:</strong> {result.tracking_number}
+                    </p>
                 </div>
 
-                {/* Detalles expandibles */}
-                {expandido === envio.id_envio && (
-                  <div className="mt-4 space-y-2 text-sm text-[var(--color-text-dark)]">
-                    <p><strong>Orden:</strong> {envio.id_orden}</p>
-                    <p><strong>Tipo de transporte:</strong> {envio.tipo_transporte}</p>
-                    <p><strong>Dirección de entrega:</strong> {`${envio.direccion_entrega.calle}, ${envio.direccion_entrega.ciudad}, ${envio.direccion_entrega.provincia}, ${envio.direccion_entrega.codigo_postal}, ${envio.direccion_entrega.pais}`}</p>
-                    <p><strong>Dirección de salida:</strong> {`${envio.direccion_salida.calle}, ${envio.direccion_salida.ciudad}, ${envio.direccion_salida.provincia}, ${envio.direccion_salida.codigo_postal}, ${envio.direccion_salida.pais}`}</p>
-                    <p><strong>Total:</strong> {envio.costo_total} {envio.moneda}</p>
-                    <p><strong>Número de seguimiento:</strong> {envio.numero_seguimiento}</p>
-                    <p><strong>Transportista:</strong> {envio.transportista}</p>
-
-                    <div>
-                      <strong>Productos:</strong>
-                      <ul className="list-disc list-inside ml-4">
-                        {envio.productos.map((p) => (
-                          <li key={p.id_producto}>Producto #{p.id_producto} - Cantidad: {p.cantidad}</li>
+                <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
+                    <h4 className="font-heading font-medium text-[var(--color-primary)] mb-2">
+                        Direcciones
+                    </h4>
+                    <p className="text-sm mb-2">
+                        <strong>Entrega:</strong> {result.delivery_Address.street}, {result.delivery_Address.city} ({result.delivery_Address.postal_code})
+                    </p>
+                    <p className="text-sm">
+                        <strong>Salida:</strong> {result.departure_Address.street}, {result.departure_Address.city} ({result.departure_Address.postal_code})
+                    </p>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
+                    <h4 className="font-heading font-medium text-[var(--color-primary)] mb-2">
+                        Productos ({result.products.length})
+                    </h4>
+                    <ul className="space-y-1">
+                        {result.products.map((p, index) => (
+                            <li key={index} className="text-sm flex justify-between">
+                                <span>ID Producto: {p.idProduct}</span> 
+                                <span className="font-medium">Cantidad: {p.quantity}</span>
+                            </li>
                         ))}
-                      </ul>
-                    </div>
+                    </ul>
+                </div>
+            </div>
+        )}
 
-                    <div>
-                      <strong>Historial de envíos:</strong>
-                      <ul className="list-disc list-inside ml-4">
-                        {envio.registros.map((log, index) => (
-                          <li key={index}>
-                            [{new Date(log.fecha).toLocaleString()}] {log.estado} - {log.mensaje}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-center">
-              No se encontraron envíos con ese ID.
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
