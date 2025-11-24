@@ -189,7 +189,10 @@ export default function ConsultarEnvioPage() {
                 </h3>
 
                 <div className="space-y-3">
-                    <p className="flex justify-between">
+                  <p>
+                    <strong>Número de Orden:</strong> {result.order_id}
+                  </p>
+                    <p className="flex items-center gap-2">
                         <strong>Estado Actual:</strong>
                         <span className={`font-bold ${result.status === 'DELIVERED' ? 'text-green-600' : result.status === 'CANCELLED' ? 'text-red-600' : 'text-orange-600'}`}>
                             {getStatusName(result.status)}
@@ -197,7 +200,7 @@ export default function ConsultarEnvioPage() {
                     </p>
                     <p>
                         <strong>Método de Transporte:</strong> {getTransportMethodName(result.transport_type.type)}
-                    </p> 
+                    </p>  
                     <p className="pt-2">
                         <strong>Costo Total:</strong> 
                         <span className="text-[var(--color-secondary)] font-bold ml-1">
