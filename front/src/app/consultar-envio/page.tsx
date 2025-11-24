@@ -279,7 +279,7 @@ export default function ConsultarEnvioPage() {
                               <div className="text-xs text-gray-600">{s.order_id ? `Orden ${s.order_id}` : null}</div>
                             </div>
                             <div className="text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs ${s.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : s.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                              <span className={`px-2 py-1 rounded-full text-xs ${s.status === 'delivered' ? 'bg-green-100 text-green-700' : s.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                                 {s.status ?? "Estado"}
                               </span>
                             </div>
@@ -305,7 +305,7 @@ export default function ConsultarEnvioPage() {
                   </p>
                     <p className="flex items-center gap-2">
                         <strong>Estado Actual:</strong>
-                        <span className={`font-bold ${result.status === 'DELIVERED' ? 'text-green-600' : result.status === 'CANCELLED' ? 'text-red-600' : 'text-orange-600'}`}>
+                        <span className={`font-bold ${result.status === 'delivered' ? 'text-green-600' : result.status === 'cancelled' ? 'text-red-600' : 'text-orange-600'}`}>
                             {getStatusName(result.status)}
                         </span>
                     </p>

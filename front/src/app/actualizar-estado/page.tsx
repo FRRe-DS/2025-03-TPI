@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { consultarEnvio, actualizarEstadoEnvio } from "@/app/services/logistica-backend";
+import { ChevronDown, Check } from "lucide-react";
+import { useRef } from "react";
+
 
 const allowedTransitions: Record<string, string[]> = {
   created: ["reserved", "cancelled"],
@@ -29,6 +32,8 @@ export default function ActualizarEstadoPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
 
   // Redirección si no está autenticado
   useEffect(() => {
@@ -52,6 +57,17 @@ export default function ActualizarEstadoPage() {
 
     fetchStatus();
   }, [shippingId, token]);
+
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      setIsSelectOpen(false);
+    }
+  }
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,23 +142,60 @@ export default function ActualizarEstadoPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Custom Select: Nuevo Estado */}
+            <div className="flex flex-col relative" ref={selectRef}>
+              <label className="block mb-1 font-semibold">Nuevo estado:</label>
 
-          <div>
-            <label className="block mb-1 font-semibold">Nuevo estado:</label>
-            <select
-              className="w-full border p-2 rounded"
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-            >
-              <option value="">Seleccione un estado</option>
-              {nextStates.map((state) => (
-                <option key={state} value={state}>
-                  {state.toString()}
-                </option>
-              ))}
-            </select>
-          </div>
+              <button
+                type="button"
+                onClick={() => setIsSelectOpen(!isSelectOpen)}
+                className={`mt-1 p-2 border rounded-md w-full bg-white flex justify-between items-center text-left transition-all duration-200
+                  ${isSelectOpen ? 'border-[var(--color-primary)] ring-1 ring-[var(--color-primary)]' : 'border-gray-300 hover:border-gray-400'}
+                `}
+              >
+                <span className={!newStatus ? "text-gray-500" : "text-[var(--color-text-dark)]"}>
+                  {newStatus || "Seleccione un estado"}
+                </span>
 
+                <ChevronDown
+                  className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isSelectOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {isSelectOpen && (
+                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-100">
+                  <ul className="py-1">
+                    <li
+                      onClick={() => {
+                        setNewStatus("");
+                        setIsSelectOpen(false);
+                      }}
+                      className="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 cursor-pointer border-b border-gray-100"
+                    >
+                      Seleccione un estado
+                    </li>
+
+                    {nextStates.map((state) => (
+                      <li
+                        key={state}
+                        onClick={() => {
+                          setNewStatus(state);
+                          setIsSelectOpen(false);
+                        }}
+                        className={`px-3 py-2 text-sm cursor-pointer flex justify-between items-center transition-colors duration-150
+                          ${newStatus === state
+                            ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium'
+                            : 'text-gray-700 hover:bg-[var(--color-primary)] hover:text-white'}
+                        `}
+                      >
+                        {state}
+                        {newStatus === state && <Check className="w-4 h-4" />}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           <div>
             <label className="block mb-1 font-semibold">Nota (opcional):</label>
             <textarea
