@@ -1,15 +1,23 @@
 meta {
-  name: update-shipping-satus 
+  name: update-shipping-satus
   type: http
   seq: 13
 }
 
-get {
-  url: 
-  body: none
+patch {
+  url: http://localhost:3010/shipping/1/status
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "newStatus": "reserved",
+    "notes": "Producto reservado para envío"
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }
