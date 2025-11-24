@@ -69,6 +69,72 @@ export default function ConsultarEnvioPage() {
   const [error, setError] = useState<string | null>(null);
   const { token, isAuthenticated, isLoading } = useAuth();
 
+  type ShortShipping = { shipping_id: string; order_id?: string; status?: string; tracking_number?: string };
+  const [shipments, setShipments] = useState<ShortShipping[]>([]);
+  const [loadingList, setLoadingList] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
+
+  // Traer lista de envíos al montar 
+  useEffect(() => {
+    if (!token) return;
+    const fetchList = async () => {
+      setLoadingList(true);
+      setListError(null);
+      try {
+        const authHeader = token?.startsWith("Bearer ") ? token : `Bearer ${token}`;
+        const res = await fetch("http://localhost:3010/shipping?page=1&items_per_page=50", {
+        headers: { Authorization: authHeader },
+        });
+        if (!res.ok) throw new Error("No se pudo obtener la lista de envíos.");
+        const data = await res.json();
+        // data puede ser { page, total_pages, data: [...] } o directamente un array
+        const items = Array.isArray(data)
+          ? data
+          : data.data ||
+            data.items ||
+            data.results ||
+            data.shipments ||
+            [];
+
+        // Normalizar a ShortShipping (shipping_id como string)
+        setShipments(
+          items.map((it: any) => ({
+            shipping_id: String(it.shipping_id ?? it.id ?? ""),
+            order_id: it.order_id,
+            status: (it.status ?? "").toString(),
+            tracking_number: it.tracking_number,
+          }))
+        );
+      } catch (err) {
+        setListError((err as Error).message || "Error al cargar envíos.");
+      } finally {
+        setLoadingList(false);
+      }
+    };
+    fetchList();
+  }, [token]);
+
+  // Filtrado en vivo por shippingId (substring)
+  const filteredShipments = shipments.filter((s) =>
+    shippingId.trim() === "" ? true : s.shipping_id.includes(shippingId.trim())
+  );
+
+  // Al seleccionar un envío de la lista, traer sus detalles (usa consultarEnvio existente)
+  const handleSelectShipment = async (id: string) => {
+    setError(null);
+    setResult(null);
+    setShippingId(id); // opcional: pone el id en el input
+    try {
+      setLoading(true);
+      const resp = await consultarEnvio(id, token as string | null);
+      setResult(resp);
+    } catch (err) {
+      setError((err as Error).message || "Error al cargar detalle del envío.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Protección de ruta - redirigir si no está autenticado
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -141,7 +207,6 @@ export default function ConsultarEnvioPage() {
           </h1>
         </div>
 
-        {/* 🟢 Formulario de consulta */}
         <form onSubmit={onSubmit} className="space-y-6">
             <label className="flex flex-col">
                 <span className={estiloLabel}>Buscar por ID de Envío</span>
@@ -179,6 +244,43 @@ export default function ConsultarEnvioPage() {
                 >
                     {loading ? "Consultando..." : "Consultar Envío"}
                 </button>
+            </div>
+
+            {/* Lista de envíos - filtrado en vivo por shippingId */}
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-2 text-[var(--color-primary)]">Envíos</h3>
+              {loadingList ? (
+                <div className="text-sm text-gray-500">Cargando envíos...</div>
+              ) : listError ? (
+                <div className="text-sm text-red-600">{listError}</div>
+              ) : (
+                <div className="max-h-64 overflow-auto border rounded-md p-2 bg-white">
+                  {filteredShipments.length === 0 ? (
+                    <div className="text-sm text-gray-500">No hay envíos que coincidan.</div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {filteredShipments.map((s) => (
+                        <li key={s.shipping_id}>
+                          <button
+                            onClick={() => handleSelectShipment(s.shipping_id)}
+                            className="w-full text-left p-2 rounded-md hover:bg-gray-100 flex justify-between items-center border"
+                          >
+                            <div>
+                              <div className="font-medium">Envío #{s.shipping_id}</div>
+                              <div className="text-xs text-gray-600">{s.order_id ? `Orden ${s.order_id}` : null}</div>
+                            </div>
+                            <div className="text-sm">
+                              <span className={`px-2 py-1 rounded-full text-xs ${s.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : s.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                {s.status ?? "Estado"}
+                              </span>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
         </form>
 
