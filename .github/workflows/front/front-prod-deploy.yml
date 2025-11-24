@@ -8,6 +8,14 @@ on:
       - main
     paths:
       - 'front/**'
+      - '.github/workflows/front/front-prod-deploy.yml'
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+    paths:
+      - 'front/**'
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
