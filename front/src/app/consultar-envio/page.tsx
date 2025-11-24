@@ -103,14 +103,16 @@ export default function ConsultarEnvioPage() {
         order_id?: string;
         status?: string;
         tracking_number?: string;
-      };
+        };
 
-      items.map((it: BackendShipment) => ({
-        shipping_id: String(it.shipping_id ?? it.id ?? ""),
-        order_id: it.order_id,
-        status: it.status ?? "",
-        tracking_number: it.tracking_number,
-      }));
+        setShipments(
+          items.map((it: BackendShipment) => ({
+            shipping_id: String(it.shipping_id ?? it.id ?? ""),
+            order_id: it.order_id,
+            status: it.status ?? "",
+            tracking_number: it.tracking_number,
+          }))
+        );
 
       } catch (err) {
         setListError((err as Error).message || "Error al cargar envíos.");
