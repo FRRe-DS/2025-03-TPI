@@ -1,0 +1,20 @@
+meta {
+  name: api-gateway-stock
+  type: http
+  seq: 12
+}
+
+get {
+  url: https://api-gateway-production-3b95.up.railway.app/api/productos
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1YmViN2M1Ni04MTBmLTQwNjYtYjZiNi02Y2I2MGIyMTk1MzAifQ.eyJleHAiOjE3NjM5NjYzODUsImlhdCI6MTc2MzkzMDM4NSwianRpIjoiMzVkZWI2NjUtNDc2YS00ZjFlLWIzZGEtZDM5NGI0YTEwYjU3IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay1wcm9kdWN0aW9uLTc3NTEudXAucmFpbHdheS5hcHAvcmVhbG1zL2RzLTIwMjUtcmVhbG0iLCJzdWIiOiI3NDc0ZjRmNy1lN2RmLTRlMzMtYWE3Ny00MzUwZjlhOTUzMWQiLCJ0eXAiOiJTZXJpYWxpemVkLUlEIiwic2lkIjoiMWU1NGM4MTQtN2U2Zi00YWZjLTkxOTUtYzZhZmVjNjg4MWVhIiwic3RhdGVfY2hlY2tlciI6ImQzODJlM0JaWlFfaHBxU2diZ3V2N19EN0dTQ2ZYOTUxNFRpdHBUREwzU3cifQ.K0br0T7Yjb7NEHBLvWF4ftk3frT21346gH_oNq0ZESFrab2hq3ch1mP7dboRiB9TSKxL9wCmShQ0J2CB82M8sQ
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

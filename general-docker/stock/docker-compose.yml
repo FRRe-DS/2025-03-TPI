@@ -1,0 +1,56 @@
+services:
+
+  postgres-stock:
+    image: postgres:16.2
+    container_name: postgres_main
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+        - shared_net
+
+  backend-stock:
+    image: ghcr.io/frre-ds/2025-grupo-11-backend-stock:f5ff36db6851a291c436acc38baae82805c39c67
+    container_name: backend-stock
+    environment:
+      DB_HOST: postgres_main
+      DB_NAME: stock_management
+      DB_USER: postgres
+      DB_PASS: postgres
+      KEYCLOAK_CLIENT_ID: grupo-11
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ds2025
+      KEYCLOAK_DB: keycloak_db
+      KEYCLOAK_DB_USER: keycloak_db_user
+      KEYCLOAK_DB_PASS: keycloak_db_user_password
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/ds-2025-realm
+      KEYCLOAK_CLIENT_SECRET: ef7f0900-8de5-46c0-b813-ce76d61e0158
+      KEYCLOAK_REALM: ds-2025-realm
+    ports:
+      - "3099:3000"
+    depends_on:
+      - postgres-stock
+    networks:
+        - shared_net
+
+
+networks:
+  shared_net:
+    external: true
+
+volumes:
+  postgres_data:
+
+
