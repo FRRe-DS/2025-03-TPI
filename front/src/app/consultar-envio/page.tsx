@@ -74,8 +74,11 @@ export default function ConsultarEnvioPage() {
   const [shipments, setShipments] = useState<ShortShipping[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 50;
 
-  // Traer lista de envíos al montar 
+  // Traer lista de envíos al montar y cuando cambia la página
   useEffect(() => {
     if (!token) return;
     const fetchList = async () => {
@@ -83,7 +86,7 @@ export default function ConsultarEnvioPage() {
       setListError(null);
       try {
         const authHeader = token?.startsWith("Bearer ") ? token : `Bearer ${token}`;
-        const res = await fetch(`${API_BASE_URL}/shipping?page=1&items_per_page=50`, {
+        const res = await fetch(`${API_BASE_URL}/shipping?page=${currentPage}&items_per_page=${itemsPerPage}`, {
         headers: { Authorization: authHeader },
         });
         if (!res.ok) throw new Error("No se pudo obtener la lista de envíos.");
@@ -96,6 +99,14 @@ export default function ConsultarEnvioPage() {
             data.results ||
             data.shipments ||
             [];
+
+        // Actualizar totalPages si está disponible en la respuesta
+        if (data.total_pages) {
+          setTotalPages(data.total_pages);
+        } else if (data.page && Array.isArray(items)) {
+          // Si no hay total_pages pero hay page, estimar basado en si hay más items
+          setTotalPages(data.page);
+        }
 
         // Normalizar a ShortShipping (shipping_id como string)
         type BackendShipment = {
@@ -122,7 +133,7 @@ export default function ConsultarEnvioPage() {
       }
     };
     fetchList();
-  }, [token]);
+  }, [token, currentPage]);
 
   // Filtrado en vivo por shippingId (substring)
   const filteredShipments = shipments.filter((s) =>
@@ -222,7 +233,13 @@ export default function ConsultarEnvioPage() {
                 <span className={estiloLabel}>Buscar por ID de Envío</span>
                 <input
                     value={shippingId}
-                    onChange={(e) => setShippingId(e.target.value)}
+                    onChange={(e) => {
+                      setShippingId(e.target.value);
+                      // Resetear a página 1 cuando se busca
+                      if (currentPage !== 1) {
+                        setCurrentPage(1);
+                      }
+                    }}
                     className={error && !shippingId.trim() ? estiloErrorInput : estiloInput}
                     placeholder="Ej: 7633"
                     disabled={loading}
@@ -258,7 +275,30 @@ export default function ConsultarEnvioPage() {
 
             {/* Lista de envíos - filtrado en vivo por shippingId */}
             <div className="mt-6">
-              <h3 className="text-lg font-medium mb-2 text-[var(--color-primary)]">Envíos</h3>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium text-[var(--color-primary)]">Envíos</h3>
+                {!loadingList && !listError && totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1 || loadingList}
+                      className="px-3 py-1 text-sm border border-[var(--color-primary)] rounded-md hover:bg-[var(--color-primary)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages || loadingList}
+                      className="px-3 py-1 text-sm border border-[var(--color-primary)] rounded-md hover:bg-[var(--color-primary)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                )}
+              </div>
               {loadingList ? (
                 <div className="text-sm text-gray-500">Cargando envíos...</div>
               ) : listError ? (
