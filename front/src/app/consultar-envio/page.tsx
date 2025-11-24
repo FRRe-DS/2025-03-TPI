@@ -337,7 +337,7 @@ export default function ConsultarEnvioPage() {
                         <strong>Salida:</strong> {result.departure_Address.street}, {result.departure_Address.city} ({result.departure_Address.postal_code})
                     </p>
                 </div> 
-                
+              
                 <div className="mt-4 pt-4 border-t border-[var(--color-primary)]/20">
                     <h4 className="font-heading font-medium text-[var(--color-primary)] mb-2">
                         Productos ({result.products.length})
