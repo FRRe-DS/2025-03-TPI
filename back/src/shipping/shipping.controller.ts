@@ -19,18 +19,18 @@ import { TransportMethodsResponseDto } from './dto/transport-methods-response.dt
 import { ShippingListResponseDto } from './dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from './dto/shipping-detail.dto';
 import { ShippingService } from './services/shipping.service';
-import { PaginationInDto } from 'src/shared/dto/pagination-in-dto';
+import { PaginationInDto } from '../shared/dto/pagination-in-dto';
 import { CreateShippingResponseDto } from './dto/create-shipment-response.dto';
 import { CancelShippingResponseDto } from './dto/cancel-shipping-response.dto';
 import { CostCalculationResponseDto } from './dto/cost-calculation-response.dto';
 import { ShippingStatementLogsRequestDto } from './dto/shipping-statement-logs-request.dto';
 import { ShippingStatementLogsResponseDto } from './dto/shipping-statement-logs-response.dto';
-import { ContextValidationPipe } from 'src/common/exceptions/custom-validation-pipe.exception';
-import { InvalidCostCalculationException } from 'src/common/exceptions/invalid-cost-calculation.exception';
-import { InvalidShippingOrderException } from 'src/common/exceptions/invalid-shipping-order.exception';
-import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
-import { ShippingIdNotFoundException } from 'src/common/exceptions/shipping-id-notfound.exception';
-import { ShippingIdNonCancellableException } from 'src/common/exceptions/shipping-id-noncancellable.exception';
+import { ContextValidationPipe } from '../common/exceptions/custom-validation-pipe.exception';
+import { InvalidCostCalculationException } from '../common/exceptions/invalid-cost-calculation.exception';
+import { InvalidShippingOrderException } from '../common/exceptions/invalid-shipping-order.exception';
+import { UnexpectedErrorException } from '../common/exceptions/unexpected-error.exception';
+import { ShippingIdNotFoundException } from '../common/exceptions/shipping-id-notfound.exception';
+import { ShippingIdNonCancellableException } from '../common/exceptions/shipping-id-noncancellable.exception';
 
 @Controller('shipping')
 export class ShippingController {
