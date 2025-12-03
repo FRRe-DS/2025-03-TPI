@@ -66,14 +66,14 @@ function setupApiMocks() {
 function mockKeycloakRedirects() {
   const keycloakUrl = Cypress.env('keycloakUrl') || 'https://keycloak-production-7751.up.railway.app';
 
-  // Intercept Keycloak authorization requests
-  cy.intercept('GET', `${keycloakUrl}/**`, (req) => {
+  // Intercept Keycloak authorization requests - be specific to avoid redirect loops
+  cy.intercept('GET', `${keycloakUrl}/realms/**/protocol/openid-connect/auth*`, (req) => {
     // Simulate successful auth redirect back to app
     req.redirect('http://localhost:3000/?code=mock-auth-code');
   }).as('keycloakAuth');
 
   // Intercept Keycloak token requests
-  cy.intercept('POST', `${keycloakUrl}/**/token`, {
+  cy.intercept('POST', `${keycloakUrl}/realms/**/protocol/openid-connect/token`, {
     statusCode: 200,
     body: {
       access_token: 'mock-jwt-token-for-testing',
@@ -98,10 +98,7 @@ Cypress.Commands.add('login', (username?: string, password?: string) => {
         // CI Mode: Mock authentication
         cy.log('🔧 Using mocked authentication (CI mode)');
 
-        // Setup API mocks
-        setupApiMocks();
-
-        // Mock Keycloak redirects
+        // Mock Keycloak redirects (API mocks are set up globally in e2e.ts)
         mockKeycloakRedirects();
 
         // Mock the Keycloak authentication first
@@ -162,11 +159,6 @@ Cypress.Commands.add('login', (username?: string, password?: string) => {
       },
     }
   );
-
-  // Setup API mocks for all tests (they persist across session)
-  if (useMocks) {
-    setupApiMocks();
-  }
 });
 
 export {};
