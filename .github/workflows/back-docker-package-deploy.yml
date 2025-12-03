@@ -23,6 +23,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: ./back
+        run: bun install
+
+      - name: Run e2e tests
+        working-directory: ./back
+        run: bun run test:e2e
+
       - name: Set image name (lowercase)
         id: vars
         run: |

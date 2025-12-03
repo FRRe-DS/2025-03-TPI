@@ -9,7 +9,7 @@ import ProductRepository from '../repositories/product.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
-import { TransportMethodNotFoundException } from 'src/common/exceptions/transport_method-notfound.exception';
+import { TransportMethodNotFoundException } from '../../common/exceptions/transport_method-notfound.exception';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
@@ -23,8 +23,8 @@ import ShipmentProductRepository from '../repositories/shipment_product.reposito
 import shippingLogRepository from '../repositories/shipping-log.repository';
 import { StockProduct } from 'src/shared/types/stock-api';
 import { ShippingStatusTransitionHelper } from '../helpers/shipping-status-transition.helper';
-import { BusinessRuleViolationException } from 'src/common/exceptions/business-rule-viol.exception';
-import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
+import { BusinessRuleViolationException } from '../../common/exceptions/business-rule-viol.exception';
+import { UnexpectedErrorException } from '../../common/exceptions/unexpected-error.exception';
 
 @Injectable()
 export class ShippingService {
