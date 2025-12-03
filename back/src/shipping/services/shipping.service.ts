@@ -9,7 +9,7 @@ import ProductRepository from '../repositories/product.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
-import { TransportMethodNotFoundException } from 'src/common/exceptions/transport_method-notfound.exception';
+import { TransportMethodNotFoundException } from '../../common/exceptions/transport_method-notfound.exception';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
@@ -70,7 +70,6 @@ export class ShippingService {
     });
     const savedOriginAddress = await this.addressRepository.saveAddress(originAddress);
 
-    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
     const destinationAddress = await this.addressRepository.createAddress(createShippmentDto.delivery_address);
 
     const savedDestinationAddress = await this.addressRepository.saveAddress(destinationAddress);

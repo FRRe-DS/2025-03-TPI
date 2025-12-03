@@ -4,6 +4,9 @@ import request from 'supertest';
 import { ShippingController } from '../../shipping/shipping.controller';
 import { ShippingService } from '../../shipping/services/shipping.service';
 import { AfterInsert } from 'typeorm';
+import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
+
+
 
 describe('Shipping API (e2e) - mocked', () => {
   let app: INestApplication;
@@ -16,11 +19,11 @@ describe('Shipping API (e2e) - mocked', () => {
     }),
     createShipment: jest.fn().mockResolvedValue({
       id: 123,
-      status: 'PENDING',
+      status: ShippingStatus.CREATED,
       tracking_number: 'LOG-AR-123456789',
     }),
     ShippingServicePagination: jest.fn().mockResolvedValue({
-      items: [{ id: 123, status: 'PENDING' }],
+      items: [{ id: 123, status: ShippingStatus.CREATED }],
       total: 1,
       page: 1,
       perPage: 20,
@@ -30,9 +33,9 @@ describe('Shipping API (e2e) - mocked', () => {
       status: 'PENDING',
       transport_method: { id: 1, type: 'AIR', estimated_days: 2 },
     }),
-    cancelShipment: jest.fn().mockResolvedValue({ id: 123, status: 'CANCELLED' }),
+    cancelShipment: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.CANCELLED }),
     calculateCost: jest.fn().mockResolvedValue({ total: 150 }),
-    updateShippingStatus: jest.fn().mockResolvedValue({ id: 123, status: 'DELIVERED' }),
+    updateShippingStatus: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.DELIVERED }),
   };
 
   beforeAll(async () => {
@@ -85,7 +88,7 @@ describe('Shipping API (e2e) - mocked', () => {
 
   it('POST /shipping/:id/cancel -> cancel shipment', async () => {
     const res = await request(app.getHttpServer()).post('/shipping/123/cancel').expect(200);
-    expect(res.body.status).toBe('CANCELLED');
+    expect(res.body.status).toBe(ShippingStatus.CANCELLED);
     expect(mockService.cancelShipment).toHaveBeenCalledWith(123);
   });
 
@@ -103,8 +106,8 @@ describe('Shipping API (e2e) - mocked', () => {
   });
 
   it('PATCH /shipping/:id/status -> update status', async () => {
-    const res = await request(app.getHttpServer()).patch('/shipping/123/status').send({ status: 'DELIVERED' }).expect(200);
-    expect(res.body.status).toBe('DELIVERED');
-    expect(mockService.updateShippingStatus).toHaveBeenCalledWith(123, 'DELIVERED');
+    const res = await request(app.getHttpServer()).patch('/shipping/123/status').send({ status: ShippingStatus.DELIVERED }).expect(200);
+    expect(res.body.status).toBe(ShippingStatus.DELIVERED);
+    expect(mockService.updateShippingStatus).toHaveBeenCalledWith(123, ShippingStatus.DELIVERED);
   });
 });
