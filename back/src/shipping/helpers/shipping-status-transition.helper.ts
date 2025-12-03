@@ -17,7 +17,7 @@ export class ShippingStatusTransitionHelper {
    * con validaciones específicas
    */
   private static readonly ALLOWED_TRANSITIONS: Record<ShippingStatus, ShippingStatus[]> = {
-    [ShippingStatus.CREATED]: [ShippingStatus.RESERVED, ShippingStatus.CANCELLED],
+    [ShippingStatus.CREATED]: [ShippingStatus.RESERVED, ShippingStatus.IN_TRANSIT, ShippingStatus.CANCELLED],
     [ShippingStatus.RESERVED]: [ShippingStatus.IN_TRANSIT, ShippingStatus.CANCELLED],
     [ShippingStatus.IN_TRANSIT]: [ShippingStatus.IN_DISTRIBUTION],
     [ShippingStatus.ARRIVED]: [ShippingStatus.DELIVERED],

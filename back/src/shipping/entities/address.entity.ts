@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
+import { AddressDomain } from '../domain/address';
 @Entity('addresses')
-export class Address {
+export class Address implements AddressDomain {
     @PrimaryGeneratedColumn()
     id: number;
 

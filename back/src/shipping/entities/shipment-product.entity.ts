@@ -1,9 +1,10 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Shipment } from './shipment.entity';
 import { Product } from './product.entity';
+import { ShipmentProductDomain } from '../domain/shipment-product';
 
 @Entity('shipment_products')
-export class ShipmentProduct {
+export class ShipmentProduct implements ShipmentProductDomain {
     @PrimaryColumn()
     idShipment: number;
 

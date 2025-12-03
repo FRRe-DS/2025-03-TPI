@@ -13,9 +13,10 @@ import { User } from './user.entity';
 import { TransportMethod } from './transport-method.entity';
 import { ShipmentProduct } from './shipment-product.entity';
 import { ShippingLog } from './shipping-log.entity';
+import { ShipmentDomain } from '../domain/shipment';
 
 @Entity('shipments')
-export class Shipment {
+export class Shipment implements ShipmentDomain {
     @PrimaryGeneratedColumn()
     id: number;
 

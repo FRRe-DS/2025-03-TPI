@@ -211,7 +211,7 @@ export class SeedService implements OnModuleInit {
           transportMethod: transportMethods[0],
           totalCost: 150.50,
           trackingNumber: 'TRACK001',
-          carrierName: 'FastShip Inc.'
+          carrierName: 'EnviGo'
         },
         {
           user: users[1],
@@ -221,7 +221,7 @@ export class SeedService implements OnModuleInit {
           transportMethod: transportMethods[1],
           totalCost: 89.99,
           trackingNumber: 'TRACK002',
-          carrierName: 'OceanCargo Ltd.'
+          carrierName: 'EnviGo'
         },
         {
           user: users[0],
@@ -231,7 +231,7 @@ export class SeedService implements OnModuleInit {
           transportMethod: transportMethods[2],
           totalCost: 45.00,
           trackingNumber: 'TRACK003',
-          carrierName: 'RoadExpress'
+          carrierName: 'EnviGo'
         },
       ];
 
