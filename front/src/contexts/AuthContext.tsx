@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isInitialized.current = true;
 
     // Check if running in Cypress test mode
-    if (typeof window !== 'undefined' && (window as any).Cypress) {
+    if (typeof window !== 'undefined' && (window as unknown as { Cypress: boolean }).Cypress) {
       const mockAuthData = localStorage.getItem('keycloakCypress');
       if (mockAuthData) {
         try {
