@@ -1,7 +1,9 @@
 describe("Full shipment creation flow", () => {
+  beforeEach(() => {
+    cy.login();
+  });
 
   it("should navigate to the form, fill in the data, add products, and create the shipment", () => {
-    
     cy.visit("http://localhost:3000/");
 
     cy.contains("Crear envío").click();
@@ -20,11 +22,15 @@ describe("Full shipment creation flow", () => {
       .clear().type("Corrientes");
 
     cy.get('input[placeholder="3500"]')
-      .clear().type("3400");
+      .clear().type("A3400BBB");
 
     cy.get('input[placeholder="AR"]').should("have.value", "AR");
 
-    cy.get("select").select("Barco");
+    // Interactuar con el select personalizado
+    cy.contains("Método de transporte").parent().find("button").click();
+    // Esperar a que aparezca el dropdown y seleccionar "Barco"
+    cy.contains("Método de transporte").parent().find("ul").should("be.visible");
+    cy.contains("Método de transporte").parent().find("ul li").contains("Barco").click();
 
     cy.get('input[placeholder="Ej: 456"]').eq(1)
       .clear().type("1");

@@ -1,0 +1,16 @@
+{
+  "currency": "ARS",
+  "total_cost": 1500.50,
+  "transport_type": "Barco",
+  "products": [
+    {
+      "id": 1,
+      "cost": 750.25
+    },
+    {
+      "id": 2,
+      "cost": 750.25
+    }
+  ]
+}
+

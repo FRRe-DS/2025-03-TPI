@@ -1,21 +1,14 @@
 describe("Login and Tracking Flow", () => {
+  beforeEach(() => {
+    cy.login();
+  });
 
   it("should login, consult shipment #2, and logout", () => {
-    // --- PASO 1: LOGIN (Igual que antes) ---
+    // --- PASO 1: LOGIN (ya hecho en beforeEach) ---
     cy.visit("http://localhost:3000/");
 
-    cy.contains("Iniciar Sesión").click();
-
-    cy.origin("https://keycloak-production-7751.up.railway.app", () => {
-      cy.get('#username').clear().type("alejo");
-      cy.get('#password').clear().type("123");
-      cy.get('#kc-login').click();
-    });
-
-    // Verificamos que volvió al inicio logueado
-    cy.url().should("include", "localhost:3000");
-    cy.contains("Cerrar Sesión", { timeout: 10000 }).should("exist");
-
+    // Verificamos que estamos logueados
+    cy.contains("Cerrar Sesión", { timeout: 5000 }).should("exist");
 
     // --- PASO 2: NAVEGAR A CONSULTAR ENVÍO ---
     // Buscamos el enlace en la barra de navegación y hacemos click

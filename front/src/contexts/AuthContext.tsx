@@ -30,6 +30,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isInitialized.current) return;
     
     isInitialized.current = true;
+
+    // Check if running in Cypress test mode
+    if (typeof window !== 'undefined' && (window as any).Cypress) {
+      const mockAuthData = localStorage.getItem('keycloakCypress');
+      if (mockAuthData) {
+        try {
+          const parsed = JSON.parse(mockAuthData);
+          setIsAuthenticated(parsed.authenticated || false);
+          setToken(parsed.token || null);
+          setIsLoading(false);
+          return;
+        } catch (error) {
+          console.error("Error parsing mock auth data:", error);
+        }
+      }
+    }
     
     keycloakClient
       .init({

@@ -1,0 +1,10 @@
+{
+  "token": "mock-jwt-token-for-testing",
+  "refreshToken": "mock-refresh-token",
+  "user": {
+    "id": "alejo",
+    "username": "alejo",
+    "email": "alejo@test.com"
+  }
+}
+

@@ -1,4 +1,7 @@
 describe("Full cost calculation flow", () => {
+  beforeEach(() => {
+    cy.login();
+  });
 
   it("should navigate to the form, fill in the data, add products, and calculate the shipment", () => {
     cy.visit("http://localhost:3000/");
@@ -17,12 +20,16 @@ describe("Full cost calculation flow", () => {
       .clear().type("Corrientes");
 
     cy.get('input[placeholder="3500"]')
-      .clear().type("3400");
+      .clear().type("A3400BBB");
 
     cy.get('input[placeholder="AR"]')  // readOnly
       .should("have.value", "AR");
 
-    cy.get("select").select(1);
+    // Interactuar con el select personalizado
+    cy.contains("Método de transporte").parent().find("button").click();
+    // Esperar a que aparezca el dropdown y seleccionar la primera opción real (no la opción de placeholder)
+    cy.contains("Método de transporte").parent().find("ul").should("be.visible");
+    cy.contains("Método de transporte").parent().find("ul li").eq(1).click();
 
     cy.get('input[placeholder="Ej: 456"]').first()
       .clear().type("1");

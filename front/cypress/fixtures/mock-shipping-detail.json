@@ -1,0 +1,52 @@
+{
+  "shipping_id": 2,
+  "order_id": 456,
+  "user_id": 1,
+  "delivery_Address": {
+    "street": "Mendoza 1062",
+    "city": "Corrientes",
+    "state": "Corrientes",
+    "postal_code": "3400",
+    "country": "AR"
+  },
+  "departure_Address": {
+    "street": "Av. Siempre Viva 123",
+    "city": "Resistencia",
+    "state": "Chaco",
+    "postal_code": "3500",
+    "country": "AR"
+  },
+  "products": [
+    {
+      "idShipment": 2,
+      "idProduct": 1,
+      "quantity": 6,
+      "product": {
+        "id": 1
+      }
+    },
+    {
+      "idShipment": 2,
+      "idProduct": 3,
+      "quantity": 12,
+      "product": {
+        "id": 3
+      }
+    }
+  ],
+  "status": "En tránsito",
+  "transport_type": {
+    "id": 1,
+    "name": "Barco",
+    "type": "Barco",
+    "estimatedDays": "15-20 días"
+  },
+  "tracking_number": "TRACK123456",
+  "carrier": "Transporte Marítimo SA",
+  "total_cost": 1500.50,
+  "currency": "ARS",
+  "estimated_delivery_at": "2024-12-31T12:00:00Z",
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-16T14:30:00Z"
+}
+

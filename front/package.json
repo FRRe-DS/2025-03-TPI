@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "cypress:run:ci": "CYPRESS_USE_MOCKS=true cypress run"
   },
   "dependencies": {
     "axios": "^1.12.2",

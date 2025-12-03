@@ -1,3 +1,5 @@
 .vercel
 
-
+# Cypress screenshots and videos
+cypress/screenshots/
+cypress/videos/

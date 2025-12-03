@@ -1,0 +1,7 @@
+{
+  "shipping_id": 123,
+  "status": "Pendiente",
+  "transport_type": "Barco",
+  "estimated_delivery_at": "2024-12-31T12:00:00Z"
+}
+

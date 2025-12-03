@@ -1,6 +1,10 @@
 describe('Navigation Flow', () => {
   const baseURL = 'http://localhost:3000/';
 
+  beforeEach(() => {
+    cy.login();
+  });
+
   it('should navigate to Calcular Costo page and verify content', () => {
     cy.visit(baseURL);
 
