@@ -45,7 +45,7 @@ services:
     env_file:
       - .env
     ports:
-      - "3010:3001"
+      - "3010:3010"
     networks:
       - shipping_network
 

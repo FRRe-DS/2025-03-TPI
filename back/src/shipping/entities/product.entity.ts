@@ -1,8 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { ShipmentProduct } from './shipment-product.entity';
+import { ProductDomain } from '../domain/product';
 
 @Entity('products')
-export class Product {
+export class Product implements ProductDomain{
     @PrimaryGeneratedColumn()
     id: number;
 
