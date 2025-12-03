@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateShippmentRequestDto } from '../dto/create-shippment-request.dto';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
 import TransportMethodsRepository from '../repositories/transport_methods.repository';
@@ -23,7 +23,8 @@ import ShipmentProductRepository from '../repositories/shipment_product.reposito
 import shippingLogRepository from '../repositories/shipping-log.repository';
 import { StockProduct } from 'src/shared/types/stock-api';
 import { ShippingStatusTransitionHelper } from '../helpers/shipping-status-transition.helper';
-import { BusinessRuleViolationException } from '../../common/exceptions/business-rule-viol.exception';
+import { BusinessRuleViolationException } from 'src/common/exceptions/business-rule-viol.exception';
+import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
 
 @Injectable()
 export class ShippingService {
@@ -50,7 +51,7 @@ export class ShippingService {
     };
   }
 
-  async createShipment(createShippmentDto: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
+  async createShipment(createShippmentDto: CreateShippmentRequestDto, token: string): Promise<CreateShippingResponseDto> {
     // 1. Verificar o crear usuario
     let user = await this.userRepository.findOne(createShippmentDto.user_id);
 
@@ -59,38 +60,77 @@ export class ShippingService {
       user = await this.userRepository.save(user);
     }
 
-    //TODO esto se deberia buscar de los productos
-    // 2. Crear direcciones (siempre se crean nuevas)
+    // 2. Obtener información de productos desde el servicio de stock
+    const promises = createShippmentDto.products.map(async (p) => {
+      const response = await fetch(`${process.env.STOCK_SERVICE_URL}/api/productos/${p.id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new InternalServerErrorException(`Error HTTP al obtener producto ${p.id}: ${response.status}`);
+      }
+      
+      return response.json() as Promise<StockProduct>;
+    });
+
+    const stockProducts: StockProduct[] = await Promise.all(promises);
+
+    // 3. Usar la dirección de origen del primer producto (warehouse)
+    const firstProduct = stockProducts[0];
     const originAddress = await this.addressRepository.createAddress({
-      street: "Av. Siempre Viva 742",
-      city: "Springfield",
-      state: "Illinois",
-      postal_code: "62704",
-      country: "US"
+      street: firstProduct.ubicacion.street,
+      city: firstProduct.ubicacion.city,
+      state: firstProduct.ubicacion.state,
+      postal_code: firstProduct.ubicacion.postal_code,
+      country: firstProduct.ubicacion.country
     });
     const savedOriginAddress = await this.addressRepository.saveAddress(originAddress);
 
+    // 4. Crear dirección de destino
     const destinationAddress = await this.addressRepository.createAddress(createShippmentDto.delivery_address);
 
     const savedDestinationAddress = await this.addressRepository.saveAddress(destinationAddress);
 
-    // 3. Verificar método de transporte
+    // 5. Verificar método de transporte
     const transportMethod = await this.transportMethodsRepository.findOne(createShippmentDto.transport_type);
 
     if (!transportMethod) {
       throw new TransportMethodNotFoundException();
     }
 
-    // TODO: Implementar lógica de cálculo de costo
-    const totalCost = 100;
-    // 4. Crear shipment
+    // 6. Calcular el costo total usando el servicio de cálculo
+    const productsWithDetails: ProductWithDetails[] = createShippmentDto.products.map((p, index) => {
+      const stockProduct = stockProducts[index];
+      
+      return {
+        id: p.id,
+        quantity: p.quantity,
+        weight: stockProduct.pesoKg,
+        length: stockProduct.dimensiones.largoCm,
+        width: stockProduct.dimensiones.anchoCm,
+        height: stockProduct.dimensiones.altoCm,
+        warehouse_postal_code: stockProduct.ubicacion.postal_code,
+      };
+    });
+
+    const destinationPostalCode = createShippmentDto.delivery_address.postal_code || 'C1000AAA';
+    const costCalculation = await this.costCalculatorService.calculateCost(
+      productsWithDetails,
+      destinationPostalCode as any,
+    );
+    const totalCost = costCalculation.total_cost;
+
+    // 7. Crear shipment
     // Generar tracking number aleatorio
     const randomNumber = Math.floor(100000000 + Math.random() * 900000000); // 9 dígitos
     const trackingNumber = `LOG-AR-${randomNumber}`;
-    const carrierName = 'Andreani'
+    const carrierName = 'EnviGo'
     const savedShipment = await this.shipmentRepository.createShipment(user, createShippmentDto.order_id, savedOriginAddress, savedDestinationAddress, transportMethod, totalCost, trackingNumber, carrierName);
 
-    // 5. Verificar o crear produtos y crea relaciones 
+    // 8. Verificar o crear productos y crear relacioness
     for (const productDto of createShippmentDto.products) {
       let product = await this.productRepository.findOne(productDto.id);
 
@@ -99,20 +139,19 @@ export class ShippingService {
         product = await this.productRepository.save(product);
       }
 
-      //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
       const shipmentProduct = await this.shipmentProductRepository.create(savedShipment, product, productDto.quantity);
-
       await this.shipmentProductRepository.save(shipmentProduct);
     }
-    //TODO: Esto debería ser un repository, estamos ligados a la BD con esto
+
+    // 9. Crear log inicial del envío
     const shippingLog = await this.shippingLogRepository.create(savedShipment);
     await this.shippingLogRepository.save(shippingLog);
 
-    // 6. Retornar shipment completo
+    // 10. Retornar shipment completo
     const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
 
     if (!result) {
-      throw new ShippingIdNotFoundException();
+      throw new UnexpectedErrorException('Shipment created but not found');
     }
 
     return {

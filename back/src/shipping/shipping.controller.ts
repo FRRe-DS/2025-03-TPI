@@ -48,8 +48,12 @@ export class ShippingController {
   @HttpCode(200)
   @Scopes('envios:write')
   @UsePipes(new ContextValidationPipe(InvalidShippingOrderException))
-  async createShippingOrder(@Body() ship: CreateShippmentRequestDto): Promise<CreateShippingResponseDto> {
-    return await this.shippingService.createShipment(ship);
+  async createShippingOrder(@Body() ship: CreateShippmentRequestDto, @Req() req: any): Promise<CreateShippingResponseDto> {
+    const authHeader = req.headers?.authorization || '';
+    const token = authHeader.startsWith('Bearer ') 
+      ? authHeader.replace('Bearer ', '') 
+      : authHeader;
+    return await this.shippingService.createShipment(ship, token);
   }
 
   @Get('transport-methods')
