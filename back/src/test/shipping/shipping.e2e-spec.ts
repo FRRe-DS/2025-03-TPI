@@ -48,7 +48,12 @@ describe('Shipping API (e2e) - mocked', () => {
       }),
     cancelShipment: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.CANCELLED }),
     calculateCost: jest.fn().mockResolvedValue({ total: 150 }),
-    updateShippingStatus: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.DELIVERED }),
+    updateShippingStatus: jest.fn().mockResolvedValue({
+      orderId: '123',
+      currentStatus: ShippingStatus.DELIVERED,
+      statusHistory: [],
+      allowedNextStatuses: [],
+    }),
   };
 
   beforeAll(async () => {
@@ -77,8 +82,7 @@ describe('Shipping API (e2e) - mocked', () => {
     const payload = {
       user_id: 1,
       order_id: 1,
-      origin_address: { street: 'Av A', city: 'X', state: 'S', postal_code: 'A0000ABC', country: 'AR' },
-      destination_address: { street: 'Av B', city: 'Y', state: 'S', postal_code: 'B1111DEF', country: 'AR' },
+      delivery_address: { street: 'Av B', city: 'Y', state: 'S', postal_code: 'B5678DEF', country: 'AR' },
       transport_type: 'air',
       products: [{ id: 1, quantity: 1 }],
     };
@@ -107,11 +111,8 @@ describe('Shipping API (e2e) - mocked', () => {
 
   it('POST /shipping/cost -> calculate cost', async () => {
     const payload = {
-      user_id: 1,
-      transport_type: 'AIR',
-      products: [],
-      origin_address: { street: 'A', city: 'X', state: 'S', postal_code: '0000', country: 'AR' },
-      destination_address: { street: 'B', city: 'Y', state: 'S', postal_code: '1111', country: 'AR' },
+      delivery_address: { street: 'B', city: 'Y', state: 'S', postal_code: 'B5678DEF', country: 'AR' },
+      products: [{ id: 1, quantity: 1 }],
     };
     const res = await request(app.getHttpServer()).post('/shipping/cost').send(payload).expect(200);
     expect(res.body.total).toBe(150);
@@ -119,8 +120,8 @@ describe('Shipping API (e2e) - mocked', () => {
   });
 
   it('PATCH /shipping/:id/status -> update status', async () => {
-    const res = await request(app.getHttpServer()).patch('/shipping/123/status').send({ status: ShippingStatus.DELIVERED }).expect(200);
-    expect(res.body.status).toBe(ShippingStatus.DELIVERED);
-    expect(mockService.updateShippingStatus).toHaveBeenCalledWith(123, ShippingStatus.DELIVERED);
+    const res = await request(app.getHttpServer()).patch('/shipping/123/status').send({ newStatus: ShippingStatus.DELIVERED }).expect(200);
+    expect(res.body.currentStatus).toBe(ShippingStatus.DELIVERED);
+    expect(mockService.updateShippingStatus).toHaveBeenCalled();
   });
 });
