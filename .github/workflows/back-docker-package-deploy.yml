@@ -16,7 +16,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,14 @@ jobs:
       - name: Run e2e tests
         working-directory: ./back
         run: bun run test:e2e
+
+  publish-docker-image:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set image name (lowercase)
         id: vars
