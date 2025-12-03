@@ -3,10 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { ShippingController } from '../../shipping/shipping.controller';
 import { ShippingService } from '../../shipping/services/shipping.service';
-import { AfterInsert } from 'typeorm';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
-
-
 
 describe('Shipping API (e2e) - mocked', () => {
   let app: INestApplication;
@@ -28,11 +25,27 @@ describe('Shipping API (e2e) - mocked', () => {
       page: 1,
       perPage: 20,
     }),
-    findById: jest.fn().mockResolvedValue({
-      id: 123,
-      status: 'PENDING',
-      transport_method: { id: 1, type: 'AIR', estimated_days: 2 },
-    }),
+    // findById debe devolver estados coherentes en el orden de llamadas de los tests:
+    // 1) GET /shipping/:id  -> CREATED (consulta)
+    // 2) POST /shipping/:id/cancel -> CREATED (permitir cancel)
+    // 3) PATCH /shipping/:id/status -> ARRIVED (para permitir transición a DELIVERED)
+    findById: jest
+      .fn()
+      .mockResolvedValueOnce({
+        id: 123,
+        status: ShippingStatus.CREATED,
+        transport_method: { id: 1, type: 'AIR', estimated_days: 2 },
+      })
+      .mockResolvedValueOnce({
+        id: 123,
+        status: ShippingStatus.CREATED,
+        transport_method: { id: 1, type: 'AIR', estimated_days: 2 },
+      })
+      .mockResolvedValue({
+        id: 123,
+        status: ShippingStatus.ARRIVED,
+        transport_method: { id: 1, type: 'AIR', estimated_days: 2 },
+      }),
     cancelShipment: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.CANCELLED }),
     calculateCost: jest.fn().mockResolvedValue({ total: 150 }),
     updateShippingStatus: jest.fn().mockResolvedValue({ id: 123, status: ShippingStatus.DELIVERED }),
@@ -67,8 +80,8 @@ describe('Shipping API (e2e) - mocked', () => {
       origin_address: { street: 'Av A', city: 'X', state: 'S', postal_code: 'A0000ABC', country: 'AR' },
       destination_address: { street: 'Av B', city: 'Y', state: 'S', postal_code: 'B1111DEF', country: 'AR' },
       transport_type: 'air',
-      products: [{id:1,quantity:1}],
-      };
+      products: [{ id: 1, quantity: 1 }],
+    };
     const res = await request(app.getHttpServer()).post('/shipping').send(payload).expect(200);
     expect(res.body.id).toBe(123);
     expect(mockService.createShipment).toHaveBeenCalled();

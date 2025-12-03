@@ -23,8 +23,8 @@ import ShipmentProductRepository from '../repositories/shipment_product.reposito
 import shippingLogRepository from '../repositories/shipping-log.repository';
 import { StockProduct } from 'src/shared/types/stock-api';
 import { ShippingStatusTransitionHelper } from '../helpers/shipping-status-transition.helper';
-import { BusinessRuleViolationException } from 'src/common/exceptions/business-rule-viol.exception';
-import { UnexpectedErrorException } from 'src/common/exceptions/unexpected-error.exception';
+import { BusinessRuleViolationException } from '../../common/exceptions/business-rule-viol.exception';
+import { UnexpectedErrorException } from '../../common/exceptions/unexpected-error.exception';
 
 @Injectable()
 export class ShippingService {
