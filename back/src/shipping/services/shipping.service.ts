@@ -9,6 +9,7 @@ import ProductRepository from '../repositories/product.repository';
 import { TransportMethodsResponseDto } from '../dto/transport-methods-response.dto';
 import { ShippingListResponseDto } from '../dto/shipping-list.response';
 import { ShippingDetailsResponseDto } from '../dto/shipping-detail.dto';
+import { TransportMethodNotFoundException } from 'src/common/exceptions/transport_method-notfound.exception';
 import { ShippingIdNotFoundException } from '../../common/exceptions/shipping-id-notfound.exception';
 import { ShippingIdNonCancellableException } from '../../common/exceptions/shipping-id-noncancellable.exception';
 import { CostCalculationRequestDto } from '../dto/cost-calculation-request.dto';
@@ -78,7 +79,7 @@ export class ShippingService {
     const transportMethod = await this.transportMethodsRepository.findOne(createShippmentDto.transport_type);
 
     if (!transportMethod) {
-      throw new NotFoundException('Transport method not found');
+      throw new TransportMethodNotFoundException();
     }
 
     // TODO: Implementar lógica de cálculo de costo
@@ -112,7 +113,7 @@ export class ShippingService {
     const result = await this.shipmentRepository.findShipmentById(savedShipment.id);
 
     if (!result) {
-      throw new NotFoundException('Shipment created but not found');
+      throw new ShippingIdNotFoundException();
     }
 
     return {
