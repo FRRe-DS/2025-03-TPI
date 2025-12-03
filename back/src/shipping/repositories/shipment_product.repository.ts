@@ -1,9 +1,9 @@
-import { Product } from "../entities/product.entity";
-import { ShipmentProduct } from "../entities/shipment-product.entity";
-import { Shipment } from "../entities/shipment.entity";
+import { ProductDomain } from "../domain/product";
+import { ShipmentProductDomain } from "../domain/shipment-product";
+import { ShipmentDomain } from "../domain/shipment";
 
 export default abstract class ShipmentProductRepository{
-    abstract create(shipment: Shipment, product:Product,quantity:number): Promise<ShipmentProduct>;
-    abstract save(shipmentProduct: ShipmentProduct): Promise<ShipmentProduct>
+    abstract create(shipment: ShipmentDomain, product:ProductDomain,quantity:number): Promise<ShipmentProductDomain>;
+    abstract save(shipmentProduct: ShipmentProductDomain): Promise<ShipmentProductDomain>
     abstract count(): Promise<number>;
 }

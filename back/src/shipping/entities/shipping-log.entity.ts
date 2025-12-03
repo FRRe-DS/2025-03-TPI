@@ -7,9 +7,10 @@ import {
 } from 'typeorm';
 import { Shipment } from './shipment.entity';
 import { ShippingStatus } from '../../shared/enums/shipping-status.enum';
+import { ShippingLogDomain } from '../domain/shipping-log';
 
 @Entity('shipping_logs')
-export class ShippingLog {
+export class ShippingLog implements ShippingLogDomain {
     @PrimaryGeneratedColumn()
     id: number;
 

@@ -1,9 +1,9 @@
-import { Shipment } from "../entities/shipment.entity";
-import { ShippingLog } from "../entities/shipping-log.entity";
+import { ShipmentDomain } from "../domain/shipment";
+import { ShippingLogDomain } from "../domain/shipping-log";
 
 export default abstract class ShippingLogRepository {
-    abstract create(shipment:Shipment):Promise<ShippingLog>;
-    abstract save (shippingLog: ShippingLog):Promise<ShippingLog>;
+    abstract create(shipment:ShipmentDomain):Promise<ShippingLogDomain>;
+    abstract save (shippingLog: ShippingLogDomain):Promise<ShippingLogDomain>;
     abstract count(): Promise<number>
-    abstract findByShipmentId(shipmentId: number): Promise<ShippingLog[]>;
+    abstract findByShipmentId(shipmentId: number): Promise<ShippingLogDomain[]>;
 }
