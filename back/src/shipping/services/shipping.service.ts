@@ -60,6 +60,7 @@ export class ShippingService {
       user = await this.userRepository.save(user);
     }
 
+    console.log(`---------------------------> Hacer request a servicio de stock: ${process.env.STOCK_SERVICE_URL}/api/productos`);
     // 2. Obtener información de productos desde el servicio de stock
     const promises = createShippmentDto.products.map(async (p) => {
       const response = await fetch(`${process.env.STOCK_SERVICE_URL}/api/productos/${p.id}`, {
@@ -72,8 +73,12 @@ export class ShippingService {
       if (!response.ok) {
         throw new InternalServerErrorException(`Error HTTP al obtener producto ${p.id}: ${response.status}`);
       }
+      const product = await response.json();
       
-      return response.json() as Promise<StockProduct>;
+      console.log(`-------------------------> Product ${p.id}: ${JSON.stringify(product)}`);
+      
+      return product as Promise<StockProduct>;
+      
     });
 
     const stockProducts: StockProduct[] = await Promise.all(promises);
