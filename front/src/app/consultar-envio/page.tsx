@@ -181,12 +181,18 @@ export default function ConsultarEnvioPage() {
 
     try {
         setLoading(true);
-        // 🟢 Llama a la función del servicio con el ID ingresado
+        //  Llama a la función del servicio con el ID ingresado
         const resp = await consultarEnvio(shippingId, token as string | null); 
         setResult(resp);
     } catch (err) {
         console.error(err);
-        setError((err as Error).message || "Error al consultar el envío. Verifique el ID e intente nuevamente.");
+        const msg = (err as Error).message;
+
+        if (msg?.includes("Not Found")) {
+            setError("No hay envíos que coincidan.");
+        } else {
+            setError("Error al consultar el envío. Verifique el ID e intente nuevamente.");
+        }
     } finally {
         setLoading(false);
     }
@@ -304,32 +310,43 @@ export default function ConsultarEnvioPage() {
               ) : listError ? (
                 <div className="text-sm text-red-600">{listError}</div>
               ) : (
-                <div className="max-h-64 overflow-auto border rounded-md p-2 bg-white">
-                  {filteredShipments.length === 0 ? (
-                    <div className="text-sm text-gray-500">No hay envíos que coincidan.</div>
-                  ) : (
-                    <ul className="space-y-2">
-                      {filteredShipments.map((s) => (
-                        <li key={s.shipping_id}>
-                          <button
-                            onClick={() => handleSelectShipment(s.shipping_id)}
-                            className="w-full text-left p-2 rounded-md hover:bg-gray-100 flex justify-between items-center border"
-                          >
-                            <div>
-                              <div className="font-medium">Envío #{s.shipping_id}</div>
-                              <div className="text-xs text-gray-600">{s.order_id ? `Orden ${s.order_id}` : null}</div>
-                            </div>
-                            <div className="text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs ${s.status === 'delivered' ? 'bg-green-100 text-green-700' : s.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                {s.status ?? "Estado"}
-                              </span>
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                <>
+                  {filteredShipments.length > 0 && (
+                    <div className="max-h-64 overflow-auto border rounded-md p-2 bg-white">
+                      <ul className="space-y-2">
+                        {filteredShipments.map((s) => (
+                          <li key={s.shipping_id}>
+                            <button
+                              onClick={() => handleSelectShipment(s.shipping_id)}
+                              className="w-full text-left p-2 rounded-md hover:bg-gray-100 flex justify-between items-center border"
+                            >
+                              <div>
+                                <div className="font-medium">Envío #{s.shipping_id}</div>
+                                <div className="text-xs text-gray-600">
+                                  {s.order_id ? `Orden ${s.order_id}` : null}
+                                </div>
+                              </div>
+
+                              <div className="text-sm">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs ${
+                                    s.status === "delivered"
+                                      ? "bg-green-100 text-green-700"
+                                      : s.status === "cancelled"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                                  }`}
+                                >
+                                  {s.status ?? "Estado"}
+                                </span>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
         </form>
