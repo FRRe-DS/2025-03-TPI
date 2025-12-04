@@ -107,9 +107,9 @@ export class SeedService implements OnModuleInit {
 
       // datos de prueba
       const addresses = [
-        { street: '742 Evergreen Terrace', city: 'Springfield', state: 'IL', country: 'USA', postal_code: '62704' },
-        { street: '4 Privet Drive', city: 'Little Whinging', state: 'Surrey', country: 'UK', postal_code: 'CR300AA' },
-        { street: '221B Baker Street', city: 'London', state: 'England', country: 'UK', postal_code: 'NW156XE' },
+        { street: '742 Evergreen Terrace', city: 'Springfield', state: 'IL', country: 'USA', postal_code: 'A62704ABB' },
+        { street: '4 Privet Drive', city: 'Little Whinging', state: 'Surrey', country: 'UK', postal_code: 'C3005AAA' },
+        { street: '221B Baker Street', city: 'London', state: 'England', country: 'UK', postal_code: 'W156XEEA' },
       ];
 
       for (const address of addresses) {
@@ -191,7 +191,6 @@ export class SeedService implements OnModuleInit {
       const addresses = await this.addressRepository.findAll();
       const transportMethods = await this.transportMethodRepository.getTransportMethods();
 
-      // 👇 AGREGÁ ESTOS LOGS PARA DETECTAR EL ERROR
       this.logger.log(`🔍 Debug: Users found: ${users.length}`);
       this.logger.log(`🔍 Debug: Addresses found: ${addresses.length}`);
       this.logger.log(`🔍 Debug: Transports found: ${transportMethods.length}`);
@@ -307,7 +306,7 @@ export class SeedService implements OnModuleInit {
       this.logger.log('📝 Seeding shipping logs...');
 
       // Obtenemos los envíos para crearles logs
-      // Usamos desestructuración [shipments] porque tu findAll devuelve [data, count]
+      // Usamos desestructuración [shipments]
       const [shipments] = await this.shipmentRepository.findAll(1, 100);
 
       if (shipments.length === 0) {
@@ -317,7 +316,7 @@ export class SeedService implements OnModuleInit {
 
       for (const shipment of shipments) {
         // Creamos el log inicial (CREATED)
-        // Tu repositorio MySqlShippingLogRepository.create ya maneja el status y timestamp internamente
+        // MySqlShippingLogRepository.create ya maneja el status y timestamp internamente
         await this.shippingLogRepository.create(shipment);
         
         this.logger.log(`✅ Inserted log for Shipment ID: ${shipment.id}`);
