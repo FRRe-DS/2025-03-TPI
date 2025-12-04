@@ -188,7 +188,7 @@ export default function ConsultarEnvioPage() {
         console.error(err);
         const msg = (err as Error).message;
 
-        if (msg.includes("Not Found")) {
+        if (msg?.includes("Not Found")) {
             setError("No hay envíos que coincidan.");
         } else {
             setError("Error al consultar el envío. Verifique el ID e intente nuevamente.");
