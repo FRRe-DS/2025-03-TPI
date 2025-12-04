@@ -65,8 +65,8 @@ services:
       DB_USERNAME: shipping_user
       DB_PASSWORD: shipping_pass
       DB_DATABASE: shipping_db
-       PORT: 3010
-      KEYCLOAK_AUTH_SERVER_URL: https://keycloak-production-7751.up.railway.app
+      PORT: 3010
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080 #tu URL de keycloak
       KEYCLOAK_REALM: ds-2025-realm
       STOCK_SERVICE_URL: http://api-gateway:80 #no hace falta que se la URL de tu API Gateway, puede ser la URL del servicio de stock directo
     depends_on:
